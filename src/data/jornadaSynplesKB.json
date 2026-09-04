@@ -1,0 +1,321 @@
+{
+    "project_title": "Guia de Implementacao e Uso da Jornada Synples Syngular",
+    "version": "1.0",
+    "description": "Base de conhecimento detalhada estruturada em JSON, consolidando todas as informacoes dos 6 manuais e documentos da Syngular para treinamento e alimentacao de uma Inteligencia Artificial.",
+    "sources_included": [
+        "447b0d6f-4cb3-4f52-8cde-e64cde5ee450.pdf (Criando o pedido no GFSIS - Jornada Synples)",
+        "9ce63056-05b9-4f35-9256-4d23799ba2cc.pdf (Manual da Jornada Synples - Emissao no App)",
+        "EXPERIENCIA DO CLIENTE.pdf (Experiencia do Cliente - Videoconferencia)",
+        "Guiar novo.pdf (Guia Operacional do Agente de Registro - Guiar)",
+        "e99c22b1-8f51-4a4c-9349-788403bc5182.pdf (FAQ - Syn Pass e Jornada Synples)",
+        "roteiro de videoconferencia 1.8-5.pdf (Roteiro de Atendimento por Videoconferencia - Versao 1.8)"
+    ],
+    "content": {
+        "jornada_synples_e_syn_pass": {
+            "o_que_e": "A Jornada Synples consiste em utilizar o Syn Pass (certificado de Pessoa Fisica - PF em nuvem, gratuito) para realizar a emissao online de um certificado digital PJ A1 (Pessoa Juridica), que obrigatoriamente deve estar sob a responsabilidade do mesmo titular.",
+            "syn_pass_detalhes": {
+                "definicao": "Certificado digital ICP-Brasil de Pessoa Fisica em nuvem.",
+                "validade": "Atualmente vale por 3 anos (renovacao online). Apos a migracao para a cadeia V12, a validade passara a ser de 5 anos.",
+                "custo": "Gratuito para a AR. Ha apenas o custo de consulta de API incluso na validacao do certificado.",
+                "emissao_modalidades": "Disponivel para emissao presencial, videoconferencia e online.",
+                "armazenamento": "Emitido e armazenado no aplicativo Syn. Se o usuario desinstalar o app ou limpar seus dados, o certificado Syn Pass e o PJ A1 emitido sao removidos permanentemente.",
+                "recuperacao": "Nao ha recuperacao de senha PUK em caso de perda. O certificado pode ser exportado em formato .pfx da aba 'Certificados' do app Syn quantas vezes quiser, desde que o app nao seja desinstalado."
+            },
+            "jornada_synples_regras_negocio": {
+                "exclusividade_produto": "Exclusivo para emissao de PJ A1 Emissao Online.",
+                "requisito_titularidade": "O Syn Pass (PF em nuvem) e o PJ A1 devem pertencer rigorosamente ao mesmo titular (mesmo CPF de responsavel).",
+                "emissao_computador": "Nao e possivel emitir o Syn Pass no computador; ele deve obrigatoriamente ser emitido no aplicativo Syn. Porem, o PJ A1 correspondente pode ser emitido no computador (Modulo Publico) utilizando o Syn Pass do celular para autenticacao.",
+                "custo_jornada": "Nao ha custo adicional para utilizar a Jornada Synples, apenas o custo normal do certificado PJ A1 adquirido.",
+                "fluxo_vs_emissao_online": "Nao sao a mesma coisa. A Jornada Synples e uma otimizacao da emissao online. Embora ambas sejam online, elas seguem fluxos e barramentos distintos."
+            }
+        },
+        "etapas_do_processo_operacional": {
+            "1_criacao_pedido_gf_sis": {
+                "perfil_uso": "Exclusivo para Autoridades de Registro (ARs) que usam o GFSIS como ERP. Outros ERPs devem consultar a documentacao Postman especifica.",
+                "passo_a_passo": [
+                    "Ao criar o pedido do certificado de Pessoa Fisica no GFSIS, marque a opcao 'Emissao Synples' e escolha a modalidade de validacao do Syn Pass (presencial ou videoconferencia).",
+                    "Selecione o produto PJ A1 Emissao Online (emissao totalmente online diretamente no app Syn).",
+                    "Apos finalizar a criacao, o GFSIS gerara dois registros vinculados automaticamente: o protocolo do Syn Pass (PF em nuvem) e o protocolo do PJ A1."
+                ],
+                "regra_de_emissao": "A primeira emissao deve ser sempre do Syn Pass (PF em nuvem), pois ele sera utilizado pelo aplicativo Syn como o meio de autenticacao de assinatura para emitir o PJ A1.",
+                "status_gf_sis": {
+                    "aguardando_autenticacao": "Indica que nao e necessario enviar documentacao ou dossie da PJ para a Central de Verificacao. A emissao do PJ A1 ja pode ser concluida diretamente no app Syn apos a aprovacao do Syn Pass.",
+                    "recebida": "Significa que sera obrigatorio montar o dossie completo da pessoa juridica e envia-lo para analise e aprovacao da Central de Verificacao antes de poder emitir o PJ A1."
+                },
+                "suporte": "Caso a opcao Jornada Synples nao apareca no GFSIS, a AR deve entrar em contato com o suporte do GFSIS para solicitar a ativacao."
+            },
+            "2_experiencia_do_cliente_e_agendamento": {
+                "fluxo_inicial": "Apos o pagamento do pedido, o cliente recebe um e-mail contendo dois links (ou pode solicitar o envio via WhatsApp ao Agente de Registro).",
+                "link_1_anexar_documentos": "O cliente clica para anexar o documento de identificacao pessoal com foto (frente e verso) diretamente no sistema.",
+                "link_2_agendamento": "O cliente acessa um calendario online, escolhe a data e o horario disponiveis e confirma o agendamento do seu atendimento por videoconferencia.",
+                "modalidade_online_alternativa": "Na modalidade de emissao online tradicional, se o cliente usa um certificado digital A3 valido para fazer a renovacao, ele recebe um e-mail de aprovacao para emitir direto apos o pagamento. Se houver falha, o atendente agenda videoconferencia."
+            },
+            "3_atendimento_por_videoconferencia": {
+                "requisitos_previos": "Para videoconferencia, o cliente ja deve possuir certificado digital anterior e suas biometrias estarem cadastradas no PSBIO (emitidos a partir de 2019) ou possuir CNH (emissao posterior a 2017). Se a face do requerente nao for localizada no PSBIO ou no Datavalid, a videoconferencia nao podera ser realizada.",
+                "seguranca_e_auditoria": [
+                    "O AGR deve confirmar que o documento fisico apresentado na gravacao e o mesmo que foi anexado na solicitacao.",
+                    "A captura da foto do requerente deve ser realizada pelo AGR durante o atendimento de videoconferencia (proibido usar fotos gravadas ou de momentos distintos). Divergencias de data/horario geram rejeicao.",
+                    "O AGR deve observar atentamente sinais de deepfakes, imagens estaticas, fotos, videos ou manipulacoes na imagem e na fala.",
+                    "O atendimento deve ser estritamente com o titular. Nao e permitida a interferencia ou ajuda de terceiros para responder as perguntas.",
+                    "Tradutores ou interpretes sao aceitos como terceira pessoa na sala de video, devendo se identificar formalmente no inicio (Nome, CPF e motivo). Eles nao podem responder pelo cliente."
+                ],
+                "roteiro_operacional_versao_1_8": {
+                    "inicio_gravacao_e_boas_vindas": "Roteiro: 'Ola, Sr(a). [Nome do requerente]. Meu nome e [Seu nome] e estou representando a AR [Nome da AR]. Poderia me confirmar se o certificado digital adquirido e o modelo [informar todos os modelos]?'",
+                    "confirmacao_empresa_pj": "Se houver PJ: 'A emissao sera realizada para a empresa [Nome empresarial]?'",
+                    "confirmacao_dados_pessoais": "Perguntas: 'Seu numero de celular e o [numero]? Seu e-mail e o [e-mail]?'",
+                    "revalida_titularidade_email": "O AGR deve certificar-se de que o campo 'E-mail do certificado' esta preenchido e validado. Na entrada da videoconferencia, o cliente recebe um link para validar a titularidade do e-mail. Se ele nao o fizer, o certificado sera emitido sem e-mail codificado.",
+                    "apresentacao_documento_fisico": "Roteiro: 'Agora, irei realizar a validacao do seu documento de identificacao fisico, o mesmo que foi apresentado para entrada na videoconferencia. Por gentileza, posicione a frente do documento em frente a camera e mantenha-o imovel por aproximadamente 3 segundos. Em seguida, apresente o verso do documento, mantendo-o na mesma posicao pelo mesmo periodo.'",
+                    "perguntas_obrigatorias_e_aleatorias": "O AGR deve realizar exatamente as perguntas do sistema: 3 perguntas obrigatorias de identificacao e 1 pergunta aleatoria gerada de forma automatizada pelo sistema (proibido alterar ou substituir).",
+                    "encerramento_atendimento": "Roteiro: 'Agradeco pelas confirmacoes. Neste momento, vou encerrar a gravacao da videoconferencia. Peco que aguarde alguns instantes enquanto realizo a conferencia final das informacoes para conclusao do atendimento.'"
+                },
+                "tratamento_erros_documento": "Caso o documento apresentado em video seja diferente do anexado anteriormente, o AGR deve interromper a videoconferencia, excluir o documento antigo no Sync (para liberar o link de reenvio) e orientar o cliente a refazer o envio da foto do documento fisico."
+            },
+            "4_emissao_dos_certificados_no_app_syn": {
+                "emissao_syn_pass": [
+                    "O cliente abre o app Syn (com conta ja criada) e clica em 'Emitir' no canto inferior da tela.",
+                    "Clica em 'Iniciar', insere o numero do protocolo e o CPF e clica em 'Avancar'.",
+                    "Insere o codigo de emissao (entregue impresso no presencial ou exibido na sala de videoconferencia).",
+                    "O app identifica a Jornada Synples, apresenta as boas-vindas e o cliente clica em 'Avancar'.",
+                    "Cria e confirma a senha PIN.",
+                    "Cria e confirma a senha PUK (comunicada por e-mail com o titulo 'Compartimento criado no Syn').",
+                    "Assina o termo de titularidade clicando em 'Assinar' e confirma com a senha PIN.",
+                    "O Syn Pass e emitido com sucesso."
+                ],
+                "emissao_pj_a1": [
+                    "Imediatamente apos emitir o Syn Pass, o cliente clica em 'Continuar emissao Certificado PJ' no app Syn.",
+                    "O app detecta o CPF, seleciona automaticamente o Syn Pass para autenticacao e o cliente clica em 'Assinar'.",
+                    "O cliente insere a senha PIN do Syn Pass para autorizar e clica em 'OK'.",
+                    "Assina o novo termo de titularidade clicando em 'Assinar'.",
+                    "Cria e confirma a senha do novo certificado PJ A1 e clica em 'Avancar'.",
+                    "O certificado PJ A1 e emitido de forma totalmente online no smartphone."
+                ],
+                "interrupcao_fluxo": "Se o processo for interrompido, um alerta de 'Emissao de certificado pendente' e exibido no topo da tela inicial do app. O usuario clica nos tres pontos laterais e seleciona 'Continuar emissao'.",
+                "comportamento_erros_e_cnp_j_pendente": "Se o Syn Pass for aprovado mas o e-CNPJ ainda nao estiver liberado pela central, o app Syn informara que o PJ A1 ainda nao esta disponivel para emissao. O processo prossegue normalmente assim que o e-CNPJ for aprovado."
+            }
+        },
+        "guia_operacional_do_agente_de_registro_sync": {
+            "requisitos_e_acesso": {
+                "link_acesso": "ar.syngularid.com.br",
+                "navegador": "Google Chrome (recomendado)",
+                "extensao": "Extensao 'SyngularID' disponivel na Chrome Web Store (obrigatorio ativar e recarregar a pagina no primeiro acesso).",
+                "credenciais": "Acesso via Certificado Digital ou Usuario e Senha."
+            },
+            "conduta_e_responsabilidade_do_agr": {
+                "compromisso": "Garantir a seguranca, sigilo e conformidade ICP-Brasil de todo o processo de certificacao, observando a LGPD.",
+                "proibicoes": [
+                    "Delegar acesso ao Sync para pessoas nao autorizadas.",
+                    "Entregar o Documento Syngular impresso com informacoes/senhas a terceiros ou envia-lo por e-mail/meio eletronico."
+                ],
+                "sancoes_disciplinares": [
+                    "Advertencias formais",
+                    "Suspensao temporaria do acesso para auditoria",
+                    "Descredenciamento definitivo do AGR"
+                ]
+            },
+            "documentos_aceitos_pessoa_fisica": {
+                "documentos_fisicos": {
+                    "RG": "Registro Geral em papel (modelos informatizado, datilografado, digitalizado). Modelos antigos ou com rasuras podem ser recusados.",
+                    "CNH": "Carteira Nacional de Habilitacao fisica dentro da validade.",
+                    "DNI": "Documento Nacional de Identificacao.",
+                    "CIN": "Carteira de Identidade Nacional fisica.",
+                    "CTPS": "Carteira de Trabalho e Previdencia Social fisica.",
+                    "Passaporte": "Passaporte brasileiro valido.",
+                    "Identidade_Funcional": "Emitida por conselhos profissionais (ex: OAB, CREA, CRA). Deve ser consultada a situacao ativa nos portais dos conselhos.",
+                    "estrangeiros": [
+                        "RNE - Registro Nacional do Estrangeiro",
+                        "CRNM - Carteira de Registro Nacional Migratorio",
+                        "Protocolo RNM",
+                        "Protocolo de Refugio"
+                    ]
+                },
+                "documentos_digitais": {
+                    "CNH_Digital": "Exportada diretamente do aplicativo oficial.",
+                    "RG_Digital": "RG oficial em formato digital do respectivo Estado.",
+                    "Identidade_Funcional_Digital": "Acessada por aplicativo proprio do conselho de classe.",
+                    "CIN_Digital": "Carteira de Identidade Nacional digital.",
+                    "e_Titulo": "Via digital do titulo de eleitor. Requisitos: deve conter a foto do requerente, o AGR deve solicitar a captura de tela completa contendo todas as informacoes, e o codigo de validacao deve ser verificado no site do TSE (www.tse.jus.br) e anexado ao dossie."
+                },
+                "restricoes_importantes": "Conforme Decreto Federal nº 10.266 de 05/03/2020, documentos emitidos pela Administracao Publica Federal e entidades vinculadas a Uniao (como ministerios federais) NAO podem ser aceitos como documento de identificacao. Orgaos legislativos e de administracao dos Estados e Municipios sao aceitos."
+            },
+            "situacao_cadastral_cpf": {
+                "regras_de_aceitacao": {
+                    "Regular": {
+                        "pode_emitir": "Sim",
+                        "descricao": "Sem pendencias cadastrais na Receita Federal."
+                    },
+                    "Pendente_de_regularizacao": {
+                        "pode_emitir": "Sim",
+                        "descricao": "O contribuinte deixou de entregar alguma declaracao obrigatoria."
+                    },
+                    "Suspenso": {
+                        "pode_emitir": "Sim",
+                        "descricao": "Cadastro incompleto ou incorreto na base da Receita Federal."
+                    },
+                    "Cancelado": {
+                        "pode_emitir": "Não",
+                        "descricao": "CPF cancelado por multiplicidade ou decisao administrativa/judicial. Exige regularizacao previa."
+                    },
+                    "Nulo": {
+                        "pode_emitir": "Não",
+                        "descricao": "Fraude confirmada no cadastro do CPF. Emissao proibida."
+                    },
+                    "Titular_falecido": {
+                        "pode_emitir": "Não",
+                        "descricao": "Consta informacao de obito no cadastro. Emissao proibida."
+                    }
+                },
+                "divergencias": "Se houver divergencia de nome entre o CPF e o documento de identificacao (por casamento/divorcio), o cliente deve apresentar Certidao de Casamento ou Averbacao de Divorcio para justificar."
+            },
+            "situacoes_especiais_pessoa_fisica": {
+                "incapaz": {
+                    "regras": "Exige validacao obrigatoriamente PRESENCIAL. Existem duas situacoes: Absolutamente Incapaz e Parcialmente Incapaz (de 16 a 18 anos). Para parcialmente incapaz, as biometrias de todos os envolvidos (menor e responsaveis) devem ser coletadas, e a consulta SAF realizada."
+                },
+                "peps": {
+                    "regras": "Pessoas Expostas Politicamente. E obrigatoria a montagem de dossie completo de Pessoa Fisica, tanto para solicitacoes de PF quanto de PJ."
+                }
+            },
+            "comprovacao_do_ato_constitutivo_pessoa_juridica": {
+                "documentos_validos": {
+                    "REDESIM": "Consulta oficial emitida pela internet. Identifica o representante legal e substitui o ato constitutivo tradicional. Validade de 7 dias.",
+                    "Certidao_Simplificada": "Emitida pela Junta Comercial. Caso nao conste prazo de validade expresso, e considerado o prazo padrao de 30 dias.",
+                    "Ato_Constitutivo_ou_Contrato_Social": "Contrato de constituicao registrado. Se houver alteracao contratual posterior, esta deve estar devidamente consolidada. Se for apresentada alteracao sem consolidacao, deve-se exigir tambem a alteracao anterior.",
+                    "Estatuto_e_Ata_de_Eleicao": "Para S/A, Sociedades de Economia Mista, Associacoes e Cooperativas. Devem estar registrados em cartorio ou Junta Comercial. Se a ata nao informar a vigencia do mandato da diretoria, e considerado o prazo padrao de 2 anos a partir da data de eleicao/posse."
+                },
+                "validade_geral_consultas": "Consultas oficiais retiradas da internet (REDESIM, CNPJ) tem validade de 7 dias a partir da emissao e devem obrigatoriamente conter o link da fonte impresso no rodape."
+            },
+            "situacao_cadastral_cnpj": {
+                "regras_de_aceitacao": {
+                    "Ativa": {
+                        "pode_emitir": "Sim",
+                        "descricao": "Empresa sem pendencias cadastrais."
+                    },
+                    "Suspensa": {
+                        "pode_emitir": "Sim",
+                        "descricao": "Pendencia de recolhimento de impostos ou declaracoes."
+                    },
+                    "Inapta": {
+                        "pode_emitir": "Sim",
+                        "descricao": "Omissao de demonstrativos ou relatorios governamentais por 2 exercicios consecutivos."
+                    },
+                    "Baixada": {
+                        "pode_emitir": "Não",
+                        "descricao": "Empresa extinta. Exige regularizacao cadastral."
+                    },
+                    "Nula": {
+                        "pode_emitir": "Não",
+                        "descricao": "Duplicidade de inscricao municipal/estadual ou constatacao de atos ilicitos de registro."
+                    }
+                },
+                "correcoes_dados_cnpj": "Erros ou divergencias de dados cadastrais do CNPJ em relacao aos atos constitutivos apresentados devem ser corrigidos na Receita Federal antes da emissao. Abreviacoes no nome empresarial sao aceitas desde que correspondam ao nome oficial."
+            },
+            "substituicao_de_caracteres_especiais_no_sync": {
+                "descricao": "Para evitar falhas de integracao e compatibilidade com ERPs e emissores de Notas Fiscais, caracteres especiais devem ser substituidos durante o preenchimento no Sync:",
+                "tabela_substituicao": {
+                    "Ç": "C",
+                    "@": "A",
+                    "&": "E",
+                    "$": "S",
+                    "caracteres_de_pontuacao": {
+                        "simbolos": [
+                            ":",
+                            ".",
+                            "/",
+                            "*",
+                            "-",
+                            "_",
+                            "?",
+                            "!"
+                        ],
+                        "substituir_por": "Espaco em branco"
+                    }
+                }
+            },
+            "representacao_legal_e_situacoes_especiais_pj": {
+                "administracao": "Somente quem possui poderes de administracao expressos no ato constitutivo ou REDESIM pode assinar pela empresa. Se a clausula exigir assinatura conjunta, todos os administradores devem realizar o processo. Se for isolada, recomenda-se emitir para o socio que consta como administrador nas bases oficiais da Receita Federal.",
+                "procuracao": "Deve ser uma procuracao publica, com finalidade especifica para emissao de certificado digital ICP-Brasil e validade maxima de 90 dias a partir da data de emissao ou traslado.",
+                "recuperacao_judicial": "O certificado e emitido em nome do representante legal da empresa, mas este deve informar os dados do Administrador Judicial nomeado. A AR/AGR enviara uma notificacao formal por e-mail dando ciencia ao Administrador Judicial, e esta notificacao, com a respectiva confirmacao de entrega/leitura, deve constar no dossie.",
+                "falencia": "A empresa no CNPJ deve estar com situacao cadastral ATIVA. Deve-se apresentar o decreto de falencia e a nomeacao do Administrador Judicial, que sera o titular do certificado. Se a nomeacao tiver mais de 1 ano, exige-se Certidao de Objeto e Pe atualizada.",
+                "liquidacao": "Possivel somente com CNPJ ativo. O titular sera o responsavel nomeado no distrato social (registrado na Junta Comercial). Deve-se anexar a ultima alteracao contratual com o distrato social.",
+                "ausencia_impedimento_administrador": "Se o administrador legal estiver impedido e delegar a funcao a outro, deve comprovar por meio de carta ou oficio assinado (contendo nome, CPF e justificativa), que integrara o dossie."
+            },
+            "coleta_e_validacao_biometrica": {
+                "coleta_facial_selfie": "A foto deve ser capturada no momento do atendimento. Deve-se atentar a qualidade, enquadramento, iluminacao, fundo uniforme, distancia do rosto, boca fechada e roupas adequadas (trajes de banho sao proibidos).",
+                "inconformidades_foto": "Se o sistema apontar inconformidade (ex: fundo nao uniforme), o AGR pode optar por recapturar ou justificar. A justificativa de situacao especial nao garante aprovacao automatica; a Central de Verificacao analisara caso a caso.",
+                "coleta_biometrica_digital": "Para evitar falhas de leitura biométrica, higienize frequentemente o coletor biométrico, garantindo que esteja limpo e sem marcas de coletas anteriores.",
+                "erros_coleta": "Se houver falha de correspondencia, o Sync apresentara alertas como 'Autenticacao biometrica sem correspondencia' ou 'Problema na captura, insira o dedo novamente'."
+            },
+            "parametros_de_aprovacao_e_dossie": {
+                "aprovacao_direta_automatica": "O Sync consulta as bases do PSBIO, Serpro e Datavalid via barramento de APIs oficiais no momento em que o AGR inicia a captura biometrica. Se os dados biometricos cruzarem com sucesso, o dossie fisico e dispensado (liberacao instantanea). Se houver dados opcionais/complementares preenchidos, o processo vai para analise.",
+                "tabela_parametros_presencial": {
+                    "Datavalid_Maior_que_93_porcento": {
+                        "PSBIO_Cadastro": "Aprovacao Direta",
+                        "PSBIO_Verificacao": "Aprovacao Direta"
+                    },
+                    "Datavalid_Entre_85_e_92_99_porcento": {
+                        "PSBIO_Cadastro": "Dossie e CV",
+                        "PSBIO_Verificacao": "Aprovacao Direta"
+                    },
+                    "Datavalid_Menor_que_84_99_porcento": {
+                        "PSBIO_Cadastro_ou_Verificacao": "Nao e possivel seguir"
+                    },
+                    "Datavalid_Sem_Cadastro": {
+                        "PSBIO_Cadastro": "Dossie e CV",
+                        "PSBIO_Verificacao": "Aprovacao Direta"
+                    }
+                },
+                "tabela_parametros_videoconferencia": {
+                    "Datavalid_Maior_que_93_porcento": {
+                        "PSBIO_Cadastro": "Aprovacao Direta"
+                    },
+                    "Datavalid_Entre_85_e_92_99_porcento": {
+                        "PSBIO_Cadastro": "Dossie e CV"
+                    },
+                    "Datavalid_Menor_que_84_99_porcento": {
+                        "PSBIO_Cadastro": "Nao e possivel seguir"
+                    },
+                    "Datavalid_Sem_Cadastro": {
+                        "PSBIO_Cadastro": "Nao e possivel seguir",
+                        "PSBIO_Verificacao": "Aprovacao Direta"
+                    }
+                },
+                "outras_situacoes_dossie_obrigatorio": [
+                    "Digitais justificadas (Presencial) -> Dossie e CV",
+                    "Dados complementares preenchidos no Termo de Titularidade (Presencial) -> Dossie e CV",
+                    "Dados complementares preenchidos no Termo de Titularidade (Videoconferencia) -> Dossie e CV"
+                ],
+                "uso_de_ilovepdf_para_dossie": "Quando exigido dossie, o AGR devera consolidar todos os documentos (CNH digital, Consulta CPF, atos constitutivos, Redesim, termos) em um unico arquivo PDF. O manual orienta o uso do site oficial 'iLovePDF' (ou similar como PDF24) para realizar a mesclagem e compressao das paginas de maneira organizada."
+            },
+            "saf_sistema_antifraude": {
+                "definicao": "Base de dados centralizada contendo os registros de fraudes e tentativas de fraudes ocorridas em toda a cadeia de certificacao digital da ICP-Brasil. Disponibiliza dados, descricoes e fotos dos rostos dos fraudadores.",
+                "regras_de_consulta": "O AGR deve obrigatoriamente realizar a consulta SAF antes de prosseguir com a solicitacao. Filtro 'Sexo' e de preenchimento obrigatorio, devendo ser combinado com, no minimo, mais duas caracteristicas fisicas do cliente (ex: cor/tipo de cabelo, cor de pele, deficiencias, cicatrizes, tatuagens, idade aparente, cor dos olhos).",
+                "mensagens_sistema": {
+                    "nenhum_registro": "A consulta nao retornou nenhum registro. O AGR pode prosseguir.",
+                    "mais_de_500_registros": "A busca retornou mais de 500 correspondencias. O AGR deve refinar os filtros para limitar os resultados.",
+                    "responsabilidade": "A correta marcacao dos filtros e de total responsabilidade do AGR. Marcacoes indevidas ou negligencia que resultem na aprovacao de certificados fraudulentos acarretarao em processo administrativo e punicoes pela Auditoria."
+                }
+            },
+            "legendas_indicadores_sync": {
+                "coleta_biometrica": {
+                    "Cinza": "Biometria nao coletada.",
+                    "Amarelo": "Biometria em processamento no PSBIO.",
+                    "Verde": "Biometria validada no PSBIO ou sem registro no PSBIO (sera inserida).",
+                    "Vermelho": "Falha na validacao biometrica. A biometria existe na base, mas nao e compativel com os dados atuais (direcionado a Auditoria)."
+                },
+                "verificacao_biometrica": {
+                    "Cinza": "Consulta nao iniciada ou sem retorno do status biométrico.",
+                    "Amarelo": "Verificacao em processamento.",
+                    "Verde": "Dados biometricos validados no PSBIO ou Datavalid. Aprovacao automatica (dossie dispensado).",
+                    "Vermelho": "Falha na validacao biometrica. Biometria nao cadastrada no Datavalid. Se for um processo apenas de verificacao, a aprovacao sera direta sem dossie."
+                },
+                "verificacao_pessoa_juridica": {
+                    "Cinza": "Nao iniciado ou sem resultado (exige clicar em 'Verificar dados' na aba de Dados).",
+                    "Verde": "Consulta PJ realizada com sucesso. Vinculo do CPF do responsavel com o CNPJ verificado via barramento (Ato constitutivo dispensado)."
+                },
+                "videoconferenca_legenda": {
+                    "Cinza": "Videoconferencia nao foi gravada.",
+                    "Verde": "Gravacao da videoconferencia concluida com sucesso."
+                }
+            }
+        }
+    }
+}

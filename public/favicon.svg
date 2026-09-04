@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Purple Dot at upper left -->
+  <circle cx="8" cy="11" r="3.2" fill="#7c3aed" />
+  
+  <!-- Bold geometric 'y' -->
+  <path d="M12.5 10.5H16.2L18.8 17.8L21.4 10.5H25.1L20.6 21.2C19.6 23.6 18.3 25.2 16.7 26.1C15.2 27 13.3 27.2 11.2 26.8V23.7C12.4 23.9 13.4 23.8 14.2 23.4C15 22.9 15.6 22 16.1 20.7L12.5 10.5Z" fill="#7c3aed"/>
+</svg>

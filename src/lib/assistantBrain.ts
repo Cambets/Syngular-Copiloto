@@ -215,13 +215,13 @@ export async function queryGemini(
   const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
   const activeKey = apiKey || envKey || '';
   if (activeKey && activeKey.trim().length > 0) {
-    const geminiModels = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+    const geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
     
     // Constrói prompt rico combinando instruções RAG, regras e histórico
     let fullContext = `${systemInstruction}\n\n`;
     if (history && history.length > 0) {
       fullContext += `[HISTÓRICO DA CONVERSA RECENTE]\n`;
-      for (const h of history.slice(-6)) {
+      for (const h of history.slice(-20)) {
         fullContext += `${h.role === 'user' ? 'Usuário' : 'Copiloto'}: ${h.parts}\n`;
       }
       fullContext += `\n`;
@@ -252,23 +252,32 @@ export async function queryGemini(
 
     for (const model of geminiModels) {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey.trim()}`,
           {
             method: 'POST',
+            signal: controller.signal,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [
                 { role: 'user', parts: userParts }
               ],
-              generationConfig: { maxOutputTokens: 1200, temperature: 0.7 }
+              generationConfig: { maxOutputTokens: 4096, temperature: 0.7 }
             })
           }
         );
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const data = await response.json();
-          const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          const parts = data.candidates?.[0]?.content?.parts;
+          const responseText = Array.isArray(parts)
+            ? parts.map((p: any) => p.text || '').join('')
+            : data.candidates?.[0]?.content?.parts?.[0]?.text;
+
           if (responseText && responseText.trim().length > 0) {
             return sanitizeOutput(responseText);
           }

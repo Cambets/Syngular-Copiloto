@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     const activeKey = apiKey || process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
 
     if (activeKey) {
-      const models = ['gemini-3.6-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
       
       for (const model of models) {
         try {
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
 
           const geminiContents = [];
           if (Array.isArray(history)) {
-            for (const h of history) {
+            for (const h of history.slice(-20)) {
               geminiContents.push({
                 role: h.role === 'model' ? 'model' : 'user',
                 parts: [{ text: h.parts || h.content || '' }]
@@ -60,14 +60,18 @@ export default async function handler(req, res) {
               body: JSON.stringify({
                 contents: geminiContents,
                 systemInstruction: { parts: [{ text: systemInstruction || '' }] },
-                generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
+                generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
               })
             }
           );
 
           if (geminiRes.ok) {
             const data = await geminiRes.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            const parts = data.candidates?.[0]?.content?.parts;
+            const text = Array.isArray(parts) 
+              ? parts.map(p => p.text || '').join('')
+              : data.candidates?.[0]?.content?.parts?.[0]?.text;
+
             if (text && text.trim().length > 0) {
               return res.status(200).json({ success: true, text, model });
             }

@@ -194,10 +194,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   const [displayedPlaybooks, setDisplayedPlaybooks] = useState(allScenarioPlaybooks.slice(0, 4));
   const [isRotating, setIsRotating] = useState(false);
 
-  // Efeito de digitação orgânico
-  const [currentlyTypingText, setCurrentlyTypingText] = useState('');
-  const [typingIndex, setTypingIndex] = useState(0);
-  const [typingTarget, setTypingTarget] = useState('');
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -213,8 +209,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
         const session = chatHistory.find(s => s.id === activeSessionId);
         if (session) {
           setMessages(session.messages);
-          setCurrentlyTypingText('');
-          setTypingTarget('');
         }
       }
     }
@@ -240,7 +234,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, currentlyTypingText]);
+  }, [messages, isTyping]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -248,32 +242,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 140)}px`;
     }
   }, [inputValue]);
-
-  useEffect(() => {
-    if (typingTarget.length > 0 && typingIndex < typingTarget.length) {
-      const step = Math.min(16, typingTarget.length - typingIndex);
-      const delay = 6;
-
-      const timeout = setTimeout(() => {
-        const nextIndex = typingIndex + step;
-        setCurrentlyTypingText(typingTarget.slice(0, nextIndex));
-        setTypingIndex(nextIndex);
-      }, delay);
-
-      return () => clearTimeout(timeout);
-    } else if (typingTarget.length > 0 && typingIndex >= typingTarget.length) {
-      const finalMsg: ChatMessage = {
-        id: Math.random().toString(36).substring(2, 9),
-        sender: 'assistant',
-        text: typingTarget,
-        timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, finalMsg]);
-      setCurrentlyTypingText('');
-      setTypingTarget('');
-      setTypingIndex(0);
-    }
-  }, [typingIndex, typingTarget]);
 
   const simulationScenarios = [
     {
@@ -297,7 +265,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
 
   const handleSendMessage = async (textToSend?: string) => {
     const rawText = (textToSend || inputValue).trim();
-    if ((!rawText && !selectedImage) || isTyping || typingTarget) return;
+    if ((!rawText && !selectedImage) || isTyping) return;
 
     // 1. Intercepta comandos de ensino e correção direta no chat (/corrigir, /ensinar, /regra, /aprender) - APENAS ADMIN
     const commandMatch = rawText.match(/^\/(corrigir|ensinar|regra|aprenda|aprender)(?:\s+([\s\S]*))?$/i);
@@ -376,10 +344,15 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
 
     const reply = await queryGemini(text, apiHistory, knowledgeBase, geminiApiKey, currentImg || undefined, customRules);
 
+    const assistantMsg: ChatMessage = {
+      id: Math.random().toString(36).substring(2, 9),
+      sender: 'assistant',
+      text: reply,
+      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages(prev => [...prev, assistantMsg]);
     setIsTyping(false);
-    setCurrentlyTypingText('');
-    setTypingIndex(0);
-    setTypingTarget(reply);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -450,8 +423,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       saveChatSession(messages);
       setMessages([]);
       setSelectedImage(null);
-      setCurrentlyTypingText('');
-      setTypingTarget('');
       handleShufflePlaybooks();
     }
   };
@@ -511,7 +482,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 relative z-10">
         
         {/* Empty State Hero */}
-        {messages.length === 0 && !typingTarget && (
+        {messages.length === 0 && (
           <div className="max-w-3xl mx-auto space-y-5 animate-fade-in pb-2">
             
             {/* Hero Card */}
@@ -731,19 +702,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
           );
         })}
 
-        {/* Efeito Digitando */}
-        {currentlyTypingText && (
-          <div className="flex gap-3 max-w-2xl mr-auto justify-start animate-fade-in">
-            <div className="shrink-0 mt-0.5">
-              <SynRobotMascot size="sm" onClick={onGoHome} />
-            </div>
-            <div className="p-3.5 sm:p-4 rounded-2xl text-xs sm:text-[13px] leading-relaxed bg-slate-100 dark:bg-[#181b26] text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-slate-800 rounded-tl-xs select-text shadow-2xs">
-              {renderFormattedMessage(currentlyTypingText)}
-              <span className="inline-block w-1.5 h-3.5 ml-1 bg-[#5c24ff] animate-pulse align-middle"></span>
-            </div>
-          </div>
-        )}
-
         {/* Spinner */}
         {isTyping && (
           <div className="flex gap-3 max-w-2xl mr-auto justify-start">
@@ -833,7 +791,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
 
               <button
                 onClick={() => handleSendMessage()}
-                disabled={(!inputValue.trim() && !selectedImage) || isTyping || !!currentlyTypingText}
+                disabled={(!inputValue.trim() && !selectedImage) || isTyping}
                 className="p-2 bg-[#5c24ff] hover:bg-[#4d1cdb] disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white rounded-lg transition-all cursor-pointer active:scale-95 flex items-center justify-center shrink-0 shadow-2xs"
                 title="Enviar mensagem"
               >

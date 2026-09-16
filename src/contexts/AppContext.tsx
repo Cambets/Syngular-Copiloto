@@ -454,7 +454,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
-  const DEFAULT_GEMINI_KEY = '';
+  const DEFAULT_GEMINI_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
   const [geminiApiKey, setGeminiApiKeyState] = useState<string>(() => {
     const saved = localStorage.getItem('syngular_gemini_key');
     if (saved && saved.trim().length > 0) return saved.trim();

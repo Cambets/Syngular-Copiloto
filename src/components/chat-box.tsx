@@ -203,19 +203,20 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sincronizar sessão ativa do histórico ou resetar para o Início
+  // Sincronizar sessão ativa quando o usuário clica em uma conversa do histórico
+  const prevActiveSessionIdRef = useRef<string | null | undefined>(null);
+
   useEffect(() => {
-    if (activeSessionId) {
-      const session = chatHistory.find(s => s.id === activeSessionId);
-      if (session) {
-        setMessages(session.messages);
-        setCurrentlyTypingText('');
-        setTypingTarget('');
+    if (activeSessionId !== prevActiveSessionIdRef.current) {
+      prevActiveSessionIdRef.current = activeSessionId;
+      if (activeSessionId) {
+        const session = chatHistory.find(s => s.id === activeSessionId);
+        if (session) {
+          setMessages(session.messages);
+          setCurrentlyTypingText('');
+          setTypingTarget('');
+        }
       }
-    } else {
-      setMessages([]);
-      setCurrentlyTypingText('');
-      setTypingTarget('');
     }
   }, [activeSessionId, chatHistory]);
 
@@ -249,13 +250,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   }, [inputValue]);
 
   useEffect(() => {
-    if (typingIndex < typingTarget.length) {
-      const step = Math.min(12, typingTarget.length - typingIndex);
-      const delay = 8;
+    if (typingTarget.length > 0 && typingIndex < typingTarget.length) {
+      const step = Math.min(16, typingTarget.length - typingIndex);
+      const delay = 6;
 
       const timeout = setTimeout(() => {
-        setCurrentlyTypingText(prev => prev + typingTarget.substring(typingIndex, typingIndex + step));
-        setTypingIndex(prev => prev + step);
+        const nextIndex = typingIndex + step;
+        setCurrentlyTypingText(typingTarget.slice(0, nextIndex));
+        setTypingIndex(nextIndex);
       }, delay);
 
       return () => clearTimeout(timeout);

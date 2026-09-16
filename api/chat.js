@@ -24,7 +24,13 @@ export default async function handler(req, res) {
     const activeKey = apiKey || process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
 
     if (activeKey) {
-      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+      const models = [
+        'gemini-3.5-flash-lite',
+        'gemini-3.1-flash-lite',
+        'gemini-flash-lite-latest',
+        'gemini-3.7-flash',
+        'gemini-3.6-flash'
+      ];
       
       for (const model of models) {
         try {
@@ -43,7 +49,7 @@ export default async function handler(req, res) {
 
           const geminiContents = [];
           if (Array.isArray(history)) {
-            for (const h of history.slice(-20)) {
+            for (const h of history.slice(-10)) {
               geminiContents.push({
                 role: h.role === 'model' ? 'model' : 'user',
                 parts: [{ text: h.parts || h.content || '' }]
@@ -60,7 +66,7 @@ export default async function handler(req, res) {
               body: JSON.stringify({
                 contents: geminiContents,
                 systemInstruction: { parts: [{ text: systemInstruction || '' }] },
-                generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+                generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
                 safetySettings: [
                   { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
                   { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },

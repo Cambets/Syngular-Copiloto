@@ -205,29 +205,25 @@ export async function queryGemini(
   knowledgeBase: Product[],
   apiKey: string,
   imageBase64?: string,
-  customRules?: CustomRule[]
+  customRules?: CustomRule[],
+  onChunk?: (textSoFar: string) => void
 ): Promise<string> {
   const rag = retrieveRelevantContext(query, knowledgeBase, customRules, 5);
   const systemInstruction = getSystemPrompt(knowledgeBase, customRules, rag.contextText);
   const userText = query || (imageBase64 ? 'Analise este print/imagem anexa e me oriente com a solução técnica passo a passo.' : 'Olá!');
 
-  // Engine 1 (PRINCIPAL & OFICIAL): Google Gemini 3.6 Flash (Direto e sem popups de login)
+  // Engine 1 (ULTRA-RÁPIDO & OFICIAL): Google Gemini 3.5 Flash-Lite com Streaming SSE (< 1 segundo)
   const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
   const activeKey = apiKey || envKey || '';
   if (activeKey && activeKey.trim().length > 0) {
-    const geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    const geminiModels = [
+      'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite',
+      'gemini-flash-lite-latest',
+      'gemini-3.7-flash',
+      'gemini-3.6-flash'
+    ];
     
-    // Constrói prompt rico combinando instruções RAG, regras e histórico
-    let fullContext = `${systemInstruction}\n\n`;
-    if (history && history.length > 0) {
-      fullContext += `[HISTÓRICO DA CONVERSA RECENTE]\n`;
-      for (const h of history.slice(-20)) {
-        fullContext += `${h.role === 'user' ? 'Usuário' : 'Copiloto'}: ${h.parts}\n`;
-      }
-      fullContext += `\n`;
-    }
-    fullContext += `[PERGUNTA / MENSAGEM DO USUÁRIO]:\n${userText}`;
-
     interface GeminiPart {
       text?: string;
       inlineData?: {
@@ -236,7 +232,7 @@ export async function queryGemini(
       };
     }
 
-    const userParts: GeminiPart[] = [{ text: fullContext }];
+    const userParts: GeminiPart[] = [{ text: userText }];
 
     if (imageBase64) {
       const mimeMatch = imageBase64.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
@@ -250,50 +246,86 @@ export async function queryGemini(
       }
     }
 
+    const geminiContents: { role: 'user' | 'model'; parts: GeminiPart[] }[] = [];
+    if (history && history.length > 0) {
+      for (const h of history.slice(-10)) {
+        geminiContents.push({
+          role: h.role === 'model' ? 'model' : 'user',
+          parts: [{ text: h.parts }]
+        });
+      }
+    }
+    geminiContents.push({ role: 'user', parts: userParts });
+
     for (const model of geminiModels) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey.trim()}`,
-          {
-            method: 'POST',
-            signal: controller.signal,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [
-                { role: 'user', parts: userParts }
-              ],
-              generationConfig: { maxOutputTokens: 4096, temperature: 0.7 },
-              safetySettings: [
-                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-                { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-                { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
-              ]
-            })
-          }
-        );
+        // 1. Tenta Streaming SSE em tempo real (resposta começa a brotar em < 500ms)
+        const streamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${activeKey.trim()}`;
+        const response = await fetch(streamUrl, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            contents: geminiContents,
+            generationConfig: { maxOutputTokens: 4096, temperature: 0.3 },
+            safetySettings: [
+              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+            ]
+          })
+        });
         clearTimeout(timeoutId);
 
-        if (response.ok) {
-          const data = await response.json();
-          const parts = data.candidates?.[0]?.content?.parts;
-          const responseText = Array.isArray(parts)
-            ? parts.map((p: any) => p.text || '').join('')
-            : data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (response.ok && response.body) {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let fullText = '';
+          let buffer = '';
 
-          if (responseText && responseText.trim().length > 0) {
-            return sanitizeOutput(responseText);
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (trimmed.startsWith('data: ')) {
+                try {
+                  const json = JSON.parse(trimmed.substring(6));
+                  const chunkParts = json.candidates?.[0]?.content?.parts;
+                  const partText = Array.isArray(chunkParts)
+                    ? chunkParts.map((p: any) => p.text || '').join('')
+                    : '';
+                  if (partText) {
+                    fullText += partText;
+                    if (onChunk) {
+                      onChunk(sanitizeOutput(fullText));
+                    }
+                  }
+                } catch (e) {}
+              }
+            }
           }
-        } else {
+
+          if (fullText.trim().length > 0) {
+            return sanitizeOutput(fullText);
+          }
+        } else if (!response.ok) {
           const errText = await response.text();
-          logger.warn(`Gemini ${model} status ${response.status}:`, errText);
+          logger.warn(`Gemini ${model} stream status ${response.status}:`, errText);
         }
       } catch (error) {
-        logger.warn(`Gemini ${model} tentativa falhou, tentando fallback:`, error);
+        logger.warn(`Gemini ${model} tentativa falhou, tentando próximo modelo:`, error);
       }
     }
   }

@@ -335,6 +335,15 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
     setInputValue('');
     setSelectedImage(null);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
+    const assistantMsgId = Math.random().toString(36).substring(2, 9);
+    const initialAssistantMsg: ChatMessage = {
+      id: assistantMsgId,
+      sender: 'assistant',
+      text: '',
+      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages(prev => [...prev, initialAssistantMsg]);
     setIsTyping(true);
 
     const apiHistory = messages.map(msg => ({
@@ -342,16 +351,20 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       parts: msg.text
     }));
 
-    const reply = await queryGemini(text, apiHistory, knowledgeBase, geminiApiKey, currentImg || undefined, customRules);
+    const reply = await queryGemini(
+      text, 
+      apiHistory, 
+      knowledgeBase, 
+      geminiApiKey, 
+      currentImg || undefined, 
+      customRules,
+      (streamedText) => {
+        setIsTyping(false);
+        setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, text: streamedText } : m));
+      }
+    );
 
-    const assistantMsg: ChatMessage = {
-      id: Math.random().toString(36).substring(2, 9),
-      sender: 'assistant',
-      text: reply,
-      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages(prev => [...prev, assistantMsg]);
+    setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, text: reply || m.text } : m));
     setIsTyping(false);
   };
 
@@ -604,6 +617,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
 
         {/* Mensagens do Chat */}
         {messages.map((msg) => {
+          if (!msg.text && !msg.image && msg.sender === 'assistant') return null;
           const isUser = msg.sender === 'user';
 
           return (

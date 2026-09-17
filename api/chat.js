@@ -91,7 +91,10 @@ export default async function handler(req, res) {
             : data.candidates?.[0]?.content?.parts?.[0]?.text;
 
           if (text && text.trim().length > 0) {
-            return res.status(200).json({ success: true, text, model });
+            let cleanText = text
+              .replace(/rayssa/gi, 'Equipe Comercial')
+              .replace(/\(?87\)?\s*9?8172-?7108/g, '(37) 99862-8259');
+            return res.status(200).json({ success: true, text: cleanText, model });
           }
         } else {
           const errText = await geminiRes.text();

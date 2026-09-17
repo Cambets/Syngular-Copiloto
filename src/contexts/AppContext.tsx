@@ -94,9 +94,9 @@ const defaultProducts: Product[] = [
     id: 'parceria-syngular-preco-fixo',
     name: 'Parceria Syngular / Newtech (Modelo Preço Fixo)',
     category: 'Parcerias',
-    description: 'Parceria estratégica para credenciamento e emissão de certificados digitais no modelo de Custo Fixo (PJ A1 padrão R$ 73,30, PJ A1 promocional R$ 65,00 e PF A1 promocional R$ 47,00). Pós-pago com acerto quinzenal via boleto com base nas emissões reais. Limite de crédito operacional de R$ 2.500,00 renovado a cada quinzena. Meta de 20 certificados/mês sem taxa fixa de manutenção. Bonificação de 1 mês de certificados grátis para fechamentos em até 5 dias úteis. Contato comercial: Rayssa (87) 98172-7108.',
+    description: 'Parceria estratégica para credenciamento e emissão de certificados digitais no modelo de Custo Fixo (PJ A1 padrão R$ 73,30, PJ A1 promocional R$ 65,00 e PF A1 promocional R$ 47,00). Pós-pago com acerto quinzenal via boleto com base nas emissões reais. Limite de crédito operacional de R$ 2.500,00 renovado a cada quinzena. Meta de 20 certificados/mês sem taxa fixa de manutenção. Bonificação de 1 mês de certificados grátis para fechamentos em até 5 dias úteis. Contato comercial oficial Syngular: WhatsApp (37) 99862-8259.',
     pitch: 'Adquira certificados por custo fixo preestabelecido e lucre 100% do valor cobrado acima com acerto pós-pago quinzenal.',
-    keywords: ['syngular', 'newtech', 'preco fixo', 'pos-pago', 'rayssa', 'credenciamento', 'custo fixo', 'parceria', 'comissao'],
+    keywords: ['syngular', 'newtech', 'preco fixo', 'pos-pago', 'comercial', 'credenciamento', 'custo fixo', 'parceria', 'comissao'],
     objections: [
       { question: 'Como funciona o acerto financeiro?', answer: 'O cliente final paga diretamente ao parceiro pelo valor cheio. A cada 15 dias a Syngular envia um extrato consolidado com o boleto referente apenas ao custo fixo dos certificados emitidos.' },
       { question: 'Existe fidelidade ou taxa mensal fixa?', answer: 'Não há taxa mensal fixa nem mensalidades de sistema. A meta é de 20 emissões/mês para manter a tabela comercial premium.' }

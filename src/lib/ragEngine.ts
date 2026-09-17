@@ -89,13 +89,13 @@ export function buildRAGIndex(knowledgeBase: Product[], customRules: CustomRule[
     content: `CREDENCIAMENTO DE AR & REQUISITOS ITI (SYNGULAR):\n- Hardware: Windows 10/11 Pro, BitLocker ativo, senha de admin com a Syngular.\n- Kit Biométrico: Futronic FS80H/FS88H + Webcam HD.\n- Capacitação: Curso de AGR 100% online de 1 dia + Certificado A3 em token.\n- Contratação CLT do AGR na Syngular com mecanismo de salário devolutivo no fechamento quinzenal.\n- Zero Start Fee, zero taxa de auditoria anual e GFSIS 100% gratuito.`
   });
 
-  // 5. Indexar Script Comercial & Tabela de Preço Fixo (Rayssa)
+  // 5. Indexar Script Comercial & Tabela de Preço Fixo
   chunks.push({
     id: 'op-script-vendas',
     category: 'vendas_script',
     title: 'Modelo Comercial de Custo Fixo, Pós-Pago e Script de Prospecção',
-    keywords: ['rayssa', 'vendas', 'preco fixo', 'pos pago', 'lucro liquido', 'quinzenal', 'pj a1', 'pf a1', 'meta', '20 certificados', 'credito operacional'],
-    content: `MODELO COMERCIAL SYNGULAR:\n- Modelo de Preço Fixo: Parceiro paga valor de custo e todo o excedente é lucro líquido.\n- Pós-pago quinzenal com limite de crédito operacional inicial de R$ 2.500,00.\n- Sem taxa de implantação nem mensalidade fixa (volume projetado: 20 cert/mês).\n- Contato Comercial: Rayssa | WhatsApp: (87) 98172-7108.`
+    keywords: ['comercial', 'vendas', 'preco fixo', 'pos pago', 'lucro liquido', 'quinzenal', 'pj a1', 'pf a1', 'meta', '20 certificados', 'credito operacional'],
+    content: `MODELO COMERCIAL SYNGULAR:\n- Modelo de Preço Fixo: Parceiro paga valor de custo e todo o excedente é lucro líquido.\n- Pós-pago quinzenal com limite de crédito operacional inicial de R$ 2.500,00.\n- Sem taxa de implantação nem mensalidade fixa (volume projetado: 20 cert/mês).\n- Contato Comercial Oficial: Equipe Comercial Syngular | WhatsApp: (37) 99862-8259.`
   });
 
   // 6. Indexar Suporte Técnico N2 (SEFAZ & ERP)

@@ -60,8 +60,9 @@ ${customRules.map((r, i) => `${i + 1}. ${r.rule}`).join('\n')}
 • Regras Fundamentais:
   1) Se o assunto for imposto/alíquota complexa, dê o direcionamento geral e recomende validar a regra específica com o contador da empresa.
   2) Nunca invente funcionalidades que o sistema não possui; explique com transparência como funciona no plano.
-  3) Para produtos com orçamentos personalizados, convide com simpatia para falar no WhatsApp oficial de suporte/comercial: (37) 99862-8259 ou (87) 98172-7108 (Rayssa).
+  3) Para produtos com orçamentos personalizados, convide com simpatia para falar no WhatsApp oficial da Syngular: (37) 99862-8259.
   4) Trate a marca "Syngular" no feminino ("a Syngular") e os módulos no masculino ("o Syn ERP", "o Syn Ponto", "o Syn Signer").
+  5) 🚫 PROIBIÇÃO RIGOROSA: NUNCA mencione o nome "Rayssa", telefones pessoais (como 87 98172-7108) ou qualquer pessoa física. Todo atendimento comercial e de expansão deve ser atribuído genericamente à "Equipe Comercial Syngular" ou "Suporte Oficial Syngular pelo WhatsApp (37) 99862-8259".
 
 =========================================================================
 2. DIRETRIZES DE SUPORTE TÉCNICO NÍVEL 2 (N2) - ERP & EMISSÃO FISCAL
@@ -96,7 +97,7 @@ Sempre que houver um erro, rejeição ou problema técnico no ERP/SEFAZ, respond
 4. ECOSSISTEMA INSTITUCIONAL & PARCERIAS SYNGULAR
 =========================================================================
 • Identidade Institucional: Syngular (Autoridade Certificadora Syngular ID). Parceria estratégica para credenciamento e emissão de certificados digitais no modelo de Custo Fixo de alta rentabilidade para contabilidades e pontos de atendimento.
-• Contato Comercial Principal: Rayssa | WhatsApp/Tel: (87) 98172-7108 (Atendimento, negociação, prospecção e fechamento).
+• Contato Comercial Principal: Equipe Comercial Syngular | WhatsApp Oficial: (37) 99862-8259 (Atendimento, negociação, prospecção e fechamento).
 
 A) MODELO DE NEGÓCIO & FINANCEIRO:
 - Modelo de Preço Fixo: O parceiro adquire o certificado pelo valor de custo fixo e todo o valor cobrado acima é lucro líquido direto do parceiro, com autonomia total de precificação regional.
@@ -141,9 +142,9 @@ E) COMPARATIVO FINANCEIRO: SYNGULAR vs AR TRADICIONAL:
 - AR Tradicional: Paga Start Fee (a partir de R$ 15.000,00), Auditoria Anual (R$ 1.300 a R$ 2.500), Seguro RC obrigatório (R$ 950 a R$ 1.200/ano), Videoconferência por validação (R$ 4 a R$ 7 cada), GFSIS (R$ 1.800 implantação + R$ 300/mês), Consultas Acertid (R$ 3,50/cert) e Honorários Contábeis.
 - Na Syngular: Zero Start Fee, Zero taxa de auditoria, Zero taxa de seguro, GFSIS 100% gratuito e pós-pago quinzenal.
 
-F) SCRIPT COMERCIAL DE VENDAS & PROSPECÇÃO (RAYSSA):
+F) SCRIPT COMERCIAL DE VENDAS & PROSPECÇÃO DA EQUIPE SYNGULAR:
 - Funil em 4 Etapas:
-  1. Saudação/Apresentação: Contato de expansão com Rayssa, indicando proposta de parceria para quem trabalha com certificados.
+  1. Saudação/Apresentação: Contato de expansão da equipe Syngular, indicando proposta de parceria para quem trabalha com certificados.
   2. Sondagem e Qualificação: Perguntar qual certificadora atua, volume mensal médio, quantos clientes atende e preço de custo atual do PJ A1 e PF A1.
   3. Proposta de Valor: Apresentar o modelo de preço fixo onde tudo acima do custo é lucro líquido do parceiro, com emissão rápida de 3 a 5 min sem Java.
   4. Fechamento e Follow-up: Envio da proposta comercial, tabela e vídeos demonstrativos, com retorno agendado e pergunta-chave de fechamento: "Faz sentido para você iniciarmos essa parceria conosco?".
@@ -187,6 +188,10 @@ function sanitizeOutput(text: string): string {
   safe = safe.replace(/avante/gi, 'Syn ERP');
   safe = safe.replace(/stelanto/gi, 'Syn ERP');
   safe = safe.replace(/docnuvem/gi, 'Syn GED');
+
+  // Privacidade e Contatos Institucionais Oficiais
+  safe = safe.replace(/rayssa/gi, 'Equipe Comercial');
+  safe = safe.replace(/\(?87\)?\s*9?8172-?7108/g, '(37) 99862-8259');
 
   // Limpeza de poluição visual de markdown bruto (###, ##, $$, etc.)
   safe = safe.replace(/^#{1,6}\s*(\d+)\.\s*/gm, '🔹 $1. ');

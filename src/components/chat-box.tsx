@@ -9,7 +9,7 @@ import {
   ArrowRight, RefreshCw, Smartphone,
   FileCheck2, SendHorizontal, User, Image as ImageIcon,
   X, Users, Headphones, Sparkles,
-  Brain, Trash2, Plus
+  Brain, Trash2, Plus, FileText, CreditCard, Landmark, Shield
 } from 'lucide-react';
 
 const allScenarioPlaybooks = [
@@ -64,34 +64,66 @@ const allScenarioPlaybooks = [
   {
     id: 'ponto-objecao',
     badge: 'Quebra de Objeção',
-    title: 'Cliente achando o Certifica Ponto caro',
+    title: 'Cliente achando o Syn Ponto caro',
     context: 'Argumentos de segurança jurídica contra passivo trabalhista e Portaria 671.',
     icon: ShieldAlert,
-    prompt: 'Um cliente com 15 colaboradores disse que achou o Certifica Ponto caro. Me dê 2 argumentos práticos e uma pergunta reflexiva sobre passivo trabalhista para eu fechar a venda agora.'
+    prompt: 'Um cliente com 15 colaboradores disse que achou o Syn Ponto caro. Me dê 2 argumentos práticos e uma pergunta reflexiva sobre passivo trabalhista para eu fechar a venda agora.'
   },
   {
     id: 'erp-food',
     badge: 'Pitch de Impacto',
-    title: 'Apresentar ERP Food para Restaurante',
+    title: 'Apresentar Syn ERP Food para Restaurante',
     context: 'Fluxo integrado de comandas, delivery, mesas e PIX obrigatório na NFC-e.',
     icon: Zap,
-    prompt: 'Monte um pitch objetivo de 1 minuto para o dono de um restaurante sobre o Certifica ERP Food, destacando comandas, delivery e conformidade de PIX na NFC-e com a SEFAZ.'
+    prompt: 'Monte um pitch objetivo de 1 minuto para o dono de um restaurante sobre o Syn ERP Food, destacando comandas, delivery e conformidade de PIX na NFC-e com a SEFAZ.'
   },
   {
     id: 'syn-nuvem',
     badge: 'Migração & Vendas',
-    title: 'Migrar cliente de Token para Syn na Nuvem',
+    title: 'Migrar cliente de Token para SynPass na Nuvem',
     context: 'Vantagens do certificado A3 no celular com biometria facial, sem risco de quebra.',
     icon: Smartphone,
-    prompt: 'Como estruturar um pitch para um cliente que usa token físico migrar para o Syn na nuvem, destacando a praticidade no celular e a biometria facial?'
+    prompt: 'Como estruturar um pitch para um cliente que usa token físico migrar para o SynPass na nuvem, destacando a praticidade no celular e a biometria facial?'
   },
   {
     id: 'certifica-sst',
     badge: 'Segurança do Trabalho',
-    title: 'PGR e NR-01 atualizada no Certifica SST',
+    title: 'PGR e NR-01 atualizada no Syn SST',
     context: 'Evitar multas do MTE, dispensas de MEI/ME e laudos com certificação ICP-Brasil.',
     icon: FileCheck2,
-    prompt: 'Como abordar uma empresa sobre o Certifica SST com foco nas exigências do PGR (NR-01 atualizada) para evitar multas trabalhistas?'
+    prompt: 'Como abordar uma empresa sobre o Syn SST com foco nas exigências do PGR (NR-01 atualizada) para evitar multas trabalhistas?'
+  },
+  {
+    id: 'syn-ged-ia',
+    badge: 'Gestão Inteligente',
+    title: 'Syn GED com IA e OCR Inteligente',
+    context: 'Digitalização, indexação automática e busca semântica em documentos com validade jurídica.',
+    icon: FileText,
+    prompt: 'Apresente os benefícios do Syn GED com OCR e IA para escritórios de contabilidade e empresas que precisam organizar arquivos e eliminar papel com segurança.'
+  },
+  {
+    id: 'syn-concilia-cartoes',
+    badge: 'Finanças & Automação',
+    title: 'Syn Concilia: Conciliação Bancária e Cartões',
+    context: 'Auditoria automática de taxas de maquininhas, PIX e extratos bancários sem erros manuais.',
+    icon: CreditCard,
+    prompt: 'Como demonstrar o valor do Syn Concilia para uma empresa que vende muito no cartão/PIX e perde horas conferindo extratos bancários e taxas de operadoras?'
+  },
+  {
+    id: 'syn-signer-icp',
+    badge: 'Assinatura Digital',
+    title: 'Syn Signer: Assinador ICP-Brasil em Nuvem',
+    context: 'Assinaturas digitais e eletrônicas com validade jurídica plena e gestão de fluxos de aprovação.',
+    icon: Shield,
+    prompt: 'Quais os principais diferenciais do Syn Signer para imobiliárias, RHs e departamentos jurídicos que precisam colher assinaturas digitais e eletrônicas rapidamente?'
+  },
+  {
+    id: 'reforma-tributaria',
+    badge: 'Fiscal & Reforma',
+    title: 'Reforma Tributária (CBS, IBS, IS) no Syn ERP',
+    context: 'Como o Syn ERP já está preparado para o período de transição tributária e emissão fiscal.',
+    icon: Landmark,
+    prompt: 'Como orientar um cliente preocupado com a Reforma Tributária (CBS e IBS) e demonstrar que o Syn ERP e Syn Nota estão 100% preparados para as novas regras?'
   },
   {
     id: 'roleplay-parceiro',
@@ -107,7 +139,7 @@ const allScenarioPlaybooks = [
     title: 'Treino de Objeção: Cliente achando Ponto caro',
     context: 'O Copiloto assume o papel de cliente resistente para você praticar seu fechamento e receber nota.',
     icon: ShieldAlert,
-    prompt: '[INICIAR_ROLEPLAY] Vamos fazer um treino de vendas real. Você será o dono de uma empresa com 20 funcionários que acha o Certifica Ponto caro e prefere folha manual. Comece a ligação com sua objeção inicial.'
+    prompt: '[INICIAR_ROLEPLAY] Vamos fazer um treino de vendas real. Você será o dono de uma empresa com 20 funcionários que acha o Syn Ponto caro e prefere folha manual. Comece a ligação com sua objeção inicial.'
   }
 ];
 
@@ -185,9 +217,40 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [newRuleModalInput, setNewRuleModalInput] = useState('');
 
-  // Estados dos playbooks
-  const [displayedPlaybooks, setDisplayedPlaybooks] = useState(allScenarioPlaybooks.slice(0, 4));
+  // Estados dos playbooks dinâmicos com auto-rotação
+  const [playbookPageIndex, setPlaybookPageIndex] = useState(0);
   const [isRotating, setIsRotating] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const totalPages = Math.ceil(allScenarioPlaybooks.length / 4);
+
+  // Auto-rotação contínua e dinâmica dos cards a cada 7 segundos
+  useEffect(() => {
+    if (messages.length > 0 || isHovered) return;
+
+    const interval = setInterval(() => {
+      setIsRotating(true);
+      setTimeout(() => {
+        setPlaybookPageIndex(prev => (prev + 1) % totalPages);
+        setIsRotating(false);
+      }, 250);
+    }, 7000);
+
+    return () => clearInterval(interval);
+  }, [messages.length, isHovered, totalPages]);
+
+  const displayedPlaybooks = allScenarioPlaybooks.slice(
+    playbookPageIndex * 4,
+    playbookPageIndex * 4 + 4
+  );
+
+  const handleShufflePlaybooks = useCallback(() => {
+    setIsRotating(true);
+    setTimeout(() => {
+      setPlaybookPageIndex(prev => (prev + 1) % totalPages);
+      setIsRotating(false);
+    }, 200);
+  }, [totalPages]);
 
 
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -211,21 +274,12 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
 
   const practicalChips = [
     { label: '🤝 Como captar e credenciar nova AR?', prompt: 'Quais os principais diferenciais da Syngular ID para captação e expansão de novas Autoridades de Registro (ARs)?' },
-    { label: '📱 Vender Syn na nuvem (sem token)', prompt: 'Quais os 3 principais argumentos de venda do Syn na nuvem para clientes que querem se livrar de token físico?' },
+    { label: '📱 Vender SynPass na nuvem (sem token)', prompt: 'Quais os 3 principais argumentos de venda do SynPass na nuvem para clientes que querem se livrar de token físico?' },
     { label: '🛠️ Pós-Venda: Erro de biometria / videoconferência', prompt: 'Quais os passos operacionais para resolver pendências de biometria e emissão por videoconferência no pós-venda?' },
     { label: '🔄 Script de reativação para parceiro inativo', prompt: 'Me dê uma mensagem direta e consultiva para enviar no WhatsApp a um parceiro que não emite certificados há 45 dias.' },
-    { label: '⚖️ Cerca virtual de 85m no Certifica Ponto', prompt: 'Explique como funciona a cerca virtual de 85m e a biometria facial offline no Certifica Ponto.' },
-    { label: '🌾 ERP Agro: Livro Caixa & NFe Rural', prompt: 'Quais os diferenciais do Certifica ERP Agro e como ele atende o Livro Caixa do Produtor Rural?' }
+    { label: '⚖️ Cerca virtual de 85m no Syn Ponto', prompt: 'Explique como funciona a cerca virtual de 85m e a biometria facial offline no Syn Ponto.' },
+    { label: '🌾 Syn ERP Agro: Livro Caixa & NFe Rural', prompt: 'Quais os diferenciais do Syn ERP Agro e como ele atende o Livro Caixa do Produtor Rural?' }
   ];
-
-  const handleShufflePlaybooks = useCallback(() => {
-    setIsRotating(true);
-    setTimeout(() => {
-      const shuffled = [...allScenarioPlaybooks].sort(() => 0.5 - Math.random());
-      setDisplayedPlaybooks(shuffled.slice(0, 4));
-      setIsRotating(false);
-    }, 200);
-  }, []);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -494,14 +548,48 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
               </div>
             </div>
 
-            {/* Playbooks Dinâmicos */}
-            <div className="space-y-3">
+            {/* Playbooks Dinâmicos Auto-Rotativos */}
+            <div 
+              className="space-y-3"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
               <div className="flex items-center justify-between px-1 flex-wrap gap-2">
-                <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <span>Cenários Rápidos de Atendimento & Parcerias</span>
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>Cenários Dinâmicos</span>
+                  </span>
+
+                  {/* Indicador Dinâmico de Rotação */}
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/60 text-[#5c24ff] dark:text-purple-300 border border-purple-200/50 dark:border-purple-800/40">
+                    <span className={`w-1.5 h-1.5 rounded-full ${isHovered ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`}></span>
+                    <span>{isHovered ? 'Pausado (Cursor em cima)' : 'Alternando a cada 7s'}</span>
+                  </div>
+                </div>
                 
                 <div className="flex items-center gap-1.5">
+                  {/* Page Dots */}
+                  <div className="flex items-center gap-1 mr-1">
+                    {Array.from({ length: totalPages }).map((_, pIdx) => (
+                      <button
+                        key={pIdx}
+                        onClick={() => {
+                          setIsRotating(true);
+                          setTimeout(() => {
+                            setPlaybookPageIndex(pIdx);
+                            setIsRotating(false);
+                          }, 150);
+                        }}
+                        className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                          playbookPageIndex === pIdx 
+                            ? 'w-4 bg-[#5c24ff] dark:bg-[#c084fc]' 
+                            : 'w-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300'
+                        }`}
+                        title={`Ir para o grupo ${pIdx + 1}`}
+                      />
+                    ))}
+                  </div>
+
                   <button
                     onClick={handleStartSimulation}
                     className="flex items-center gap-1.5 text-[11px] font-bold text-white bg-[#5c24ff] hover:bg-[#4d1cdb] px-2.5 py-1 rounded-md transition-all cursor-pointer shadow-2xs"
@@ -514,7 +602,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
                   <button
                     onClick={handleShufflePlaybooks}
                     className="flex items-center gap-1 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-2.5 py-1 rounded-md transition-all cursor-pointer border border-slate-200 dark:border-slate-700"
-                    title="Alternar para outros cenários"
+                    title="Alternar agora para os próximos cenários"
                   >
                     <RefreshCw className={`w-3 h-3 ${isRotating ? 'animate-spin' : ''}`} />
                     <span>Alternar</span>
@@ -522,7 +610,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 transition-all duration-250 ${isRotating ? 'opacity-30 scale-[0.99]' : 'opacity-100 scale-100'}`}>
                 {displayedPlaybooks.map((item) => {
                   const IconComp = item.icon;
                   return (

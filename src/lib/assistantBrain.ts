@@ -212,7 +212,30 @@ export async function queryGemini(
   const systemInstruction = getSystemPrompt(knowledgeBase, customRules, rag.contextText);
   const userText = query || (imageBase64 ? 'Analise este print/imagem anexa e me oriente com a solução técnica passo a passo.' : 'Olá!');
 
-  // Engine 1 (ULTRA-RÁPIDO & OFICIAL): Google Gemini 3.5 Flash-Lite com Streaming SSE (< 1 segundo)
+  // Engine 1 (PRINCIPAL & SEGURO): Backend Serverless na Vercel (/api/chat) - 100% no Backend
+  try {
+    const apiRes = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: userText,
+        history,
+        systemInstruction,
+        imageBase64
+      })
+    });
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data.success && data.text) {
+        if (onChunk) onChunk(sanitizeOutput(data.text));
+        return sanitizeOutput(data.text);
+      }
+    }
+  } catch (apiErr) {
+    logger.warn('Backend /api/chat indisponível, tentando cliente de contingência...', apiErr);
+  }
+
+  // Engine 2 (CONTINGÊNCIA DIRETA / DEV LOCAL): Google Gemini Flash-Lite com Streaming SSE
   const BUILTIN_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
   const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
   const activeKey = apiKey || envKey || BUILTIN_KEY;
@@ -263,7 +286,7 @@ export async function queryGemini(
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-        // 1. Tenta Streaming SSE em tempo real (resposta começa a brotar em < 500ms)
+        // Streaming SSE em tempo real
         const streamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${activeKey.trim()}`;
         const response = await fetch(streamUrl, {
           method: 'POST',
@@ -328,29 +351,6 @@ export async function queryGemini(
         logger.warn(`Gemini ${model} tentativa falhou, tentando próximo modelo:`, error);
       }
     }
-  }
-
-  // Engine 1 (PRINCIPAL): Tenta Backend Serverless da Vercel (/api/chat) ou Gemini Direto
-  try {
-    const apiRes = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: userText,
-        history,
-        systemInstruction,
-        imageBase64,
-        apiKey
-      })
-    });
-    if (apiRes.ok) {
-      const data = await apiRes.json();
-      if (data.success && data.text) {
-        return sanitizeOutput(data.text);
-      }
-    }
-  } catch (apiErr) {
-    logger.warn('Backend /api/chat indisponível, tentando cliente Gemini direto...', apiErr);
   }
 
   // Engine 3: Resposta Dinâmica Inteligente e Amigável do Copiloto (Conversacional)

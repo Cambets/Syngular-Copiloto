@@ -9,7 +9,7 @@ import {
   ArrowRight, RefreshCw, Smartphone,
   FileCheck2, SendHorizontal, User, Image as ImageIcon,
   X, Users, Headphones, Sparkles,
-  Brain, Trash2, Plus, Key
+  Brain, Trash2, Plus
 } from 'lucide-react';
 
 const allScenarioPlaybooks = [
@@ -172,7 +172,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
     deleteCustomRule, 
     currentUser, 
     geminiApiKey,
-    setGeminiApiKey,
     saveChatSession, 
     chatHistory 
   } = useApp();
@@ -185,10 +184,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   const [copiedZapId, setCopiedZapId] = useState<string | null>(null);
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [newRuleModalInput, setNewRuleModalInput] = useState('');
-
-  // API Key Quick Setup Modal
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [tempApiKey, setTempApiKey] = useState(geminiApiKey || '');
 
   // Estados dos playbooks
   const [displayedPlaybooks, setDisplayedPlaybooks] = useState(allScenarioPlaybooks.slice(0, 4));
@@ -451,23 +446,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Botão de Ativação / Conexão de IA */}
-          <button
-            onClick={() => {
-              setTempApiKey(geminiApiKey || '');
-              setIsApiKeyModalOpen(true);
-            }}
-            className={`flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-md border transition-all cursor-pointer ${
-              geminiApiKey 
-                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 border-emerald-300 dark:border-emerald-800' 
-                : 'text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 border-amber-300 dark:border-amber-800 animate-pulse'
-            }`}
-            title={geminiApiKey ? 'IA Google Gemini 2.5 Flash Conectada e Ativa' : 'Clique para colar sua chave gratuita do Google Gemini e ativar a IA'}
-          >
-            <Key className="w-3.5 h-3.5 text-[#5c24ff]" />
-            <span>{geminiApiKey ? '🟢 IA Ativa' : '⚡ Conectar IA'}</span>
-          </button>
-
           {/* Botão de Memória / Regras Ensinadas */}
           <button
             onClick={() => setShowRulesModal(true)}
@@ -514,25 +492,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
                   </h1>
                 </div>
               </div>
-
-              {!geminiApiKey && (
-                <div className="mt-3 pt-3 border-t border-purple-200/50 dark:border-purple-900/40 flex items-center justify-between gap-3 flex-wrap relative z-10">
-                  <span className="text-xs text-purple-950 dark:text-purple-200 font-medium flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#5c24ff] shrink-0 animate-pulse" />
-                    <span>Conecte sua chave gratuita da IA Google Gemini para respostas 100% ao vivo.</span>
-                  </span>
-                  <button
-                    onClick={() => {
-                      setTempApiKey(geminiApiKey || '');
-                      setIsApiKeyModalOpen(true);
-                    }}
-                    className="px-3 py-1.5 bg-[#5c24ff] hover:bg-[#4d1cdb] text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1 shrink-0"
-                  >
-                    <Key className="w-3.5 h-3.5" />
-                    <span>Conectar Chave Grátis</span>
-                  </button>
-                </div>
-              )}
             </div>
 
             {/* Playbooks Dinâmicos */}
@@ -997,87 +956,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       )}
 
       {/* Modal: Conectar Chave da IA Google Gemini */}
-      {isApiKeyModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in select-none">
-          <div className="bg-white dark:bg-[#120c24] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-purple-900/50 animate-in zoom-in-95 duration-150 text-slate-900 dark:text-white">
-            
-            {/* Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-purple-900/40 flex items-center justify-between bg-slate-50/70 dark:bg-[#150d28]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-[#5c24ff] dark:text-purple-300 flex items-center justify-center shadow-xs">
-                  <Key className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-extrabold">Conectar Inteligência Artificial Google Gemini</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-purple-300/70">Ative respostas ao vivo com o modelo Gemini 2.5 Flash</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setIsApiKeyModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-4 sm:p-5 space-y-4 text-xs">
-              <p className="text-slate-600 dark:text-purple-200/80 leading-relaxed">
-                Para o Copiloto responder de forma 100% natural, descontraída e com raciocínio ao vivo durante sua apresentação, basta colar sua chave gratuita do **Google AI Studio**:
-              </p>
-
-              <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-purple-300 mb-1">
-                  Chave de API (Google Gemini)
-                </label>
-                <input
-                  type="password"
-                  placeholder="Cole aqui sua chave (ex: AIzaSy...)"
-                  value={tempApiKey}
-                  onChange={(e) => setTempApiKey(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0c0818] border border-slate-200 dark:border-purple-900/60 focus:border-[#5c24ff] rounded-xl text-xs font-mono focus:outline-hidden"
-                />
-              </div>
-
-              <div className="p-3 bg-purple-50/80 dark:bg-purple-950/40 rounded-xl border border-purple-200/60 dark:border-purple-800/40 space-y-1.5">
-                <span className="font-bold text-[#5c24ff] dark:text-purple-300 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Como pegar sua chave grátis em 15 segundos:</span>
-                </span>
-                <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-600 dark:text-purple-200/70">
-                  <li>Acesse <strong>aistudio.google.com/apikey</strong></li>
-                  <li>Clique em <strong>"Create API Key"</strong></li>
-                  <li>Copie e cole aqui!</li>
-                </ol>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-purple-900/30">
-                <button
-                  type="button"
-                  onClick={() => setIsApiKeyModalOpen(false)}
-                  className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-xs transition-colors cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setGeminiApiKey(tempApiKey.trim());
-                    setIsApiKeyModalOpen(false);
-                  }}
-                  className="px-4 py-2 bg-[#5c24ff] hover:bg-[#4d1cdb] active:scale-95 text-white font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-md"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Salvar & Ativar IA</span>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };

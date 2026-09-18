@@ -397,6 +397,18 @@ const defaultUsers: User[] = [
     createdAt: '2026-08-01T10:00:00.000Z',
     lastLogin: '2026-08-28T12:00:00.000Z',
     authProvider: 'google'
+  },
+  {
+    email: 'marcus.almeida@syngular.id',
+    name: 'Marcus Almeida',
+    salt: 'salt_adm_9941',
+    passwordHash: '7a13d7199c90538a74e4fe62c0ebdf58d601b0f02377ebba9c323fca8eb2f7c0',
+    role: 'admin',
+    status: 'approved',
+    department: 'Diretoria Executiva',
+    createdAt: '2026-08-01T10:00:00.000Z',
+    lastLogin: '2026-08-28T12:00:00.000Z',
+    authProvider: 'google'
   }
 ];
 
@@ -567,7 +579,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       delete legacyExisting.password;
     }
 
-    if (cleanEmail === 'marcus.almeida@certifica.com.br') {
+    if (cleanEmail === 'marcus.almeida@certifica.com.br' || cleanEmail === 'marcus.almeida@syngular.id' || cleanEmail.startsWith('marcus.almeida@')) {
       existing = { ...existing, role: 'admin', status: 'approved' };
     }
 
@@ -612,7 +624,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, message: 'Por favor, selecione ou informe uma conta Google válida.' };
     }
     const cleanEmail = googleEmail.toLowerCase().trim();
-    const isCorporate = cleanEmail.endsWith('@certifica.com.br') || cleanEmail.endsWith('@syngular.com.br');
+    const isCorporate = cleanEmail.endsWith('@certifica.com.br') || cleanEmail.endsWith('@syngular.id') || cleanEmail.endsWith('@syngular.com.br');
 
     let existing = users.find(u => u.email.toLowerCase() === cleanEmail);
 
@@ -630,7 +642,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (!existing) {
-      const isMasterAdmin = cleanEmail === 'marcus.almeida@certifica.com.br';
+      const isMasterAdmin = cleanEmail === 'marcus.almeida@certifica.com.br' || cleanEmail === 'marcus.almeida@syngular.id' || cleanEmail.startsWith('marcus.almeida@');
       const role: 'admin' | 'user' = isMasterAdmin ? 'admin' : 'user';
       const status: 'approved' | 'pending' = (isCorporate || isMasterAdmin) ? 'approved' : 'pending';
 
@@ -727,7 +739,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    const isMasterAdmin = cleanEmail === 'marcus.almeida@certifica.com.br';
+    const isMasterAdmin = cleanEmail === 'marcus.almeida@certifica.com.br' || cleanEmail === 'marcus.almeida@syngular.id' || cleanEmail.startsWith('marcus.almeida@');
     const role: 'admin' | 'user' = isMasterAdmin ? 'admin' : 'user';
     const status: 'approved' | 'pending' = isMasterAdmin ? 'approved' : 'pending';
 
@@ -793,7 +805,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUsers(prev => {
       const updated = prev.map(u => {
         if (u.email.toLowerCase() === clean) {
-          if (clean === 'marcus.almeida@certifica.com.br') return u;
+          if (clean === 'marcus.almeida@certifica.com.br' || clean === 'marcus.almeida@syngular.id' || clean.startsWith('marcus.almeida@')) return u;
           return { ...u, status };
         }
         return u;
@@ -808,7 +820,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUsers(prev => {
       const updated = prev.map(u => {
         if (u.email.toLowerCase() === clean) {
-          if (clean === 'marcus.almeida@certifica.com.br') return u;
+          if (clean === 'marcus.almeida@certifica.com.br' || clean === 'marcus.almeida@syngular.id' || clean.startsWith('marcus.almeida@')) return u;
           return { ...u, role };
         }
         return u;
@@ -885,7 +897,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteUser = (email: string) => {
     const cleanEmail = email.toLowerCase().trim();
-    if (cleanEmail === 'marcus.almeida@certifica.com.br') return;
+    if (cleanEmail === 'marcus.almeida@certifica.com.br' || cleanEmail === 'marcus.almeida@syngular.id' || cleanEmail.startsWith('marcus.almeida@')) return;
     setUsers(prev => {
       const updated = prev.filter(u => u.email.toLowerCase() !== cleanEmail);
       pushSharedUsersToCloud(updated);

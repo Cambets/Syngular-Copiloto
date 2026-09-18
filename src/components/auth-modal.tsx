@@ -90,7 +90,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const res = await registerUser({ email, name, password, department });
       if (res.success) {
         setSuccessMessage(res.message);
-        if (email.toLowerCase().trim() === 'marcus.almeida@certifica.com.br') {
+        if (email.toLowerCase().trim() === 'marcus.almeida@certifica.com.br' || email.toLowerCase().trim() === 'marcus.almeida@syngular.id' || email.toLowerCase().trim().startsWith('marcus.almeida@')) {
           setTimeout(() => {
             setActiveTab('login');
           }, 1200);
@@ -183,13 +183,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   type="email"
                   required
                   autoFocus
-                  placeholder="seu.nome@certifica.com.br"
+                  placeholder="seu.nome@certifica.com.br ou @syngular.id"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden transition-colors"
                 />
               </div>
-              {email.toLowerCase().trim() === 'marcus.almeida@certifica.com.br' && (
+              {(email.toLowerCase().trim() === 'marcus.almeida@certifica.com.br' || email.toLowerCase().trim() === 'marcus.almeida@syngular.id' || email.toLowerCase().trim().startsWith('marcus.almeida@')) && (
                 <span className="text-[10px] text-[#5c24ff] font-bold mt-1.5 flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   Conta de Administrador Master Detectada
@@ -265,7 +265,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <input
                   type="email"
                   required
-                  placeholder="seu.nome@certifica.com.br"
+                  placeholder="seu.nome@certifica.com.br ou @syngular.id"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden transition-colors"

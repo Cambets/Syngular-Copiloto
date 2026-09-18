@@ -398,7 +398,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onOpenInstallModal }) => {
           </button>
           
           <div className="text-[10px] text-center text-slate-400 -mt-2">
-            Entrada imediata para <strong className="text-slate-600">@certifica.com.br</strong> e <strong className="text-slate-600">@syngular.com.br</strong>
+            Entrada imediata para <strong className="text-slate-600">@certifica.com.br</strong> e <strong className="text-slate-600">@syngular.id</strong>
           </div>
 
           {/* Divider */}
@@ -659,7 +659,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onOpenInstallModal }) => {
                     type="email"
                     required
                     autoFocus
-                    placeholder="seu.email@certifica.com.br ou @gmail.com"
+                    placeholder="seu.email@certifica.com.br ou @syngular.id"
                     value={googleEmail}
                     onChange={(e) => setGoogleEmail(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden transition-colors"

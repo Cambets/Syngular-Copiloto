@@ -320,7 +320,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                         <td className="p-3.5 text-slate-600 font-mono text-[11px]">{user.email}</td>
                         <td className="p-3.5 text-slate-600 font-medium">{user.department || 'Geral'}</td>
                         <td className="p-3.5">
-                          {user.email !== 'marcus.almeida@certifica.com.br' ? (
+                          {user.email !== 'marcus.almeida@certifica.com.br' && user.email !== 'marcus.almeida@syngular.id' && !user.email.startsWith('marcus.almeida@') ? (
                             <button
                               onClick={() => updateUserRole(user.email, user.role === 'admin' ? 'user' : 'admin')}
                               className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider cursor-pointer transition-all flex items-center gap-1 ${
@@ -348,7 +348,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                           </span>
                         </td>
                         <td className="p-3.5 text-right space-x-1.5">
-                          {user.email !== 'marcus.almeida@certifica.com.br' ? (
+                          {user.email !== 'marcus.almeida@certifica.com.br' && user.email !== 'marcus.almeida@syngular.id' && !user.email.startsWith('marcus.almeida@') ? (
                             <div className="inline-flex items-center gap-1">
                               {user.status !== 'approved' && (
                                 <button 
@@ -531,7 +531,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                   <input
                     type="email"
                     required
-                    placeholder="joao.silva@certifica.com.br ou @gmail.com"
+                    placeholder="joao.silva@certifica.com.br ou @syngular.id"
                     value={newUserEmail}
                     onChange={(e) => setNewUserEmail(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden"

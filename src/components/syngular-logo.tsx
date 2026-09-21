@@ -70,82 +70,28 @@ export const SynRobotMascot: React.FC<SynRobotMascotProps> = ({
   className = '',
   onClick
 }) => {
-  const iconSize = size === 'sm' ? 'w-7 h-7' : size === 'lg' ? 'w-10 h-10' : size === 'xl' ? 'w-14 h-14 sm:w-16 sm:h-16' : 'w-8 h-8';
+  const [imgError, setImgError] = React.useState(false);
+  const iconSize = size === 'sm' ? 'w-8 h-8' : size === 'lg' ? 'w-12 h-12' : size === 'xl' ? 'w-16 h-16 sm:w-20 sm:h-20' : 'w-10 h-10';
 
   return (
     <div 
       onClick={onClick}
       className={`relative flex items-center justify-center shrink-0 select-none ${onClick ? 'cursor-pointer group' : ''} ${className}`}
-      title="Syn Copiloto"
+      title="SynCop - Copiloto de Vendas"
     >
-      <div className={`${iconSize} rounded-2xl bg-gradient-to-br from-[#8b5cf6] via-[#7c3aed] to-[#6d28d9] p-1.5 flex items-center justify-center shadow-md shadow-purple-900/10 transition-transform duration-150 group-hover:scale-105 relative overflow-hidden`}>
-        
-        {/* Soft specular reflection */}
-        <div className="absolute inset-0 bg-radial from-white/25 via-transparent to-transparent pointer-events-none rounded-2xl"></div>
-
-        {/* Crisp Vector Robot Mascot */}
-        <svg 
-          viewBox="0 0 32 32" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg" 
-          className="w-full h-full text-white"
-        >
-          {/* Subtle Dynamic Orbit */}
-          <ellipse 
-            cx="16" 
-            cy="16" 
-            rx="12.5" 
-            ry="7" 
-            stroke="rgba(255, 255, 255, 0.45)" 
-            strokeWidth="1.2" 
-            strokeDasharray="2.5 2"
-            transform="rotate(-22 16 16)"
+      <div className={`${iconSize} rounded-2xl bg-white dark:bg-[#15102a] border border-purple-200/80 dark:border-purple-800/80 p-0.5 flex items-center justify-center shadow-md shadow-purple-900/10 transition-transform duration-200 group-hover:scale-105 relative overflow-hidden`}>
+        {!imgError ? (
+          <img 
+            src="/syncop-mascot.png" 
+            alt="SynCop" 
+            onError={() => setImgError(true)}
+            className="w-full h-full object-contain rounded-xl"
           />
-
-          {/* Spark Star */}
-          <path 
-            d="M24 6C24 7.5 25.5 7.5 25.5 7.5C25.5 7.5 24 7.5 24 9C24 7.5 22.5 7.5 22.5 7.5C22.5 7.5 24 7.5 24 6Z" 
-            fill="#ffffff"
-          />
-
-          {/* Inner Face Core */}
-          <rect 
-            x="7.5" 
-            y="9.5" 
-            width="17" 
-            height="13" 
-            rx="6.5" 
-            fill="#5b21b6" 
-            stroke="rgba(255,255,255,0.3)" 
-            strokeWidth="1"
-          />
-
-          {/* Friendly Glowing Eyes */}
-          <rect 
-            x="11" 
-            y="13.5" 
-            width="2.8" 
-            height="4.5" 
-            rx="1.4" 
-            fill="#ffffff"
-          />
-          <rect 
-            x="18.2" 
-            y="13.5" 
-            width="2.8" 
-            height="4.5" 
-            rx="1.4" 
-            fill="#ffffff"
-          />
-
-          {/* Subtle Smile */}
-          <path 
-            d="M14.5 19.5C15.2 20.2 16.8 20.2 17.5 19.5" 
-            stroke="#ffffff" 
-            strokeWidth="1.2" 
-            strokeLinecap="round"
-          />
-        </svg>
+        ) : (
+          <div className="w-full h-full rounded-xl bg-gradient-to-br from-[#8b5cf6] via-[#7c3aed] to-[#6d28d9] flex items-center justify-center text-white font-bold text-xs">
+            🤖
+          </div>
+        )}
       </div>
     </div>
   );

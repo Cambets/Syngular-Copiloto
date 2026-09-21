@@ -6,7 +6,7 @@ import { logger } from '../lib/logger';
 import { 
   Mail, User, Lock, ArrowRight, ShieldCheck, 
   Eye, EyeOff, AlertCircle, CheckCircle2, Briefcase, 
-  Sparkles, KeyRound, Shield, Check, Globe, X, Smartphone
+  Sparkles, KeyRound, Shield, Check, Globe, X
 } from 'lucide-react';
 
 interface GoogleCredentialResponse {
@@ -52,11 +52,7 @@ function parseJwt(token: string) {
   }
 }
 
-interface LoginPageProps {
-  onOpenInstallModal?: () => void;
-}
-
-export const LoginPage: React.FC<LoginPageProps> = ({ onOpenInstallModal }) => {
+export const LoginPage: React.FC = () => {
   const { login, loginWithGoogle, registerUser } = useApp();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
 
@@ -266,18 +262,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onOpenInstallModal }) => {
   return (
     <div className="min-h-screen w-screen flex flex-col lg:flex-row bg-slate-900 text-slate-900 font-sans select-none overflow-y-auto relative">
       
-      {/* Install PWA Button on Login Screen */}
-      {onOpenInstallModal && (
-        <button
-          onClick={onOpenInstallModal}
-          className="absolute top-4 right-4 z-40 flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-xs font-bold transition-all backdrop-blur-md cursor-pointer shadow-lg active:scale-95"
-          title="Instalar como App no Celular ou PC"
-        >
-          <Smartphone className="w-3.5 h-3.5 text-purple-300" />
-          <span>Baixar App (Android / iOS / PC)</span>
-        </button>
-      )}
-
       {/* Left Column: Brand Hero & Visual Positioning (Syngular Style) */}
       <div className="lg:w-1/2 bg-gradient-to-br from-slate-950 via-[#150d2a] to-[#0a0614] text-white p-8 sm:p-12 lg:p-16 flex flex-col justify-between relative overflow-hidden">
         

@@ -121,20 +121,25 @@ function AppContent() {
           )}
         </div>
 
-        {/* Center Brand Identity: certifica+ & SynCop */}
+        {/* Center Brand Identity: Syngular ID & SynCop */}
         <div 
           onClick={handleGoHome}
           className="flex flex-col items-center justify-center cursor-pointer group px-2 py-0.5"
           title="Ir para a Tela Inicial do SynCop"
         >
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            <img 
+              src="/syncop-mascot.png" 
+              alt="Syngular" 
+              className="w-7 h-7 object-contain group-hover:scale-105 transition-transform" 
+            />
             <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
-              certifica<span className="text-orange-500 font-black">+</span>
+              SYNGULAR<span className="text-[#7c3aed] ml-0.5">.ID</span>
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-1">
+          <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-purple-300 mt-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>ASSISTENTE DE VENDAS &bull; SYNCOP</span>
+            <span>COPILOTO DE VENDAS &bull; SYNCOP</span>
           </div>
         </div>
 

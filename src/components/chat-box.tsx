@@ -62,27 +62,27 @@ function renderFormattedMessage(text: string) {
 const ecosystemQuestions = [
   {
     id: 'nr1-changes',
-    prompt: 'Quais são as principais mudanças nas novas normas da NR1?',
+    prompt: 'Quais são as principais mudanças nas novas normas da NR1 e SST?',
   },
   {
     id: 'registro-marca',
-    prompt: 'Por que fazer registro de marca com o Certifica Registro?',
+    prompt: 'Por que oferecer registro de marca com o Syn Registro para contadores?',
   },
   {
     id: 'up-digital',
-    prompt: 'Como o Certifica UP Digital aumenta presença online?',
+    prompt: 'Como o Syn UP Digital ajuda as empresas a aumentarem a presença online?',
   },
   {
     id: 'nr1-facilidades',
-    prompt: 'Quais as facilidades da NR1 para MEI, ME e EPP no Certifica SST?',
+    prompt: 'Quais as facilidades da NR1 para MEI, ME e EPP no Syn SST?',
   },
   {
     id: 'ged-dores',
-    prompt: 'Que dores o Certifica GED resolve no dia a dia do cliente?',
+    prompt: 'Que dores o Syn GED resolve na gestão de documentos e contratos?',
   },
   {
     id: 'erp-objecoes',
-    prompt: 'Como contornar objeções comuns ao apresentar o Certifica ERP?',
+    prompt: 'Como contornar objeções comuns de preço ao apresentar o Syn ERP?',
   }
 ];
 
@@ -397,7 +397,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
             {/* Friendly Speech Bubble / Welcome Card */}
             <div className="p-5 sm:p-6 rounded-2xl bg-white/90 dark:bg-[#110c22]/90 backdrop-blur-md border border-slate-200/90 dark:border-purple-900/40 shadow-xs space-y-4">
               <p className="text-xs sm:text-[13px] leading-relaxed text-slate-800 dark:text-slate-100 font-normal">
-                Olá! Sou o assistente virtual da <strong className="font-bold text-slate-900 dark:text-white">Certifica+</strong>. Estou aqui para ajudar com dúvidas sobre nossos produtos, suporte técnico, estratégias de venda e gestão de empresas. Como posso ajudar você hoje?
+                Olá! Sou o <strong className="font-bold text-[#5c24ff] dark:text-[#a78bfa]">SynCop</strong>, copiloto de vendas e especialista no ecossistema <strong className="font-bold text-slate-900 dark:text-white">Syngular ID</strong>. Estou aqui para ajudar você com dúvidas sobre emissão, superação de objeções de clientes, produtos e parcerias comerciais. Como posso ajudar você hoje?
               </p>
 
               {/* Feedback & Actions Toolbar */}
@@ -405,7 +405,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
                 <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText("Olá! Sou o assistente virtual da Certifica+. Estou aqui para ajudar com dúvidas sobre nossos produtos, suporte técnico, estratégias de venda e gestão de empresas. Como posso ajudar você hoje?");
+                      navigator.clipboard.writeText("Olá! Sou o SynCop, copiloto de vendas e especialista no ecossistema Syngular ID. Estou aqui para ajudar você com dúvidas sobre emissão, superação de objeções de clientes, produtos e parcerias comerciais. Como posso ajudar você hoje?");
                       setHeroCopied(true);
                       setTimeout(() => setHeroCopied(false), 1500);
                     }}

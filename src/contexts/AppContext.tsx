@@ -84,7 +84,8 @@ interface AppContextType {
   deleteProduct: (id: string) => void;
   addCustomRule: (ruleText: string, createdBy?: string) => CustomRule;
   deleteCustomRule: (id: string) => void;
-  saveChatSession: (messages: ChatMessage[]) => void;
+  saveChatSession: (messages: ChatMessage[], sessionId?: string) => string;
+  deleteChatSession: (sessionId: string) => void;
   clearChatHistory: () => void;
 }
 
@@ -936,15 +937,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCustomRules(prev => prev.filter(r => r.id !== id));
   };
 
-  const saveChatSession = (messages: ChatMessage[]) => {
-    if (!currentUser || messages.length === 0) return;
-    const session: ChatSession = {
-      id: Math.random().toString(36).substring(2, 9),
-      userEmail: currentUser.email,
-      messages,
-      timestamp: new Date().toISOString()
-    };
-    setChatHistory(prev => [session, ...prev]);
+  const saveChatSession = (messages: ChatMessage[], sessionId?: string): string => {
+    if (!currentUser || messages.length === 0) return '';
+    const targetId = sessionId || Math.random().toString(36).substring(2, 9);
+    setChatHistory(prev => {
+      const idx = prev.findIndex(s => s.id === targetId);
+      const session: ChatSession = {
+        id: targetId,
+        userEmail: currentUser.email,
+        messages,
+        timestamp: new Date().toISOString()
+      };
+      if (idx >= 0) {
+        const updated = [...prev];
+        updated[idx] = session;
+        return updated;
+      }
+      return [session, ...prev];
+    });
+    return targetId;
+  };
+
+  const deleteChatSession = (sessionId: string) => {
+    setChatHistory(prev => prev.filter(s => s.id !== sessionId));
   };
 
   const clearChatHistory = () => {
@@ -975,6 +990,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addCustomRule,
       deleteCustomRule,
       saveChatSession,
+      deleteChatSession,
       clearChatHistory
     }}>
       {children}

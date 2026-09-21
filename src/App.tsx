@@ -23,7 +23,7 @@ export default function App() {
 }
 
 function AppContent() {
-  const { currentUser, logout, chatHistory, clearChatHistory, users, updateUserStatus } = useApp();
+  const { currentUser, logout, chatHistory, clearChatHistory, deleteChatSession, users, updateUserStatus } = useApp();
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,6 +53,7 @@ function AppContent() {
         }, 100);
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -233,24 +234,49 @@ function AppContent() {
                   return (
                     <div
                       key={session.id}
-                      onClick={() => { 
-                        setActiveSessionId(session.id); 
-                        setIsAdminMode(false); 
-                        setIsHistoryDrawerOpen(false);
-                      }}
-                      className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer group flex items-start justify-between gap-2 ${
+                      className={`w-full text-left p-3 rounded-xl border transition-all group flex items-start justify-between gap-2 ${
                         isActive 
                           ? 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800 text-slate-900 dark:text-white' 
                           : 'bg-white dark:bg-[#15102a] border-slate-200/80 dark:border-slate-800 hover:border-[#5c24ff]/50 text-slate-700 dark:text-slate-300 shadow-2xs'
                       }`}
                     >
-                      <div className="min-w-0 flex-1">
+                      <div 
+                        className="min-w-0 flex-1 cursor-pointer"
+                        onClick={() => { 
+                          setActiveSessionId(session.id); 
+                          setIsAdminMode(false); 
+                          setIsHistoryDrawerOpen(false);
+                        }}
+                      >
                         <p className="text-xs font-bold truncate leading-tight group-hover:text-[#5c24ff] transition-colors">{firstUserMsg}</p>
                         <span className="text-[10px] text-slate-400 block mt-1">
                           {new Date(session.timestamp).toLocaleDateString('pt-BR')} • {session.messages.length} msg(s)
                         </span>
                       </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 group-hover:text-[#5c24ff] group-hover:translate-x-0.5 transition-all mt-0.5 shrink-0" />
+                      <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteChatSession(session.id);
+                            if (activeSessionId === session.id) {
+                              handleGoHome();
+                            }
+                          }}
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition-colors cursor-pointer opacity-70 hover:opacity-100"
+                          title="Excluir este atendimento do histórico"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <ChevronRight 
+                          onClick={() => { 
+                            setActiveSessionId(session.id); 
+                            setIsAdminMode(false); 
+                            setIsHistoryDrawerOpen(false);
+                          }}
+                          className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 group-hover:text-[#5c24ff] group-hover:translate-x-0.5 transition-all cursor-pointer" 
+                        />
+                      </div>
                     </div>
                   );
                 })

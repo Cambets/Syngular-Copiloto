@@ -157,17 +157,30 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   const textareaRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sincronizar sessão ativa quando o usuário clica em uma conversa do histórico
-  const prevActiveSessionIdRef = useRef<string | null | undefined>(null);
+  // Rastreamento contínuo e persistente da sessão ativa
+  const sessionIdRef = useRef<string | null>(activeSessionId || null);
+  const messagesRef = useRef<ChatMessage[]>(messages);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  // Sincronizar sessão ativa quando o usuário clica em uma conversa do histórico ou clica em Nova
+  const prevActiveSessionIdRef = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
     if (activeSessionId !== prevActiveSessionIdRef.current) {
       prevActiveSessionIdRef.current = activeSessionId;
+      sessionIdRef.current = activeSessionId || null;
+
       if (activeSessionId) {
         const session = chatHistory.find(s => s.id === activeSessionId);
         if (session) {
           setMessages(session.messages);
         }
+      } else if (prevActiveSessionIdRef.current !== undefined) {
+        // Se limpou o activeSessionId externamente (botão Nova)
+        setMessages([]);
       }
     }
   }, [activeSessionId, chatHistory]);
@@ -176,10 +189,16 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-
   const handleSendMessage = async (textToSend?: string) => {
     const rawText = (textToSend || inputValue).trim();
     if ((!rawText && !selectedImage) || isTyping) return;
+
+    // Garante que temos um ID de sessão único para este atendimento
+    let targetSessionId = sessionIdRef.current;
+    if (!targetSessionId) {
+      targetSessionId = Math.random().toString(36).substring(2, 9);
+      sessionIdRef.current = targetSessionId;
+    }
 
     // 1. Intercepta comandos de ensino e correção direta no chat (/corrigir, /ensinar, /regra, /aprender) - APENAS ADMIN
     const commandMatch = rawText.match(/^\/(corrigir|ensinar|regra|aprenda|aprender)(?:\s+([\s\S]*))?$/i);
@@ -198,8 +217,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
           text: `🔒 **Acesso Restrito:** Apenas administradores do sistema têm permissão para calibrar regras ou registrar correções permanentes na memória da IA. Para sugerir ajustes na base oficial, contate a administração.`,
           timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
         };
-        setMessages(prev => [...prev, userMsg, denyMsg]);
+        const updated = [...messages, userMsg, denyMsg];
+        setMessages(updated);
         setInputValue('');
+        saveChatSession(updated, targetSessionId);
         return;
       }
 
@@ -213,8 +234,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
           text: `🧠 **Como ensinar ou corrigir uma resposta (Modo Administrador):**\n\nComo administrador, você pode calibrar a IA a qualquer momento usando \`/corrigir\` ou \`/ensinar\` seguido da instrução.\n\n**Exemplos:**\n• \`/corrigir Quando perguntarem sobre o SynPass, reforce que a renovação não precisa de videoconferência.\`\n• \`/ensinar O suporte de urgência aos sábados atende pelo WhatsApp (37) 99862-8259 das 8h às 12h.\`\n• \`/regra Nunca informe alíquota de ICMS sem orientar validação com o contador.\`\n\nToda regra ensinada é gravada imediatamente na memória de alta prioridade! ✨`,
           timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
         };
-        setMessages(prev => [...prev, userMsg, helpMsg]);
+        const updated = [...messages, userMsg, helpMsg];
+        setMessages(updated);
         setInputValue('');
+        saveChatSession(updated, targetSessionId);
         return;
       }
 
@@ -228,14 +251,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
         timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
       };
 
-      setMessages(prev => [...prev, userMsg, confirmMsg]);
+      const updated = [...messages, userMsg, confirmMsg];
+      setMessages(updated);
       setInputValue('');
+      saveChatSession(updated, targetSessionId);
       return;
     }
 
-    // Injeta a instrução da lente selecionada de forma invisível
     const text = rawText;
-
     const currentImg = selectedImage;
     const userMsg: ChatMessage = {
       id: Math.random().toString(36).substring(2, 9),
@@ -245,10 +268,15 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    const currentMsgSnapshot = [...messages, userMsg];
+    setMessages(currentMsgSnapshot);
     setInputValue('');
     setSelectedImage(null);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
+
+    // Salva imediatamente o envio do usuário no histórico persistente
+    saveChatSession(currentMsgSnapshot, targetSessionId);
+
     const assistantMsgId = Math.random().toString(36).substring(2, 9);
     const initialAssistantMsg: ChatMessage = {
       id: assistantMsgId,
@@ -257,14 +285,15 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     };
 
-    setMessages(prev => [...prev, initialAssistantMsg]);
+    setMessages([...currentMsgSnapshot, initialAssistantMsg]);
     setIsTyping(true);
 
-    const apiHistory = messages.map(msg => ({
+    const apiHistory = currentMsgSnapshot.map(msg => ({
       role: (msg.sender === 'user' ? 'user' : 'model') as 'user' | 'model',
       parts: msg.text
     }));
 
+    let streamedAccumulator = '';
     const reply = await queryGemini(
       text, 
       apiHistory, 
@@ -273,13 +302,25 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       currentImg || undefined, 
       customRules,
       (streamedText) => {
+        streamedAccumulator = streamedText;
         setIsTyping(false);
         setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, text: streamedText } : m));
       }
     );
 
-    setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, text: reply || m.text } : m));
+    const finalText = reply || streamedAccumulator;
+    const finalMessages = currentMsgSnapshot.concat([{
+      id: assistantMsgId,
+      sender: 'assistant',
+      text: finalText,
+      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    }]);
+
+    setMessages(finalMessages);
     setIsTyping(false);
+
+    // Salva o atendimento completo no histórico persistente (LocalStorage + State)
+    saveChatSession(finalMessages, targetSessionId);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -346,11 +387,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   };
 
   const handleResetConversation = () => {
-    if (messages.length > 0) {
-      saveChatSession(messages);
-      setMessages([]);
-      setSelectedImage(null);
-    }
+    sessionIdRef.current = null;
+    setMessages([]);
+    setSelectedImage(null);
+    onGoHome?.();
   };
 
   return (

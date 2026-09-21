@@ -360,7 +360,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       <div className="h-11 px-4 border-b border-slate-100 dark:border-purple-900/30 flex items-center justify-between bg-slate-50/70 dark:bg-[#120b22]/80 backdrop-blur-md flex-shrink-0 z-10">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-purple-200">
           <span className="w-2 h-2 rounded-full bg-[#5c24ff] dark:bg-[#c084fc] animate-pulse"></span>
-          <span>Copiloto Syngular ID & Syn+</span>
+          <span>Copiloto Syngular & Syn+</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -397,7 +397,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
             {/* Friendly Speech Bubble / Welcome Card */}
             <div className="p-5 sm:p-6 rounded-2xl bg-white/90 dark:bg-[#110c22]/90 backdrop-blur-md border border-slate-200/90 dark:border-purple-900/40 shadow-xs space-y-4">
               <p className="text-xs sm:text-[13px] leading-relaxed text-slate-800 dark:text-slate-100 font-normal">
-                Olá! Sou o <strong className="font-bold text-[#5c24ff] dark:text-[#a78bfa]">SynCop</strong>, copiloto de vendas e especialista no ecossistema <strong className="font-bold text-slate-900 dark:text-white">Syngular ID</strong>. Estou aqui para ajudar você com dúvidas sobre emissão, superação de objeções de clientes, produtos e parcerias comerciais. Como posso ajudar você hoje?
+                Olá! Sou o <strong className="font-bold text-[#5c24ff] dark:text-[#a78bfa]">SynCop</strong>, copiloto de vendas e especialista no ecossistema <strong className="font-bold text-slate-900 dark:text-white">Syngular</strong>. Estou aqui para ajudar você com dúvidas sobre emissão, superação de objeções de clientes, produtos e parcerias comerciais. Como posso ajudar você hoje?
               </p>
 
               {/* Feedback & Actions Toolbar */}
@@ -405,7 +405,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
                 <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText("Olá! Sou o SynCop, copiloto de vendas e especialista no ecossistema Syngular ID. Estou aqui para ajudar você com dúvidas sobre emissão, superação de objeções de clientes, produtos e parcerias comerciais. Como posso ajudar você hoje?");
+                      navigator.clipboard.writeText("Olá! Sou o SynCop, copiloto de vendas e especialista no ecossistema Syngular. Estou aqui para ajudar você com dúvidas sobre emissão, superação de objeções de clientes, produtos e parcerias comerciais. Como posso ajudar você hoje?");
                       setHeroCopied(true);
                       setTimeout(() => setHeroCopied(false), 1500);
                     }}

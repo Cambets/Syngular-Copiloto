@@ -286,7 +286,7 @@ export const LoginPage: React.FC = () => {
                 syngular
               </h1>
               <span className="text-xs font-extrabold text-[#a882ff] uppercase tracking-widest block">
-                ID & Syn+ Ecosystem
+                Syn+ Ecosystem
               </span>
             </div>
           </div>

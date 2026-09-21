@@ -121,7 +121,7 @@ function AppContent() {
           )}
         </div>
 
-        {/* Center Brand Identity: Syngular ID & SynCop */}
+        {/* Center Brand Identity: Syngular & SynCop */}
         <div 
           onClick={handleGoHome}
           className="flex flex-col items-center justify-center cursor-pointer group px-2 py-0.5"
@@ -134,7 +134,7 @@ function AppContent() {
               className="w-7 h-7 object-contain group-hover:scale-105 transition-transform" 
             />
             <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
-              SYNGULAR<span className="text-[#7c3aed] ml-0.5">.ID</span>
+              SYNGULAR
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-purple-300 mt-1">

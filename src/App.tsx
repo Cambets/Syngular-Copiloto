@@ -129,9 +129,9 @@ function AppContent() {
         >
           <div className="flex items-center gap-2">
             <img 
-              src="/syncop-mascot.png" 
+              src="/syncop-emblem.png" 
               alt="Syngular" 
-              className="w-7 h-7 object-contain group-hover:scale-105 transition-transform" 
+              className="w-8 h-8 sm:w-9 sm:h-9 object-contain group-hover:scale-105 transition-transform drop-shadow-sm" 
             />
             <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
               SYNGULAR

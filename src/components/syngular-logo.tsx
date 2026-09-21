@@ -70,7 +70,6 @@ export const SynRobotMascot: React.FC<SynRobotMascotProps> = ({
   className = '',
   onClick
 }) => {
-  const [imgError, setImgError] = React.useState(false);
   const iconSize = size === 'sm' ? 'w-8 h-8' : size === 'lg' ? 'w-12 h-12' : size === 'xl' ? 'w-16 h-16 sm:w-20 sm:h-20' : 'w-10 h-10';
 
   return (
@@ -79,20 +78,11 @@ export const SynRobotMascot: React.FC<SynRobotMascotProps> = ({
       className={`relative flex items-center justify-center shrink-0 select-none ${onClick ? 'cursor-pointer group' : ''} ${className}`}
       title="SynCop - Copiloto de Vendas"
     >
-      <div className={`${iconSize} rounded-2xl bg-white dark:bg-[#15102a] border border-purple-200/80 dark:border-purple-800/80 p-0.5 flex items-center justify-center shadow-md shadow-purple-900/10 transition-transform duration-200 group-hover:scale-105 relative overflow-hidden`}>
-        {!imgError ? (
-          <img 
-            src="/syncop-mascot.png" 
-            alt="SynCop" 
-            onError={() => setImgError(true)}
-            className="w-full h-full object-contain rounded-xl"
-          />
-        ) : (
-          <div className="w-full h-full rounded-xl bg-gradient-to-br from-[#8b5cf6] via-[#7c3aed] to-[#6d28d9] flex items-center justify-center text-white font-bold text-xs">
-            🤖
-          </div>
-        )}
-      </div>
+      <img 
+        src="/syncop-emblem.png" 
+        alt="SynCop" 
+        className={`${iconSize} object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-sm`}
+      />
     </div>
   );
 };

@@ -5,143 +5,11 @@ import { queryGemini } from '../lib/assistantBrain';
 import { SynRobotMascot } from './syngular-logo';
 import { 
   ArrowUp, Copy, Check, RotateCcw,
-  Zap, ShieldAlert,
-  ArrowRight, RefreshCw, Smartphone,
-  FileCheck2, SendHorizontal, User, Image as ImageIcon,
-  X, Users, Headphones, Sparkles,
-  Brain, Trash2, Plus, FileText, CreditCard, Landmark, Shield
+  Image as ImageIcon,
+  X, Mic,
+  Brain, Trash2, Plus,
+  SendHorizontal, User
 } from 'lucide-react';
-
-const allScenarioPlaybooks = [
-  {
-    id: 'pos-venda-validacao',
-    badge: 'Suporte N2 & Validação',
-    title: 'Diagnóstico de Rejeição SEFAZ / Erro de Emissão',
-    context: 'Diagnóstico N2 estruturado em 3 blocos: Causa provável, verificação no ERP e resolução passo a passo.',
-    icon: Headphones,
-    prompt: 'O cliente está com erro na transmissão de NF-e/NFC-e no ERP. Como diagnosticar e resolver seguindo o padrão N2 (Causa provável, Como verificar no cadastro/ERP e Passo a passo para resolver)?'
-  },
-  {
-    id: 'parceiro-credenciamento',
-    badge: 'Expansão de Parceiros',
-    title: 'Captação de nova AR / Posto de Atendimento',
-    context: 'Argumentos para credenciar uma nova AR com suporte da AC e alta rentabilidade.',
-    icon: Users,
-    prompt: 'Quais os principais argumentos e diferenciais da Syngular ID para apresentar a um empresário ou contador interessado em abrir uma AR ou Posto de Atendimento (PA)?'
-  },
-  {
-    id: 'pos-venda-validacao-cert',
-    badge: 'Suporte & Pós-Venda',
-    title: 'Pendência em Videoconferência ou Emissão',
-    context: 'Como orientar o parceiro quando um certificado digital entra em pendência na emissão.',
-    icon: Headphones,
-    prompt: 'O parceiro AR está com um certificado digital travado por pendência na validação por videoconferência. Como oriento os procedimentos operacionais de forma rápida?'
-  },
-  {
-    id: 'reativacao-parceiro',
-    badge: 'Reativação de Carteira',
-    title: 'Resgatar Parceiro / AR Inativa há 60 dias',
-    context: 'Abordagem consultiva para entender o motivo da pausa e reativar as emissões.',
-    icon: RefreshCw,
-    prompt: 'Monte um roteiro consultivo de abordagem para reativar um parceiro contador que parou de emitir certificados conosco há mais de 60 dias.'
-  },
-  {
-    id: 'indicador-plus-pitch',
-    badge: 'Expansão de Parcerias',
-    title: 'Abordar Contador para o Programa Indicador+',
-    context: 'Modelo pós-pago, lucro de R$ 100 a R$ 150 por certificado e 10% recorrente em sistemas.',
-    icon: Users,
-    prompt: 'Monte uma abordagem prática de WhatsApp para um contador sobre o programa Indicador+, destacando o modelo pós-pago (lucro imediato de R$ 100 a R$ 150 por certificado sem pagar adiantado), bonificações de certificados grátis e 10% de comissão recorrente nas 9 soluções do ecossistema.'
-  },
-  {
-    id: 'pa-reducao-custos',
-    badge: 'Credenciamento de PA',
-    title: 'Proposta de Redução de 30% em Custos para Dono de PA/AR',
-    context: 'Eliminar taxas de auditoria, custos de sistemas e acelerar emissões com esteira Sync.',
-    icon: Sparkles,
-    prompt: 'Como apresentar uma proposta comercial para um dono de Ponto de Atendimento (PA) ou AR concorrente demonstrando como a Syngular reduz 30% dos custos operacionais de bastidores e aumenta o lucro líquido por certificado?'
-  },
-  {
-    id: 'ponto-objecao',
-    badge: 'Quebra de Objeção',
-    title: 'Cliente achando o Syn Ponto caro',
-    context: 'Argumentos de segurança jurídica contra passivo trabalhista e Portaria 671.',
-    icon: ShieldAlert,
-    prompt: 'Um cliente com 15 colaboradores disse que achou o Syn Ponto caro. Me dê 2 argumentos práticos e uma pergunta reflexiva sobre passivo trabalhista para eu fechar a venda agora.'
-  },
-  {
-    id: 'erp-food',
-    badge: 'Pitch de Impacto',
-    title: 'Apresentar Syn ERP Food para Restaurante',
-    context: 'Fluxo integrado de comandas, delivery, mesas e PIX obrigatório na NFC-e.',
-    icon: Zap,
-    prompt: 'Monte um pitch objetivo de 1 minuto para o dono de um restaurante sobre o Syn ERP Food, destacando comandas, delivery e conformidade de PIX na NFC-e com a SEFAZ.'
-  },
-  {
-    id: 'syn-nuvem',
-    badge: 'Migração & Vendas',
-    title: 'Migrar cliente de Token para SynPass na Nuvem',
-    context: 'Vantagens do certificado A3 no celular com biometria facial, sem risco de quebra.',
-    icon: Smartphone,
-    prompt: 'Como estruturar um pitch para um cliente que usa token físico migrar para o SynPass na nuvem, destacando a praticidade no celular e a biometria facial?'
-  },
-  {
-    id: 'certifica-sst',
-    badge: 'Segurança do Trabalho',
-    title: 'PGR e NR-01 atualizada no Syn SST',
-    context: 'Evitar multas do MTE, dispensas de MEI/ME e laudos com certificação ICP-Brasil.',
-    icon: FileCheck2,
-    prompt: 'Como abordar uma empresa sobre o Syn SST com foco nas exigências do PGR (NR-01 atualizada) para evitar multas trabalhistas?'
-  },
-  {
-    id: 'syn-ged-ia',
-    badge: 'Gestão Inteligente',
-    title: 'Syn GED com IA e OCR Inteligente',
-    context: 'Digitalização, indexação automática e busca semântica em documentos com validade jurídica.',
-    icon: FileText,
-    prompt: 'Apresente os benefícios do Syn GED com OCR e IA para escritórios de contabilidade e empresas que precisam organizar arquivos e eliminar papel com segurança.'
-  },
-  {
-    id: 'syn-concilia-cartoes',
-    badge: 'Finanças & Automação',
-    title: 'Syn Concilia: Conciliação Bancária e Cartões',
-    context: 'Auditoria automática de taxas de maquininhas, PIX e extratos bancários sem erros manuais.',
-    icon: CreditCard,
-    prompt: 'Como demonstrar o valor do Syn Concilia para uma empresa que vende muito no cartão/PIX e perde horas conferindo extratos bancários e taxas de operadoras?'
-  },
-  {
-    id: 'syn-signer-icp',
-    badge: 'Assinatura Digital',
-    title: 'Syn Signer: Assinador ICP-Brasil em Nuvem',
-    context: 'Assinaturas digitais e eletrônicas com validade jurídica plena e gestão de fluxos de aprovação.',
-    icon: Shield,
-    prompt: 'Quais os principais diferenciais do Syn Signer para imobiliárias, RHs e departamentos jurídicos que precisam colher assinaturas digitais e eletrônicas rapidamente?'
-  },
-  {
-    id: 'reforma-tributaria',
-    badge: 'Fiscal & Reforma',
-    title: 'Reforma Tributária (CBS, IBS, IS) no Syn ERP',
-    context: 'Como o Syn ERP já está preparado para o período de transição tributária e emissão fiscal.',
-    icon: Landmark,
-    prompt: 'Como orientar um cliente preocupado com a Reforma Tributária (CBS e IBS) e demonstrar que o Syn ERP e Syn Nota estão 100% preparados para as novas regras?'
-  },
-  {
-    id: 'roleplay-parceiro',
-    badge: '🎭 Simulação de Treino',
-    title: 'Treino: Contador que já emite com outra AC',
-    context: 'Pratique convencer um contador que diz ter contrato exclusivo com outra certificadora.',
-    icon: Users,
-    prompt: '[INICIAR_ROLEPLAY] Vamos fazer um treino de vendas. Você é um contador parceiro de outra certificadora tradicional e acha trabalhoso migrar para a Syngular. Inicie a conversa com essa resistência.'
-  },
-  {
-    id: 'roleplay-ponto',
-    badge: '🎭 Simulação de Treino',
-    title: 'Treino de Objeção: Cliente achando Ponto caro',
-    context: 'O Copiloto assume o papel de cliente resistente para você praticar seu fechamento e receber nota.',
-    icon: ShieldAlert,
-    prompt: '[INICIAR_ROLEPLAY] Vamos fazer um treino de vendas real. Você será o dono de uma empresa com 20 funcionários que acha o Syn Ponto caro e prefere folha manual. Comece a ligação com sua objeção inicial.'
-  }
-];
 
 function renderFormattedMessage(text: string) {
   if (!text) return null;
@@ -191,6 +59,33 @@ function renderFormattedMessage(text: string) {
   );
 }
 
+const ecosystemQuestions = [
+  {
+    id: 'nr1-changes',
+    prompt: 'Quais são as principais mudanças nas novas normas da NR1?',
+  },
+  {
+    id: 'registro-marca',
+    prompt: 'Por que fazer registro de marca com o Certifica Registro?',
+  },
+  {
+    id: 'up-digital',
+    prompt: 'Como o Certifica UP Digital aumenta presença online?',
+  },
+  {
+    id: 'nr1-facilidades',
+    prompt: 'Quais as facilidades da NR1 para MEI, ME e EPP no Certifica SST?',
+  },
+  {
+    id: 'ged-dores',
+    prompt: 'Que dores o Certifica GED resolve no dia a dia do cliente?',
+  },
+  {
+    id: 'erp-objecoes',
+    prompt: 'Como contornar objeções comuns ao apresentar o Certifica ERP?',
+  }
+];
+
 interface ChatBoxProps {
   activeSessionId?: string | null;
   onGoHome?: () => void;
@@ -217,44 +112,49 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [newRuleModalInput, setNewRuleModalInput] = useState('');
 
-  // Estados dos playbooks dinâmicos com auto-rotação
-  const [playbookPageIndex, setPlaybookPageIndex] = useState(0);
-  const [isRotating, setIsRotating] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  // Estados da interface clean e acolhedora
+  const [heroCopied, setHeroCopied] = useState(false);
+  const [heroFeedback, setHeroFeedback] = useState<'up' | 'down' | null>(null);
+  const [isListening, setIsListening] = useState(false);
 
-  const totalPages = Math.ceil(allScenarioPlaybooks.length / 4);
+  // Manipulador de Microfone (Reconhecimento de Voz / Ditado)
+  const handleToggleVoice = useCallback(() => {
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRec) {
+      alert('Reconhecimento de voz não suportado neste navegador. Utilize o Google Chrome, Edge ou Safari.');
+      return;
+    }
 
-  // Auto-rotação contínua e dinâmica dos cards a cada 7 segundos
-  useEffect(() => {
-    if (messages.length > 0 || isHovered) return;
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
 
-    const interval = setInterval(() => {
-      setIsRotating(true);
-      setTimeout(() => {
-        setPlaybookPageIndex(prev => (prev + 1) % totalPages);
-        setIsRotating(false);
-      }, 250);
-    }, 7000);
+    try {
+      const recognition = new SpeechRec();
+      recognition.lang = 'pt-BR';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
 
-    return () => clearInterval(interval);
-  }, [messages.length, isHovered, totalPages]);
+      recognition.onstart = () => setIsListening(true);
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setInputValue(prev => prev ? `${prev} ${transcript}` : transcript);
+        }
+        setIsListening(false);
+      };
+      recognition.onerror = () => setIsListening(false);
+      recognition.onend = () => setIsListening(false);
 
-  const displayedPlaybooks = allScenarioPlaybooks.slice(
-    playbookPageIndex * 4,
-    playbookPageIndex * 4 + 4
-  );
-
-  const handleShufflePlaybooks = useCallback(() => {
-    setIsRotating(true);
-    setTimeout(() => {
-      setPlaybookPageIndex(prev => (prev + 1) % totalPages);
-      setIsRotating(false);
-    }, 200);
-  }, [totalPages]);
-
+      recognition.start();
+    } catch {
+      setIsListening(false);
+    }
+  }, [isListening]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sincronizar sessão ativa quando o usuário clica em uma conversa do histórico
@@ -272,45 +172,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
     }
   }, [activeSessionId, chatHistory]);
 
-  const practicalChips = [
-    { label: '🤝 Como captar e credenciar nova AR?', prompt: 'Quais os principais diferenciais da Syngular ID para captação e expansão de novas Autoridades de Registro (ARs)?' },
-    { label: '📱 Vender SynPass na nuvem (sem token)', prompt: 'Quais os 3 principais argumentos de venda do SynPass na nuvem para clientes que querem se livrar de token físico?' },
-    { label: '🛠️ Pós-Venda: Erro de biometria / videoconferência', prompt: 'Quais os passos operacionais para resolver pendências de biometria e emissão por videoconferência no pós-venda?' },
-    { label: '🔄 Script de reativação para parceiro inativo', prompt: 'Me dê uma mensagem direta e consultiva para enviar no WhatsApp a um parceiro que não emite certificados há 45 dias.' },
-    { label: '⚖️ Cerca virtual de 85m no Syn Ponto', prompt: 'Explique como funciona a cerca virtual de 85m e a biometria facial offline no Syn Ponto.' },
-    { label: '🌾 Syn ERP Agro: Livro Caixa & NFe Rural', prompt: 'Quais os diferenciais do Syn ERP Agro e como ele atende o Livro Caixa do Produtor Rural?' }
-  ];
-
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 140)}px`;
-    }
-  }, [inputValue]);
-
-  const simulationScenarios = [
-    {
-      title: 'Contador parceiro de outra AC concorrente',
-      prompt: '[INICIAR_ROLEPLAY] Vamos fazer um roleplay. Você é um contador parceiro de outra certificadora tradicional e acha trabalhoso migrar para a Syngular. Inicie a conversa com essa resistência.'
-    },
-    {
-      title: 'Cliente achando o Certifica Ponto caro',
-      prompt: '[INICIAR_ROLEPLAY] Vamos fazer um treino de vendas real. Você será o dono de uma empresa com 20 funcionários que acha o Certifica Ponto caro e prefere folha manual. Comece a ligação com sua objeção inicial.'
-    },
-    {
-      title: 'Contador desconfiado do Syn na Nuvem',
-      prompt: '[INICIAR_ROLEPLAY] Vamos fazer um roleplay. Você será um contador tradicional que exige token A3 físico e duvida da segurança do Syn na nuvem com biometria no celular. Inicie a ligação com sua objeção.'
-    }
-  ];
-
-  const handleStartSimulation = () => {
-    const randomScenario = simulationScenarios[Math.floor(Math.random() * simulationScenarios.length)];
-    handleSendMessage(randomScenario.prompt);
-  };
 
   const handleSendMessage = async (textToSend?: string) => {
     const rawText = (textToSend || inputValue).trim();
@@ -417,7 +282,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
     setIsTyping(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -425,7 +290,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   };
 
   // Suporte a colar print direto da área de transferência (Ctrl+V)
-  const handlePaste = (e: React.ClipboardEvent) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const items = e.clipboardData?.items;
     if (!items) return;
 
@@ -485,7 +350,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       saveChatSession(messages);
       setMessages([]);
       setSelectedImage(null);
-      handleShufflePlaybooks();
     }
   };
 
@@ -526,137 +390,79 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       {/* Message Thread Stream */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 relative z-10">
         
-        {/* Empty State Hero */}
+        {/* Empty State Hero - Clean & Amistoso (Matching Reference Design) */}
         {messages.length === 0 && (
-          <div className="max-w-3xl mx-auto space-y-5 animate-fade-in pb-2">
+          <div className="max-w-3xl mx-auto space-y-6 animate-fade-in py-2">
             
-            {/* Hero Card */}
-            <div className="p-6 sm:p-7 rounded-2xl bg-gradient-to-b from-purple-50/60 via-slate-50/30 to-white dark:from-purple-950/40 dark:via-purple-900/20 dark:to-[#120b22]/60 backdrop-blur-md border border-purple-100/80 dark:border-purple-800/40 shadow-2xs relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#a855f7]/15 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+            {/* Friendly Speech Bubble / Welcome Card */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-white/90 dark:bg-[#110c22]/90 backdrop-blur-md border border-slate-200/90 dark:border-purple-900/40 shadow-xs space-y-4">
+              <p className="text-xs sm:text-[13px] leading-relaxed text-slate-800 dark:text-slate-100 font-normal">
+                Olá! Sou o assistente virtual da <strong className="font-bold text-slate-900 dark:text-white">Certifica+</strong>. Estou aqui para ajudar com dúvidas sobre nossos produtos, suporte técnico, estratégias de venda e gestão de empresas. Como posso ajudar você hoje?
+              </p>
 
-              <div className="relative flex items-center gap-4">
-                <SynRobotMascot size="xl" onClick={onGoHome} />
-                <div className="space-y-1.5">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ede8ff] dark:bg-purple-950/60 text-[#5c24ff] dark:text-purple-300 border border-[#5c24ff]/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#5c24ff] animate-pulse"></span>
-                    <span>Copiloto Ativo & Pronto</span>
-                  </div>
-                  <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-snug">
-                    Como posso ajudar no seu atendimento hoje?
-                  </h1>
+              {/* Feedback & Actions Toolbar */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText("Olá! Sou o assistente virtual da Certifica+. Estou aqui para ajudar com dúvidas sobre nossos produtos, suporte técnico, estratégias de venda e gestão de empresas. Como posso ajudar você hoje?");
+                      setHeroCopied(true);
+                      setTimeout(() => setHeroCopied(false), 1500);
+                    }}
+                    className="flex items-center gap-1 hover:text-[#5c24ff] dark:hover:text-[#a78bfa] transition-colors cursor-pointer text-[11px] font-medium"
+                    title="Copiar mensagem de apresentação"
+                  >
+                    {heroCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{heroCopied ? 'Copiado!' : 'Copiar'}</span>
+                  </button>
+
+                  <span className="text-slate-300 dark:text-slate-700">&bull;</span>
+
+                  <button
+                    onClick={() => setHeroFeedback('up')}
+                    className={`flex items-center gap-1 transition-colors cursor-pointer text-[11px] font-medium ${heroFeedback === 'up' ? 'text-emerald-600 font-bold' : 'hover:text-emerald-600'}`}
+                    title="Essa resposta foi útil"
+                  >
+                    <span>👍</span>
+                    <span>Útil</span>
+                  </button>
+
+                  <button
+                    onClick={() => setHeroFeedback('down')}
+                    className={`flex items-center gap-1 transition-colors cursor-pointer text-[11px] font-medium ${heroFeedback === 'down' ? 'text-rose-600 font-bold' : 'hover:text-rose-600'}`}
+                    title="Essa resposta foi pouco útil"
+                  >
+                    <span>👎</span>
+                    <span>Pouco útil</span>
+                  </button>
                 </div>
+
+                <span className="text-[10px] text-slate-400 italic">
+                  {heroFeedback ? 'Obrigado pelo seu feedback!' : 'Se quiser, conte se essa resposta te ajudou — é rapidinho.'}
+                </span>
               </div>
             </div>
 
-            {/* Playbooks Dinâmicos Auto-Rotativos */}
-            <div 
-              className="space-y-3"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              <div className="flex items-center justify-between px-1 flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>Cenários Dinâmicos</span>
+            {/* Section Heading */}
+            <div className="text-center pt-2 pb-1">
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-100">
+                Explore o conhecimento<br className="hidden xs:inline" /> do nosso ecossistema
+              </h2>
+            </div>
+
+            {/* 6 Clean Question Cards (2 cols on tablet, 3 cols on desktop) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {ecosystemQuestions.map((q) => (
+                <button
+                  key={q.id}
+                  onClick={() => handleSendMessage(q.prompt)}
+                  className="p-4 sm:p-5 rounded-2xl bg-white/85 dark:bg-[#120c24]/85 hover:bg-purple-50/50 dark:hover:bg-purple-950/40 border border-slate-200/80 dark:border-purple-950/50 hover:border-[#5c24ff]/50 text-slate-700 dark:text-slate-200 hover:text-[#5c24ff] dark:hover:text-purple-300 transition-all duration-150 cursor-pointer text-center flex items-center justify-center min-h-[92px] shadow-2xs group active:scale-[0.98]"
+                >
+                  <span className="text-xs sm:text-[13px] font-medium leading-snug">
+                    {q.prompt}
                   </span>
-
-                  {/* Indicador Dinâmico de Rotação */}
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/60 text-[#5c24ff] dark:text-purple-300 border border-purple-200/50 dark:border-purple-800/40">
-                    <span className={`w-1.5 h-1.5 rounded-full ${isHovered ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`}></span>
-                    <span>{isHovered ? 'Pausado (Cursor em cima)' : 'Alternando a cada 7s'}</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-1.5">
-                  {/* Page Dots */}
-                  <div className="flex items-center gap-1 mr-1">
-                    {Array.from({ length: totalPages }).map((_, pIdx) => (
-                      <button
-                        key={pIdx}
-                        onClick={() => {
-                          setIsRotating(true);
-                          setTimeout(() => {
-                            setPlaybookPageIndex(pIdx);
-                            setIsRotating(false);
-                          }, 150);
-                        }}
-                        className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                          playbookPageIndex === pIdx 
-                            ? 'w-4 bg-[#5c24ff] dark:bg-[#c084fc]' 
-                            : 'w-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300'
-                        }`}
-                        title={`Ir para o grupo ${pIdx + 1}`}
-                      />
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={handleStartSimulation}
-                    className="flex items-center gap-1.5 text-[11px] font-bold text-white bg-[#5c24ff] hover:bg-[#4d1cdb] px-2.5 py-1 rounded-md transition-all cursor-pointer shadow-2xs"
-                    title="Iniciar Treino de Vendas contra Parceiro/Cliente Resistente"
-                  >
-                    <span>🎭</span>
-                    <span>Iniciar Treino</span>
-                  </button>
-
-                  <button
-                    onClick={handleShufflePlaybooks}
-                    className="flex items-center gap-1 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-2.5 py-1 rounded-md transition-all cursor-pointer border border-slate-200 dark:border-slate-700"
-                    title="Alternar agora para os próximos cenários"
-                  >
-                    <RefreshCw className={`w-3 h-3 ${isRotating ? 'animate-spin' : ''}`} />
-                    <span>Alternar</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 transition-all duration-250 ${isRotating ? 'opacity-30 scale-[0.99]' : 'opacity-100 scale-100'}`}>
-                {displayedPlaybooks.map((item) => {
-                  const IconComp = item.icon;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleSendMessage(item.prompt)}
-                      className="p-4 text-left rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151822] hover:border-[#5c24ff]/60 hover:bg-purple-50/15 dark:hover:bg-purple-950/20 hover:shadow-xs transition-all duration-150 cursor-pointer group flex flex-col justify-between space-y-2.5 relative"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-purple-50 dark:bg-purple-950/50 text-[#5c24ff] dark:text-purple-300 group-hover:bg-[#5c24ff] group-hover:text-white transition-colors">
-                          {item.badge}
-                        </span>
-                        <ArrowRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 group-hover:text-[#5c24ff] group-hover:translate-x-0.5 transition-all" />
-                      </div>
-
-                      <div>
-                        <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-snug mb-1 group-hover:text-[#5c24ff] transition-colors flex items-center gap-1.5">
-                          <IconComp className="w-3.5 h-3.5 text-[#5c24ff] shrink-0" />
-                          {item.title}
-                        </h3>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
-                          {item.context}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Chips Rápidos */}
-            <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block px-1">
-                Consultas Rápidas por Área
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {practicalChips.map((chip, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleSendMessage(chip.prompt)}
-                    className="text-[11px] font-medium text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-[#5c24ff] dark:hover:text-[#a78bfa] hover:border-purple-200 dark:hover:border-purple-800 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-700 transition-all cursor-pointer shadow-2xs text-left"
-                  >
-                    {chip.label}
-                  </button>
-                ))}
-              </div>
+                </button>
+              ))}
             </div>
 
           </div>
@@ -805,20 +611,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
           </div>
         )}
 
-        {/* Textarea Container */}
-        <div className="relative border border-slate-200 dark:border-slate-700 focus-within:border-[#5c24ff] focus-within:ring-1 focus-within:ring-[#5c24ff] rounded-xl bg-slate-50/50 dark:bg-[#151822] p-2 transition-all">
-          
-          <textarea
-            ref={textareaRef}
-            rows={1}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            placeholder="Cole um print (Ctrl+V) ou digite dúvidas de ARs, produtos, suporte e parcerias..."
-            className="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden resize-none px-2 py-1 max-h-36 leading-relaxed"
-          />
-
+        {/* Clean Minimalist Input Bar (Matching Reference Design) */}
+        <div className="relative flex items-center bg-white dark:bg-[#120d26] border border-slate-200/90 dark:border-purple-950/60 focus-within:border-[#5c24ff] rounded-2xl p-2 shadow-xs transition-all">
           <input 
             type="file" 
             ref={fileInputRef} 
@@ -827,40 +621,60 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
             className="hidden" 
           />
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-slate-800/80 mt-1 px-1">
-            <div className="flex items-center gap-2 text-[10px] text-slate-400">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-1 p-1 px-2 rounded-md bg-white dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-[#5c24ff] dark:text-purple-300 font-bold border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer shadow-2xs"
-                title="Anexar foto ou print de tela"
-              >
-                <ImageIcon className="w-3.5 h-3.5" />
-                <span>Print</span>
-              </button>
+          <input
+            ref={textareaRef as any}
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            placeholder="Digite sua dúvida sobre produtos, vendas ou operação..."
+            className="flex-1 bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden"
+          />
 
-              <span className="hidden md:inline text-slate-400">
-                Cole prints com <strong className="text-slate-600 dark:text-slate-300">Ctrl+V</strong>
-              </span>
-            </div>
+          <div className="flex items-center gap-1.5 shrink-0 pr-1">
+            {/* Botão de Print / Imagem */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+              title="Anexar print de tela"
+            >
+              <ImageIcon className="w-4 h-4" />
+            </button>
 
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-1 text-[10px] text-slate-400">
-                <span>Enter</span>
-                <span className="kbd text-[9px]">↵</span>
-              </div>
+            {/* Botão de Microfone (Ditado de Voz) */}
+            <button
+              type="button"
+              onClick={handleToggleVoice}
+              className={`p-2 rounded-xl transition-all cursor-pointer ${
+                isListening 
+                  ? 'bg-rose-500 text-white animate-pulse' 
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+              title={isListening ? 'Ouvindo... Clique para pausar' : 'Falar por microfone'}
+            >
+              <Mic className="w-4 h-4" />
+            </button>
 
-              <button
-                onClick={() => handleSendMessage()}
-                disabled={(!inputValue.trim() && !selectedImage) || isTyping}
-                className="p-2 bg-[#5c24ff] hover:bg-[#4d1cdb] disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white rounded-lg transition-all cursor-pointer active:scale-95 flex items-center justify-center shrink-0 shadow-2xs"
-                title="Enviar mensagem"
-              >
-                <ArrowUp className="w-4 h-4" />
-              </button>
-            </div>
+            {/* Botão de Envio (Seta para cima em destaque) */}
+            <button
+              type="button"
+              onClick={() => handleSendMessage()}
+              disabled={(!inputValue.trim() && !selectedImage) || isTyping}
+              className="p-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white rounded-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center shrink-0 shadow-xs"
+              title="Enviar mensagem"
+            >
+              <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+            </button>
           </div>
+        </div>
 
+        {/* Clean Footer Hint */}
+        <div className="text-center pt-0.5">
+          <span className="text-[10px] text-slate-400">
+            Enter para enviar &bull; Shift+Enter para quebrar linha
+          </span>
         </div>
 
         {/* Barra de Ajuda de Comandos / Ensinar IA - Apenas Administrador */}

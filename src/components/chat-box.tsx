@@ -66,23 +66,23 @@ const ecosystemQuestions = [
   },
   {
     id: 'registro-marca',
-    prompt: 'Por que oferecer registro de marca com o Syn Registro para contadores?',
+    prompt: 'Por que fazer registro de marca com o Certifica Registro?',
   },
   {
     id: 'up-digital',
-    prompt: 'Como o Syn UP Digital ajuda as empresas a aumentarem a presença online?',
+    prompt: 'Como o Certifica UP Digital ajuda as empresas a aumentarem a presença online?',
   },
   {
     id: 'nr1-facilidades',
-    prompt: 'Quais as facilidades da NR1 para MEI, ME e EPP no Syn SST?',
+    prompt: 'Quais as facilidades da NR1 para MEI, ME e EPP no Certifica SST?',
   },
   {
     id: 'ged-dores',
-    prompt: 'Que dores o Syn GED resolve na gestão de documentos e contratos?',
+    prompt: 'Que dores o Certifica GED resolve na gestão de documentos e contratos?',
   },
   {
     id: 'erp-objecoes',
-    prompt: 'Como contornar objeções comuns de preço ao apresentar o Syn ERP?',
+    prompt: 'Como contornar objeções comuns de preço ao apresentar o Certifica ERP?',
   }
 ];
 

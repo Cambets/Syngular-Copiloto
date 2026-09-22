@@ -13,14 +13,15 @@ Você atende colaboradores, parceiros, franqueados, Agentes de Registro (ARs), P
 =========================================================================
 • A empresa deve ser tratada EXCLUSIVAMENTE como SYNGULAR (Syngular ID / Syn+).
 • Esqueça qualquer menção genérica anterior: o ecossistema agora é 100% Syngular.
-• Nomenclatura oficial dos módulos:
-  - Syn ERP (Web, Food, Agro, Clínicas com Memed, Pet, Agenda, Varejo)
-  - Syn Ponto Eletrônico (Portaria MTE 671, cerca virtual de 85m, biometria facial offline)
-  - Syn GED (Gestão Eletrônica de Documentos com IA e OCR)
-  - Syn SST (Saúde e Segurança do Trabalho, PGR, PCMSO, NR-01 atualizada)
-  - Syn Signer (Assinador Digital e Eletrônico ICP-Brasil)
-  - Syn Concilia (Conciliação bancária e de cartões)
-  - Syn Nota (Emissor Fiscal NF-e, NFC-e, NFS-e, MDF-e, CT-e)
+• Nomenclatura oficial das soluções e softwares:
+  - Certifica ERP (Web, Food, Agro, Clínicas com Memed, Pet, Agenda, Varejo)
+  - Certifica Ponto (Portaria MTE 671, cerca virtual de 85m, biometria facial offline)
+  - Certifica GED (Gestão Eletrônica de Documentos com IA e OCR)
+  - Certifica SST (Saúde e Segurança do Trabalho, PGR, PCMSO, NR-01 atualizada)
+  - Certifica Signer (Assinador Digital e Eletrônico ICP-Brasil)
+  - Certifica Concilia (Conciliação bancária e de cartões)
+  - Certifica Nota (Emissor Fiscal NF-e, NFC-e, NFS-e, MDF-e, CT-e)
+  - Certifica Registro & Certifica UP Digital (Registro de marcas e soluções digitais)
   - SynPass (Certificado em nuvem com renovação simplificada e Jornada Synples)
 
 ${ragContext ? `
@@ -42,9 +43,9 @@ ${customRules.map((r, i) => `${i + 1}. ${r.rule}`).join('\n')}
 • OBRIGATÓRIO usar EMOJIS temáticos em CADA título, lista e subtópico (ex: 🚀, 💼, 🕒, 📁, 🦺, ✍️, 💳, 🧾, ☁️, 🎯, 💡, 📲, ✨, 🟢, 🤝, 📊).
 • Formatação limpa para leitura mobile:
   - Use listas bonitas com emojis no início:
-    • 💼 Syn ERP: Gestão completa com módulos Web, Food, Agro...
-    • 🕒 Syn Ponto Eletrônico: Controle com biometria facial Portaria 671...
-    • 📁 Syn GED: Gestão de documentos com OCR e IA...
+    • 💼 Certifica ERP: Gestão completa com módulos Web, Food, Agro...
+    • 🕒 Certifica Ponto: Controle com biometria facial Portaria 671...
+    • 📁 Certifica GED: Gestão de documentos com OCR e IA...
   - Destaque termos-chave com **negrito suave**.
   - Deixe linhas em branco entre os blocos para ficar arejado e gostoso de ler.
 
@@ -61,7 +62,7 @@ ${customRules.map((r, i) => `${i + 1}. ${r.rule}`).join('\n')}
   1) Se o assunto for imposto/alíquota complexa, dê o direcionamento geral e recomende validar a regra específica com o contador da empresa.
   2) Nunca invente funcionalidades que o sistema não possui; explique com transparência como funciona no plano.
   3) Para produtos com orçamentos personalizados, convide com simpatia para falar no WhatsApp oficial da Syngular: (37) 99862-8259.
-  4) Trate a marca "Syngular" no feminino ("a Syngular") e os módulos no masculino ("o Syn ERP", "o Syn Ponto", "o Syn Signer").
+  4) Trate a marca "Syngular" no feminino ("a Syngular") e os produtos de software no masculino ("o Certifica ERP", "o Certifica Ponto", "o Certifica Signer").
   5) 🚫 PROIBIÇÃO RIGOROSA: NUNCA mencione o nome "Rayssa", telefones pessoais (como 87 98172-7108) ou qualquer pessoa física. Todo atendimento comercial e de expansão deve ser atribuído genericamente à "Equipe Comercial Syngular" ou "Suporte Oficial Syngular pelo WhatsApp (37) 99862-8259".
 
 =========================================================================
@@ -176,18 +177,6 @@ ${getJornadaSynplesPromptContext()}
 
 function sanitizeOutput(text: string): string {
   let safe = text;
-  // Rebranding Syngular
-  safe = safe.replace(/certifica\+/gi, 'Syngular');
-  safe = safe.replace(/certifica erp/gi, 'Syn ERP');
-  safe = safe.replace(/certifica ponto/gi, 'Syn Ponto');
-  safe = safe.replace(/certifica ged/gi, 'Syn GED');
-  safe = safe.replace(/certifica sst/gi, 'Syn SST');
-  safe = safe.replace(/certifica signer/gi, 'Syn Signer');
-  safe = safe.replace(/certifica concilia/gi, 'Syn Concilia');
-  safe = safe.replace(/certifica nota/gi, 'Syn Nota');
-  safe = safe.replace(/avante/gi, 'Syn ERP');
-  safe = safe.replace(/stelanto/gi, 'Syn ERP');
-  safe = safe.replace(/docnuvem/gi, 'Syn GED');
 
   // Privacidade e Contatos Institucionais Oficiais
   safe = safe.replace(/rayssa/gi, 'Equipe Comercial');
@@ -363,7 +352,7 @@ export async function queryGemini(
 
   // Saudações e apresentações descontraídas
   if (normalized.match(/^(oi|olá|ola|bom dia|boa tarde|boa noite|fala|opa|e ai|e aí)/)) {
-    return `Olá! Tudo bem com você? 😊✨\n\nSou seu **Copiloto Comercial & Suporte N2** da **Syngular ID / Syn+**! 🚀💜\n\nEstou 100% pronto para te ajudar com qualquer desafio: seja tirar dúvidas sobre **Certificados Digitais (AR, emissão, normas ITI)**, soluções do nosso ecossistema (**Syn ERP, Ponto, Signer, Concilia**), resolver **rejeições da SEFAZ** ou montar roteiros de vendas matadores no WhatsApp! 💼📲\n\nMe conta: o que você precisa resolver hoje? 💬🤝`;
+    return `Olá! Tudo bem com você? 😊✨\n\nSou seu **Copiloto Comercial & Suporte N2** da **Syngular ID / Syn+**! 🚀💜\n\nEstou 100% pronto para te ajudar com qualquer desafio: seja tirar dúvidas sobre **Certificados Digitais (AR, emissão, normas ITI)**, soluções do nosso ecossistema (**Certifica ERP, Certifica Ponto, Certifica GED, Certifica Signer, Certifica Concilia**), resolver **rejeições da SEFAZ** ou montar roteiros de vendas matadores no WhatsApp! 💼📲\n\nMe conta: o que você precisa resolver hoje? 💬🤝`;
   }
 
   // Busca contextual nos produtos
@@ -376,5 +365,5 @@ export async function queryGemini(
     return `Com certeza! Vamos falar sobre o **${found.name}**! 🚀✨\n\n${found.description}\n\n💡 **O grande diferencial dessa solução:**\n${found.pitch}\n\n${found.objections && found.objections.length > 0 ? `🎯 **Dica para quando o cliente perguntar ou tiver dúvida:**\n• *Dúvida comum:* "${found.objections[0].question}"\n• *O que você pode responder:* "${found.objections[0].answer}"\n\n` : ''}👏 *Quer que eu monte uma mensagem personalizada para você enviar agora para o seu cliente pelo WhatsApp ou prefere entender mais sobre a integração técnica? Só me falar!* 💬💜`;
   }
 
-  return `Entendi perfeitamente o seu ponto! 💡✨\n\nComo seu copiloto no ecossistema **Syngular ID / Syn+**, posso te ajudar a aprofundar qualquer tema:\n\n• 📜 **Certificação Digital ICP-Brasil:** Abertura de AR, expansão de postos (PA), validação por videoconferência e modelos comissionados.\n• 💻 **Softwares do Ecossistema:** Syn ERP, Syn Ponto Eletrônico, Syn Signer, Syn Conciliação, SST e automações fiscais.\n• 🛠️ **Suporte Técnico N2:** Diagnóstico de rejeições SEFAZ, notas travadas e schemas XML.\n• 💰 **Comercial & Parcerias:** Argumentos para contadores e propostas de alto valor.\n\nMe dê mais detalhes da situação ou me envie o print do erro que vou te guiar passo a passo! 🚀👏`;
+  return `Entendi perfeitamente o seu ponto! 💡✨\n\nComo seu copiloto no ecossistema **Syngular ID / Syn+**, posso te ajudar a aprofundar qualquer tema:\n\n• 📜 **Certificação Digital ICP-Brasil:** Abertura de AR, expansão de postos (PA), validação por videoconferência e modelos comissionados.\n• 💻 **Softwares do Ecossistema:** Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Certifica Signer, Certifica Concilia, Certifica Nota.\n• 🛠️ **Suporte Técnico N2:** Diagnóstico de rejeições SEFAZ, notas travadas e schemas XML.\n• 💰 **Comercial & Parcerias:** Argumentos para contadores e propostas de alto valor.\n\nMe dê mais detalhes da situação ou me envie o print do erro que vou te guiar passo a passo! 🚀👏`;
 }

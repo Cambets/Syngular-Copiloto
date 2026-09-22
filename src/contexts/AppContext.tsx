@@ -174,171 +174,171 @@ const defaultProducts: Product[] = [
     ]
   },
 
-  // --- ECOSSISTEMA SYN+ (SOFTWARE SAAS & GESTÃO) ---
+  // --- ECOSSISTEMA DE SOFTWARES & GESTÃO (CERTIFICA) ---
   {
-    id: 'syn-erp-web',
-    name: 'Syn ERP Web',
+    id: 'certifica-erp-web',
+    name: 'Certifica ERP Web',
     category: 'Certifica+',
     description: 'Sistema de gestão empresarial e fiscal em nuvem para comércio, atacado, varejo e serviços (atende o segmento do antigo Shop). Planos: MEI (15 docs/mês), Contador (10 docs/mês), Básico, Intermediário, Avançado e Premium (ilimitados). Emite NFe, NFCe, NFSe, CTe, MDFe com suporte a SPED. Suporta PIX integrado (tipo 17 SEFAZ) com bloqueio antifraude e conciliação automática no XML.',
     pitch: 'Gestão comercial, financeira e faturamento fiscal em nuvem, pronto para as novas exigências de PIX na NFC-e da SEFAZ.',
-    keywords: ['erp web', 'nfe', 'nfce', 'nfse', 'pix integrado', 'sefaz', 'estoque', 'financeiro', 'sped', 'varejo', 'comercio', 'loja'],
+    keywords: ['erp web', 'certifica erp', 'nfe', 'nfce', 'nfse', 'pix integrado', 'sefaz', 'estoque', 'financeiro', 'sped', 'varejo', 'comercio', 'loja'],
     objections: [
       { question: 'Como funciona o PIX integrado tipo 17 na NFC-e?', answer: 'No PDV, o QR Code dinâmico é gerado com tela bloqueada, detecta o pagamento, impede cancelamento sem estorno e amarra as tags de PIX diretamente no XML da NFC-e conforme exigência da SEFAZ.' }
     ]
   },
   {
-    id: 'syn-erp-food',
-    name: 'Syn ERP Food',
+    id: 'certifica-erp-food',
+    name: 'Certifica ERP Food',
     category: 'Certifica+',
     description: 'Software para bares, restaurantes, lanchonetes e delivery. Planos Básico, Intermediário, Avançado e Premium. Comandas mobile, controle de mesas, painel do garçom, controle de entregador, cardápio digital via QR Code, módulo Fast Food, Anota Aí, frete por KM e integração nativa com iFood.',
     pitch: 'Controle ágil de comandas, mesas, delivery e cozinha integrado ao frente de caixa.',
-    keywords: ['food', 'restaurante', 'bar', 'comandas', 'mesas', 'ifood', 'garçom', 'delivery', 'cardápio digital', 'fast food'],
+    keywords: ['food', 'certifica food', 'restaurante', 'bar', 'comandas', 'mesas', 'ifood', 'garçom', 'delivery', 'cardápio digital', 'fast food'],
     objections: [
       { question: 'Integra diretamente com o iFood?', answer: 'Sim, o módulo iFood recebe e gerencia os pedidos diretamente no painel do ERP com baixa automática.' }
     ]
   },
   {
-    id: 'syn-erp-agro',
-    name: 'Syn ERP Agro & Agro Fiscal',
+    id: 'certifica-erp-agro',
+    name: 'Certifica ERP Agro & Agro Fiscal',
     category: 'Certifica+',
     description: 'Gestão para produtores rurais e agronegócio. Planos Agro: Light (40 docs/mês), Básico, Intermediário e Avançado. Planos Agro Fiscal de A30 a A3200 docs/mês e Ilimitado. Emissão de NFe/CTe/MDFe rural, Livro Caixa Digital do Produtor Rural (LCDPR), controle de romaneios de grãos/gado e múltiplas Inscrições Estaduais.',
     pitch: 'Controle de romaneios, finanças e Livro Caixa Rural em uma única plataforma homologada.',
-    keywords: ['agro', 'produtor rural', 'livro caixa', 'lcdpr', 'romaneio', 'graos', 'gado', 'nfe rural', 'agro fiscal'],
+    keywords: ['agro', 'certifica agro', 'produtor rural', 'livro caixa', 'lcdpr', 'romaneio', 'graos', 'gado', 'nfe rural', 'agro fiscal'],
     objections: [
       { question: 'Gera o arquivo oficial do Livro Caixa para a Receita Federal?', answer: 'Sim, compila todas as receitas e despesas rurais no layout homologado para o LCDPR.' }
     ]
   },
   {
-    id: 'syn-erp-clinicas',
-    name: 'Syn ERP Clínicas',
+    id: 'certifica-erp-clinicas',
+    name: 'Certifica ERP Clínicas',
     category: 'Certifica+',
     description: 'Sistema para clínicas e consultórios médicos e odontológicos. Planos: Light (até 2 prof.), Básico (até 4), Intermediário (até 6), Avançado (até 8) e Premium (acima de 8 prof.). Prontuário eletrônico unificado, agenda por profissional, personalização de receitas/atestados e Prescritor Memed com receitas digitais válidas nacionalmente.',
     pitch: 'Prontuário eletrônico, agenda unificada e Prescritor Memed integrado para consultórios.',
-    keywords: ['clinicas', 'medicos', 'consultorio', 'prontuario', 'memed', 'receita digital', 'pacientes', 'odontologia'],
+    keywords: ['clinicas', 'certifica clinicas', 'medicos', 'consultorio', 'prontuario', 'memed', 'receita digital', 'pacientes', 'odontologia'],
     objections: [
       { question: 'As receitas digitais são aceitas em farmácias?', answer: 'Sim, com o Prescritor Memed integrado e assinatura digital ICP-Brasil, as receitas possuem validade nacional.' }
     ]
   },
   {
-    id: 'syn-erp-pet',
-    name: 'Syn ERP Pet',
+    id: 'certifica-erp-pet',
+    name: 'Certifica ERP Pet',
     category: 'Certifica+',
     description: 'Sistema especializado para clínicas veterinárias e pet shops. Planos: Básico (até 10 prof.), Intermediário (11 a 20), Avançado (21 a 30) e Premium (acima de 30). Prontuário veterinário, anamnese, controle de atendimento, agenda, estoque, venda de produtos e emissão fiscal.',
     pitch: 'Prontuário veterinário, controle de atendimentos, banho e tosa e emissão fiscal integrados.',
-    keywords: ['pet', 'pet shop', 'veterinaria', 'anamnese', 'prontuario pet', 'banho e tosa'],
+    keywords: ['pet', 'certifica pet', 'pet shop', 'veterinaria', 'anamnese', 'prontuario pet', 'banho e tosa'],
     objections: [
       { question: 'O sistema emite notas fiscais de produtos e serviços veterinários?', answer: 'Sim, emite NFe, NFCe e NFSe com integração total ao cadastro de animais e clientes.' }
     ]
   },
   {
-    id: 'syn-erp-agenda',
-    name: 'Syn ERP Agenda',
+    id: 'certifica-erp-agenda',
+    name: 'Certifica ERP Agenda',
     category: 'Certifica+',
     description: 'Sistema de gestão de agendamentos e faturamento para salões de beleza, barbearias, clínicas de estética, estúdios, quadras esportivas, salas/boxes/consultórios e prestadores de serviços em geral (substitui integralmente o antigo ERP Salões). Inclui link online de agendamento, agenda por profissional ou por espaço físico, controle de serviços/procedimentos, pagamento antecipado (Asaas/Mercado Pago), comissão automática e emissão fiscal via certificado A1 (.pfx).',
     pitch: 'Agendamentos online, controle de profissionais/espaços e emissão fiscal ágil para salões, estética e prestadores de serviços.',
-    keywords: ['agenda', 'erp agenda', 'salao', 'barbearia', 'estetica', 'agendamento online', 'prestador de servico', 'a1', 'nfe', 'link na bio', 'servicos', 'quadras'],
+    keywords: ['agenda', 'certifica agenda', 'erp agenda', 'salao', 'barbearia', 'estetica', 'agendamento online', 'prestador de servico', 'a1', 'nfe', 'link na bio', 'servicos', 'quadras'],
     objections: [
       { question: 'O ERP Agenda atende salões de beleza e barbearias?', answer: 'Sim, o ERP Agenda substituiu integralmente o antigo ERP Salões, gerenciando a grade de horários, comandas, comissões da equipe e frente de caixa.' },
-      { question: 'Qual certificado digital é necessário?', answer: 'O Syn Agenda opera com certificado digital modelo A1 (.pfx) para garantir estabilidade e emissão automática em nuvem.' }
+      { question: 'Qual certificado digital é necessário?', answer: 'O Certifica Agenda opera com certificado digital modelo A1 (.pfx) para garantir estabilidade e emissão automática em nuvem.' }
     ]
   },
   {
-    id: 'syn-nota',
-    name: 'Syn Nota (Emissor Fiscal)',
+    id: 'certifica-nota',
+    name: 'Certifica Nota (Emissor Fiscal)',
     category: 'Certifica+',
     description: 'Emissor fiscal eletrônico multiformato especializado (NFe, NFCe, CTe, CTe OS, MDFe e SPED). Desenvolvido para empresas que buscam simplicidade e agilidade, sem a complexidade ou custo de módulos extras de ERP (estoque, CRM). Utilização imediata e integração validada com a SEFAZ.',
     pitch: 'Emissor fiscal rápido, 100% legalizado e sem complexidade de ERP.',
-    keywords: ['nota', 'emissor fiscal', 'nfe', 'nfce', 'cte', 'mdfe', 'sped', 'sefaz', 'sem erp'],
+    keywords: ['nota', 'certifica nota', 'emissor fiscal', 'nfe', 'nfce', 'cte', 'mdfe', 'sped', 'sefaz', 'sem erp'],
     objections: [
       { question: 'O Certifica Nota é um ERP completo?', answer: 'Não. É um emissor fiscal especializado que foca exclusivamente na emissão rápida e segura com a SEFAZ, sem módulos desnecessários.' }
     ]
   },
   {
-    id: 'syn-ponto',
-    name: 'Syn Ponto',
+    id: 'certifica-ponto',
+    name: 'Certifica Ponto',
     category: 'Certifica+',
     description: 'Controle de ponto eletrônico homologado pela Portaria 671 do MTE. Reconhecimento facial com prova de vida (liveness), cerca virtual com raio a partir de 85m (bloqueio ou notificação), registro offline com sincronização, armazenamento Amazon S3 com retenção de 5 anos, +40 relatórios gerenciais e app do colaborador. Planos por vidas: Básico (1 a 10 vidas), Intermediário (11 a 20 vidas) e Avançado (21 a 30 vidas). Sem fidelidade.',
     pitch: 'Controle de jornada com biometria facial, cerca virtual de 85m e 100% conforme a Portaria 671.',
-    keywords: ['ponto', 'portaria 671', 'mte', 'cerca virtual', 'biometria facial', 'liveness', 'banco de horas', 'offline', 'vidas'],
+    keywords: ['ponto', 'certifica ponto', 'portaria 671', 'mte', 'cerca virtual', 'biometria facial', 'liveness', 'banco de horas', 'offline', 'vidas'],
     objections: [
       { question: 'Funciona se a equipe estiver sem sinal de internet?', answer: 'Sim, o ponto é registrado offline com foto e GPS, sincronizando automaticamente ao recuperar a conexão.' },
       { question: 'Impede marcações fora da empresa?', answer: 'A cerca virtual com raio a partir de 85 metros bloqueia marcações ou notifica o gestor caso o ponto seja batido fora da área.' }
     ]
   },
   {
-    id: 'syn-ged',
-    name: 'Syn GED & Assinador',
+    id: 'certifica-ged',
+    name: 'Certifica GED & Assinador',
     category: 'Certifica+',
     description: 'Guarda eletrônica de documentos com assinador digital integrado. Planos oficiais: Básico, Intermediário e Avançado (escalonados em até 5, 6 a 10 ou ilimitados usuários). Inclui pastas, templates, checklists, CLM, gestão de tarefas Kanban, assinatura em massa e alertas de validade de certidões. Solução altamente recomendada para empresas que participam de licitações.',
     pitch: 'Centralize documentos corporativos, certidões para licitações e contratos com assinatura digital.',
-    keywords: ['ged', 'documentos', 'assinador', 'licitacao', 'certidoes', 'contratos', 'nuvem', 'clm', 'kanban'],
+    keywords: ['ged', 'certifica ged', 'documentos', 'assinador', 'licitacao', 'certidoes', 'contratos', 'nuvem', 'clm', 'kanban'],
     objections: [
       { question: 'Quais são os planos oficiais do GED?', answer: 'Os nomes oficiais são Básico, Intermediário e Avançado (nunca use Basic ou Starter). Cada plano possui um conjunto estrito de funcionalidades.' }
     ]
   },
   {
-    id: 'syn-sst',
-    name: 'Syn SST (Saúde e Segurança)',
+    id: 'certifica-sst',
+    name: 'Certifica SST (Saúde e Segurança)',
     category: 'Certifica+',
     description: 'Gestão completa de SST e mensageria eSocial conforme a NR-01 (Portaria MTE 765/2025). Geração de PGR (inventário de riscos vivo e plano de ação), PCMSO, LTCAT (sob demanda quando houver agentes nocivos), Análise de Riscos Psicossociais em 6 etapas, capacitação EAD (Anexo II) e envio dos eventos S-2210 (CAT), S-2220 (ASO) e S-2240. Planos mensais por vidas: Básico (até 5 func.), Intermediário (até 10 func.) e Avançado (até 20 func.). NUNCA divulgue valores.',
     pitch: 'Envie os eventos de SST ao eSocial e mantenha o PGR e treinamentos da NR-01 em dia sem multas.',
-    keywords: ['sst', 'esocial', 'nr-01', 'pgr', 'pcmso', 'ltcat', 'cat', 's-2240', 's-2220', 'psicossociais', 's-2210'],
+    keywords: ['sst', 'certifica sst', 'esocial', 'nr-01', 'pgr', 'pcmso', 'ltcat', 'cat', 's-2240', 's-2220', 'psicossociais', 's-2210'],
     objections: [
       { question: 'Empresas pequenas precisam de SST?', answer: 'Sim, o envio ao eSocial é obrigatório para todas as empresas com colaboradores CLT. O sistema identifica dispensas legais para MEI/ME/EPP.' },
       { question: 'Qual o valor dos planos?', answer: 'Os valores são sob consulta diretamente com o consultor especializado no WhatsApp oficial.' }
     ]
   },
   {
-    id: 'syn-concilia',
-    name: 'Syn Concilia',
+    id: 'certifica-concilia',
+    name: 'Certifica Concilia',
     category: 'Certifica+',
     description: 'Plataforma especializada de conciliação financeira de vendas em cartões de crédito, débito e PIX. Preço acessível de R$ 199/mês. Conciliação em 3 níveis: vendas no POS/TEF, financeira (adquirentes como Stone, Rede, Cielo, GetNet, PagSeguro, Mercado Pago) e extrato bancário. Alertas automáticos de divergências de taxas, atrasos e chargebacks.',
     pitch: 'Auditoria e conciliação automática de vendas em cartão e PIX por R$ 199/mês para recuperar taxas cobradas a mais.',
-    keywords: ['conciliacao', 'cartao', 'taxas', 'adquirente', 'chargeback', 'tef', 'pos', 'pix', '199'],
+    keywords: ['conciliacao', 'certifica concilia', 'cartao', 'taxas', 'adquirente', 'chargeback', 'tef', 'pos', 'pix', '199'],
     objections: [
       { question: 'Qual a vantagem frente ao controle manual?', answer: 'O sistema audita automaticamente cada taxa contratada em 3 níveis e identifica cancelamentos ou chargebacks despercebidos com ROI rápido.' }
     ]
   },
   {
-    id: 'syn-signer',
-    name: 'Syn Signer (Assinaturas Digitais)',
+    id: 'certifica-signer',
+    name: 'Certifica Signer (Assinaturas Digitais)',
     category: 'Certifica+',
     description: 'Plataforma completa para assinatura eletrônica e digital de documentos com validade jurídica nacional (MP 2.200-2). Assinatura híbrida (com ou sem certificado ICP-Brasil), múltiplos signatários simultâneos ou sequenciais, assinatura em lote, geolocalização do signatário, carimbo do tempo e trilha de auditoria completa.',
     pitch: 'Assine contratos e documentos com validade jurídica, múltiplos signatários e trilha de auditoria.',
-    keywords: ['signer', 'assinatura eletronica', 'assinatura digital', 'mp 2200', 'contratos', 'lote', 'geolocalizacao'],
+    keywords: ['signer', 'certifica signer', 'assinatura eletronica', 'assinatura digital', 'mp 2200', 'contratos', 'lote', 'geolocalizacao'],
     objections: [
       { question: 'Os documentos assinados têm validade jurídica?', answer: 'Sim, validade jurídica plena em todo o território nacional conforme a MP 2.200-2 e trilha de auditoria auditável.' }
     ]
   },
   {
-    id: 'syn-registro-marca',
-    name: 'Registro de Marca & Legal Lab',
+    id: 'certifica-registro-marca',
+    name: 'Certifica Registro (Marcas & Patentes)',
     category: 'Certifica+',
     description: 'Assessoria jurídica para registro e proteção de marcas no INPI. Planos: Básico (pesquisa, cadastro, GRUs, depósito e alertas), Intermediário (+ manifestações e recursos) e Avançado (+ notificações extrajudiciais e garantia estendida de novo protocolo sem honorários se indeferido). Serviço continuado Marca Monitorada (Legal Lab) para vigilância semanal na RPI contra marcas concorrentes pós-registro.',
     pitch: 'Garanta o direito de uso exclusivo da sua marca no INPI e mantenha a vigilância contínua na RPI.',
-    keywords: ['registro de marca', 'inpi', 'marcas', 'marca monitorada', 'legal lab', 'rpi', 'propriedade industrial'],
+    keywords: ['registro de marca', 'certifica registro', 'inpi', 'marcas', 'marca monitorada', 'legal lab', 'rpi', 'propriedade industrial'],
     objections: [
       { question: 'Por que contratar a Marca Monitorada após registrar?', answer: 'Para acompanhar semanalmente as publicações da RPI e barrar tentativas de registro de concorrentes com nomes semelhantes antes que sejam aprovadas.' }
     ]
   },
   {
-    id: 'syn-up-digital',
-    name: 'Syn UP Digital (Presença Online)',
+    id: 'certifica-up-digital',
+    name: 'Certifica UP Digital (Presença Online)',
     category: 'Certifica+',
     description: 'Solução completa de presença digital para micro e pequenas empresas locais. Criação e configuração profissional de perfis no Google Meu Negócio / Google Maps (SEO local), Instagram, Facebook e WhatsApp Business. Inclui catálogo digital de até 10 produtos/serviços e configuração de mensagens automáticas.',
     pitch: 'Coloque sua empresa no mapa digital e atraia clientes locais no Google e nas redes sociais.',
-    keywords: ['up digital', 'google meu negocio', 'google maps', 'seo local', 'instagram', 'presenca digital', 'catalogo'],
+    keywords: ['up digital', 'certifica up digital', 'google meu negocio', 'google maps', 'seo local', 'instagram', 'presenca digital', 'catalogo'],
     objections: [
       { question: 'Vale a pena para comércios locais pequenos?', answer: 'Sim, o Google Meu Negócio otimizado com SEO local coloca seu negócio nas primeiras buscas do Google Maps quando clientes procuram serviços na sua região.' }
     ]
   },
   {
-    id: 'syn-design',
-    name: 'Syn Design',
+    id: 'certifica-design',
+    name: 'Certifica Design',
     category: 'Certifica+',
     description: 'Criação de marcas e identidade visual estratégica via ClickUp. Fluxos de Naming (15 dias para até 2 rodadas de 5 opções de nome) e Identidade Visual (30 dias para logotipo, paleta, manual e vetores). Prazo total integrado de 45 dias com 2 reuniões de apresentação. NUNCA divulgue valores.',
     pitch: 'Identidade visual profissional e criação de nome (Naming) com metodologia ágil.',
-    keywords: ['design', 'naming', 'logotipo', 'identidade visual', 'marca', 'branding', 'clickup'],
+    keywords: ['design', 'certifica design', 'naming', 'logotipo', 'identidade visual', 'marca', 'branding', 'clickup'],
     objections: [
       { question: 'Qual o prazo de entrega?', answer: '15 dias para Naming, 30 dias para Identidade Visual e 45 dias para o projeto integrado, com reuniões de alinhamento.' }
     ]

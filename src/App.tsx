@@ -128,16 +128,9 @@ function AppContent() {
           className="flex flex-col items-center justify-center cursor-pointer group px-2 py-0.5"
           title="Ir para a Tela Inicial do SynCop"
         >
-          <div className="flex items-center gap-2">
-            <img 
-              src="/syncop-emblem.png" 
-              alt="Syngular" 
-              className="w-8 h-8 sm:w-9 sm:h-9 object-contain group-hover:scale-105 transition-transform drop-shadow-sm" 
-            />
-            <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
-              SYNGULAR
-            </span>
-          </div>
+          <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none group-hover:text-[#5c24ff] dark:group-hover:text-[#a78bfa] transition-colors">
+            SYNGULAR
+          </span>
           <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-purple-300 mt-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>COPILOTO DE VENDAS &bull; SYNCOP</span>

@@ -14,10 +14,10 @@ import {
 function renderFormattedMessage(text: string) {
   if (!text) return null;
   
-  // Limpa caracteres técnicos de Markdown residuais (###, ##, $$, etc.)
+  // Limpa e padroniza títulos de markdown sem injetar emojis indesejados
   const cleaned = text
-    .replace(/^#{1,6}\s*(\d+)\.\s*/gm, '🔹 $1. ')
-    .replace(/^#{1,6}\s*/gm, '✨ ')
+    .replace(/^#{1,6}\s+(\d+\..+)$/gm, '$1')
+    .replace(/^#{1,6}\s+(.+)$/gm, '**$1**')
     .replace(/\$\$/g, '')
     .replace(/---{2,}/g, '');
 
@@ -31,7 +31,7 @@ function renderFormattedMessage(text: string) {
           return <div key={lineIdx} className="h-1.5" />;
         }
 
-        const isBullet = trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*') || /^\d+[.)]/.test(trimmed) || trimmed.startsWith('🔹') || trimmed.startsWith('✨');
+        const isBullet = trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*') || /^\d+[.)]/.test(trimmed) || trimmed.startsWith('🔹');
 
         // Renderiza negrito **texto**
         const parts = line.split(/(\*\*[^*]+\*\*)/g);
@@ -45,7 +45,7 @@ function renderFormattedMessage(text: string) {
               if (part.startsWith('**') && part.endsWith('**')) {
                 const boldContent = part.slice(2, -2);
                 return (
-                  <strong key={pIdx} className="font-bold text-slate-900 dark:text-purple-200">
+                  <strong key={pIdx} className="font-semibold text-slate-900 dark:text-purple-200">
                     {boldContent}
                   </strong>
                 );

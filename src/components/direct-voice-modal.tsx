@@ -4,7 +4,8 @@ import { queryGeminiVoiceTurn } from '../lib/assistantBrain';
 import { SynRobotMascot } from './syngular-logo';
 import { 
   PhoneOff, Mic, MicOff, Volume2, VolumeX,
-  Radio, Sparkles, AlertCircle
+  Radio, Sparkles, AlertCircle, Settings2, Play,
+  UserCheck, ShieldCheck
 } from 'lucide-react';
 
 export interface VoiceConversationTurn {
@@ -33,7 +34,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
   const [callState, setCallState] = useState<CallState>('idle');
   const [mode, setMode] = useState<InteractionMode>('hands-free');
   const [isMuted, setIsMuted] = useState(false);
-  const [speechRate, setSpeechRate] = useState<number>(1.1);
+  const [speechRate, setSpeechRate] = useState<number>(1.05);
   const [userTranscript, setUserTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const [assistantReply, setAssistantReply] = useState('');
@@ -41,15 +42,91 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [callDuration, setCallDuration] = useState(0);
 
+  // Vozes do Navegador & Seleção de Voz Natural
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceUri, setSelectedVoiceUri] = useState<string>('');
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [showCloneVoiceInfo, setShowCloneVoiceInfo] = useState(false);
+  const [testingVoice, setTestingVoice] = useState(false);
+
+  // Refs de controle de concorrência e isolamento acústico
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<any>(null);
   const callTimerRef = useRef<any>(null);
+  const keepAliveTimerRef = useRef<any>(null);
+  const speechCooldownTimerRef = useRef<any>(null);
+
   const synthRef = useRef<SpeechSynthesis | null>(typeof window !== 'undefined' ? window.speechSynthesis : null);
   const isSpeakingRef = useRef<boolean>(false);
+  const isThinkingRef = useRef<boolean>(false);
+  const isMutedRef = useRef<boolean>(false);
+  const modeRef = useRef<InteractionMode>('hands-free');
+  const isOpenRef = useRef<boolean>(isOpen);
   const turnsRef = useRef<VoiceConversationTurn[]>([]);
-  const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
   turnsRef.current = turns;
+  isMutedRef.current = isMuted;
+  modeRef.current = mode;
+  isOpenRef.current = isOpen;
+
+  // Carregar e filtrar vozes em Português (Priorizando vozes Humanas/Naturais)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+    const loadVoices = () => {
+      const allVoices = window.speechSynthesis.getVoices();
+      if (!allVoices || allVoices.length === 0) return;
+
+      // Filtrar vozes em Português
+      const ptVoices = allVoices.filter(v => 
+        v.lang.toLowerCase().includes('pt-br') || 
+        v.lang.toLowerCase().includes('pt_br') || 
+        v.lang.toLowerCase().startsWith('pt')
+      );
+
+      // Ordenar por qualidade percebida (Natural/Online do Edge > Google pt-BR > Microsoft Desktop)
+      ptVoices.sort((a, b) => {
+        const getScore = (v: SpeechSynthesisVoice) => {
+          const name = v.name.toLowerCase();
+          if (name.includes('natural') || name.includes('online')) return 100;
+          if (name.includes('google')) return 80;
+          if (name.includes('francisca') || name.includes('antonio') || name.includes('thalita')) return 90;
+          if (name.includes('luciana') || name.includes('daniel')) return 50;
+          return 10;
+        };
+        return getScore(b) - getScore(a);
+      });
+
+      setAvailableVoices(ptVoices);
+
+      // Restaurar preferência do usuário ou usar a melhor voz detectada
+      const savedVoiceUri = localStorage.getItem('syncop_preferred_voice');
+      const matchedSaved = ptVoices.find(v => v.voiceURI === savedVoiceUri);
+      const chosen = matchedSaved || ptVoices[0] || allVoices.find(v => v.lang.includes('pt')) || allVoices[0];
+
+      if (chosen) {
+        setSelectedVoiceUri(chosen.voiceURI);
+        selectedVoiceRef.current = chosen;
+      }
+    };
+
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
+  // Atualizar ref da voz quando selecionada
+  useEffect(() => {
+    if (selectedVoiceUri && availableVoices.length > 0) {
+      const v = availableVoices.find(item => item.voiceURI === selectedVoiceUri);
+      if (v) {
+        selectedVoiceRef.current = v;
+        localStorage.setItem('syncop_preferred_voice', v.voiceURI);
+      }
+    }
+  }, [selectedVoiceUri, availableVoices]);
 
   // Atualiza tempo de ligação
   useEffect(() => {
@@ -66,21 +143,27 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
     return () => clearInterval(callTimerRef.current);
   }, [isOpen]);
 
-  // Cancela fala do sintetizador se fechar
+  // Cancela fala do sintetizador com limpeza de timers
   const stopSpeaking = useCallback(() => {
     if (synthRef.current) {
       synthRef.current.cancel();
     }
+    clearInterval(keepAliveTimerRef.current);
     isSpeakingRef.current = false;
-    activeUtteranceRef.current = null;
   }, []);
 
-  // Falar texto com o sintetizador de voz do navegador (pt-BR)
+  // Falar texto com o sintetizador de voz (pt-BR) com mitigação de bugs do navegador
   const speakText = useCallback((textToSpeak: string, onEndCallback?: () => void) => {
     if (!synthRef.current || !textToSpeak.trim()) {
+      isSpeakingRef.current = false;
       if (onEndCallback) onEndCallback();
       return;
     }
+
+    // 1. Interrompe escuta do microfone IMEDIATAMENTE para evitar eco acústico
+    try {
+      recognitionRef.current?.abort();
+    } catch {}
 
     stopSpeaking();
     setCallState('speaking');
@@ -91,43 +174,76 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
     utterance.rate = speechRate;
     utterance.pitch = 1.0;
 
-    // Tenta selecionar uma voz em português brasileiro natural
-    const voices = synthRef.current.getVoices();
-    const ptVoices = voices.filter(v => v.lang.includes('pt-BR') || v.lang.includes('pt_BR') || v.lang.includes('pt'));
-    const preferredVoice = ptVoices.find(v => v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Luciana') || v.name.includes('Francisca')) || ptVoices[0];
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
+    if (selectedVoiceRef.current) {
+      utterance.voice = selectedVoiceRef.current;
     }
 
-    utterance.onend = () => {
-      isSpeakingRef.current = false;
-      activeUtteranceRef.current = null;
-      if (onEndCallback) onEndCallback();
+    // Chrome 15s bug keepalive fix
+    keepAliveTimerRef.current = setInterval(() => {
+      if (synthRef.current && synthRef.current.speaking) {
+        synthRef.current.pause();
+        synthRef.current.resume();
+      } else {
+        clearInterval(keepAliveTimerRef.current);
+      }
+    }, 8000);
+
+    const handleSpeechFinish = () => {
+      clearInterval(keepAliveTimerRef.current);
+      
+      // Delay de 400ms para limpar reverberação ambiente da sala antes de reabrir o microfone
+      speechCooldownTimerRef.current = setTimeout(() => {
+        isSpeakingRef.current = false;
+        if (onEndCallback) onEndCallback();
+      }, 400);
     };
 
+    utterance.onend = handleSpeechFinish;
     utterance.onerror = (e) => {
-      console.warn('SpeechSynthesis error:', e);
-      isSpeakingRef.current = false;
-      activeUtteranceRef.current = null;
-      if (onEndCallback) onEndCallback();
+      console.warn('SpeechSynthesis event error:', e);
+      handleSpeechFinish();
     };
 
-    activeUtteranceRef.current = utterance;
     synthRef.current.speak(utterance);
   }, [speechRate, stopSpeaking]);
+
+  // Testar voz atual com frase de demonstração
+  const handleTestVoice = (voiceToTest?: SpeechSynthesisVoice) => {
+    if (!synthRef.current) return;
+    stopSpeaking();
+    setTestingVoice(true);
+
+    const testUtterance = new SpeechSynthesisUtterance(
+      'Olá! Essa é a minha voz para conversarmos no ecossistema Syngular. O que acha?'
+    );
+    testUtterance.lang = 'pt-BR';
+    testUtterance.rate = speechRate;
+    testUtterance.voice = voiceToTest || selectedVoiceRef.current || null;
+
+    testUtterance.onend = () => setTestingVoice(false);
+    testUtterance.onerror = () => setTestingVoice(false);
+
+    synthRef.current.speak(testUtterance);
+  };
 
   // Processar fala do usuário via Gemini e responder
   const handleProcessUserSpeech = useCallback(async (speechText: string) => {
     const query = speechText.trim();
-    if (!query) {
-      setCallState('listening');
+    if (!query || query.length < 2) {
+      if (!isSpeakingRef.current) setCallState('listening');
       return;
     }
 
+    // Trava de pensamento e isolamento de áudio
+    isThinkingRef.current = true;
     stopSpeaking();
     setCallState('thinking');
     setUserTranscript(query);
     setInterimTranscript('');
+
+    try {
+      recognitionRef.current?.abort();
+    } catch {}
 
     const historyPayload = turnsRef.current.slice(-2).map(t => [
       { role: 'user' as const, parts: t.user },
@@ -153,9 +269,11 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
       };
       setTurns(prev => [...prev, newTurn]);
 
-      // Fala a resposta e ao terminar retoma escuta se for viva-voz
+      isThinkingRef.current = false;
+
+      // Vocaliza a resposta e depois retoma a escuta
       speakText(cleanReply, () => {
-        if (mode === 'hands-free' && !isMuted) {
+        if (isOpenRef.current && modeRef.current === 'hands-free' && !isMutedRef.current) {
           setCallState('listening');
           try {
             recognitionRef.current?.start();
@@ -166,15 +284,21 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
       });
     } catch (err) {
       console.error('Erro na chamada de voz:', err);
+      isThinkingRef.current = false;
       const fallback = 'Tive uma pequena oscilação aqui na linha. Pode repetir para mim, parceiro?';
       setAssistantReply(fallback);
       speakText(fallback, () => {
-        setCallState('listening');
+        if (isOpenRef.current && modeRef.current === 'hands-free' && !isMutedRef.current) {
+          setCallState('listening');
+          try {
+            recognitionRef.current?.start();
+          } catch {}
+        }
       });
     }
-  }, [geminiApiKey, knowledgeBase, customRules, mode, isMuted, speakText, stopSpeaking]);
+  }, [geminiApiKey, knowledgeBase, customRules, speakText, stopSpeaking]);
 
-  // Inicialização do Reconhecimento de Fala (STT Local)
+  // Inicialização estável do Reconhecimento de Fala (STT Local)
   useEffect(() => {
     if (!isOpen) return;
 
@@ -186,21 +310,21 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
 
     const recognition = new SpeechRec();
     recognition.lang = 'pt-BR';
-    recognition.continuous = mode === 'hands-free';
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
       setErrorMessage(null);
-      if (!isSpeakingRef.current) {
+      if (!isSpeakingRef.current && !isThinkingRef.current) {
         setCallState('listening');
       }
     };
 
     recognition.onresult = (event: any) => {
-      // Se a IA estiver falando e o usuário começar a falar, interrompe a IA (Barge-in natural)
-      if (isSpeakingRef.current) {
-        stopSpeaking();
+      // REGRA CRÍTICA ANTI-ECO: Ignora completamente o microfone se a IA estiver falando ou processando
+      if (isSpeakingRef.current || isThinkingRef.current) {
+        return;
       }
 
       let interim = '';
@@ -220,33 +344,40 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
       }
 
       if (final) {
-        setInterimTranscript('');
-        setUserTranscript(final);
+        const cleanedFinal = final.trim();
+        if (cleanedFinal.length >= 2) {
+          setInterimTranscript('');
+          setUserTranscript(cleanedFinal);
 
-        // No modo viva-voz, após detectar pausa ou sentença final, dispara para a IA
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = setTimeout(() => {
-          handleProcessUserSpeech(final);
-        }, 800);
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = setTimeout(() => {
+            handleProcessUserSpeech(cleanedFinal);
+          }, 900);
+        }
       }
     };
 
     recognition.onerror = (event: any) => {
-      if (event.error === 'no-speech') {
-        // Silêncio normal, ignora
+      if (event.error === 'no-speech' || event.error === 'aborted') {
         return;
       }
       if (event.error === 'not-allowed') {
-        setErrorMessage('Permissão de microfone negada. Clique no cadeado na barra de endereços para permitir o acesso.');
+        setErrorMessage('Permissão de microfone negada. Clique no ícone de cadeado na barra de endereços para permitir o microfone.');
         setCallState('paused');
         return;
       }
-      console.warn('Speech recognition error:', event.error);
+      console.warn('Speech recognition warning:', event.error);
     };
 
     recognition.onend = () => {
-      // No modo viva-voz contínuo, reinicia automaticamente se não estiver em pensamento ou fala
-      if (isOpen && mode === 'hands-free' && !isMuted && !isSpeakingRef.current && callState !== 'thinking') {
+      // Reinicia apenas se estiver em viva-voz e nenhuma ação de fala/pensamento estiver em curso
+      if (
+        isOpenRef.current && 
+        modeRef.current === 'hands-free' && 
+        !isMutedRef.current && 
+        !isSpeakingRef.current && 
+        !isThinkingRef.current
+      ) {
         try {
           recognition.start();
         } catch {}
@@ -255,24 +386,28 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
 
     recognitionRef.current = recognition;
 
-    // Saudação inicial de abertura da ligação
+    // Saudação inicial de boas-vindas
     const initialGreeting = 'Fala parceiro! SynCop na linha. O que você precisa resolver hoje?';
     setAssistantReply(initialGreeting);
     speakText(initialGreeting, () => {
-      setCallState('listening');
-      try {
-        recognition.start();
-      } catch {}
+      if (isOpenRef.current && modeRef.current === 'hands-free' && !isMutedRef.current) {
+        setCallState('listening');
+        try {
+          recognition.start();
+        } catch {}
+      }
     });
 
     return () => {
       clearTimeout(silenceTimerRef.current);
+      clearTimeout(speechCooldownTimerRef.current);
+      clearInterval(keepAliveTimerRef.current);
       stopSpeaking();
       try {
-        recognition.stop();
+        recognition.abort();
       } catch {}
     };
-  }, [isOpen, mode, speakText, stopSpeaking, handleProcessUserSpeech, isMuted]);
+  }, [isOpen, handleProcessUserSpeech, speakText, stopSpeaking]);
 
   // Controles de PTT (Push to Talk)
   const handlePushToTalkStart = () => {
@@ -303,7 +438,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
       setIsMuted(true);
       setCallState('paused');
       try {
-        recognitionRef.current?.stop();
+        recognitionRef.current?.abort();
       } catch {}
     }
   };
@@ -312,7 +447,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
   const handleEndCall = () => {
     stopSpeaking();
     try {
-      recognitionRef.current?.stop();
+      recognitionRef.current?.abort();
     } catch {}
     onClose(turnsRef.current);
   };
@@ -325,12 +460,25 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Formatar nome amigável para vozes
+  const formatVoiceName = (voice: SpeechSynthesisVoice) => {
+    let label = voice.name;
+    const isNatural = label.toLowerCase().includes('natural') || label.toLowerCase().includes('online');
+    const isGoogle = label.toLowerCase().includes('google');
+
+    label = label.replace(/microsoft/gi, '').replace(/google/gi, '').replace(/portuguese/gi, '').replace(/\(brazil\)/gi, '').replace(/brasil/gi, '').trim();
+
+    if (isNatural) return `🌟 ${label || 'Natural'} (Humana HD)`;
+    if (isGoogle) return `⚡ ${label || 'Google'} (Neural)`;
+    return `🎙️ ${label || voice.name}`;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-xl animate-fade-in select-none">
-      <div className="relative w-full max-w-lg bg-gradient-to-b from-[#130d2a] via-[#0f0920] to-[#090514] border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center justify-between min-h-[580px] overflow-hidden">
+      <div className="relative w-full max-w-lg bg-gradient-to-b from-[#130d2a] via-[#0f0920] to-[#090514] border border-purple-500/30 rounded-3xl p-5 sm:p-7 shadow-2xl flex flex-col items-center justify-between min-h-[600px] overflow-hidden">
         
         {/* Glow de fundo */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#5c24ff]/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#5c24ff]/20 rounded-full blur-3xl pointer-events-none"></div>
 
         {/* Top Header */}
         <div className="w-full flex items-center justify-between relative z-10">
@@ -347,17 +495,18 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Toggle de Velocidade da Voz */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Seletor de Vozes & Configurações */}
             <button
-              onClick={() => {
-                const nextRate = speechRate === 1.0 ? 1.25 : (speechRate === 1.25 ? 1.5 : 1.0);
-                setSpeechRate(nextRate);
-              }}
-              className="px-2.5 py-1 rounded-full bg-purple-950/60 border border-purple-800/60 text-purple-200 text-[11px] font-mono font-bold hover:bg-purple-900/60 transition-colors cursor-pointer"
-              title="Velocidade da voz do SynCop"
+              onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+              className={`p-2 rounded-full border transition-colors cursor-pointer ${
+                showVoiceSettings 
+                  ? 'bg-purple-600 border-purple-400 text-white' 
+                  : 'bg-purple-950/60 border-purple-800/60 text-purple-200 hover:bg-purple-900/60'
+              }`}
+              title="Configurar Voz e Timbre"
             >
-              {speechRate}x
+              <Settings2 className="w-3.5 h-3.5" />
             </button>
 
             {/* Alternar Modo (Viva-Voz vs Push-to-Talk) */}
@@ -370,10 +519,129 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
               title="Alternar entre Viva-Voz contínuo e Pressione para Falar"
             >
               <Radio className="w-3 h-3 text-[#a78bfa]" />
-              <span>{mode === 'hands-free' ? 'Viva-Voz' : 'Push-to-Talk'}</span>
+              <span>{mode === 'hands-free' ? 'Viva-Voz' : 'PTT'}</span>
             </button>
           </div>
         </div>
+
+        {/* Gaveta de Configurações de Voz & Clonagem */}
+        {showVoiceSettings && (
+          <div className="w-full mt-3 p-3.5 bg-purple-950/80 border border-purple-800/70 rounded-2xl relative z-20 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Volume2 className="w-3.5 h-3.5 text-purple-400" />
+                Voz do Assistente:
+              </span>
+              <button
+                onClick={() => setShowCloneVoiceInfo(true)}
+                className="text-[10px] text-amber-300 hover:text-amber-200 underline font-semibold flex items-center gap-1 cursor-pointer"
+              >
+                ✨ Clonar minha voz?
+              </button>
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <select
+                value={selectedVoiceUri}
+                onChange={(e) => {
+                  setSelectedVoiceUri(e.target.value);
+                  const v = availableVoices.find(item => item.voiceURI === e.target.value);
+                  if (v) handleTestVoice(v);
+                }}
+                className="flex-1 bg-slate-900/90 border border-purple-700/60 text-white text-xs rounded-xl px-2.5 py-1.5 focus:outline-hidden focus:border-purple-400"
+              >
+                {availableVoices.length === 0 ? (
+                  <option value="">Carregando vozes do sistema...</option>
+                ) : (
+                  availableVoices.map(v => (
+                    <option key={v.voiceURI} value={v.voiceURI}>
+                      {formatVoiceName(v)}
+                    </option>
+                  ))
+                )}
+              </select>
+
+              <button
+                onClick={() => handleTestVoice()}
+                disabled={testingVoice}
+                className="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer shrink-0"
+                title="Ouvir teste desta voz"
+              >
+                <Play className="w-3 h-3 fill-current" />
+                <span>Testar</span>
+              </button>
+            </div>
+
+            {/* Ajuste de Velocidade */}
+            <div className="flex items-center justify-between pt-1 border-t border-purple-900/60 text-[11px] text-purple-200">
+              <span>Velocidade de fala:</span>
+              <div className="flex gap-1">
+                {[0.9, 1.05, 1.25, 1.4].map(rate => (
+                  <button
+                    key={rate}
+                    onClick={() => setSpeechRate(rate)}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-mono cursor-pointer transition-colors ${
+                      speechRate === rate 
+                        ? 'bg-purple-500 text-white font-bold' 
+                        : 'bg-purple-900/60 text-purple-300 hover:bg-purple-800'
+                    }`}
+                  >
+                    {rate}x
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Informativo: Clonagem de Voz */}
+        {showCloneVoiceInfo && (
+          <div className="absolute inset-4 z-30 bg-[#120b24] border border-purple-500/40 rounded-2xl p-5 flex flex-col justify-between shadow-2xl animate-fade-in">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border-b border-purple-800/40 pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-300">
+                    <UserCheck className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">Como Usar Sua Própria Voz</h3>
+                </div>
+                <button
+                  onClick={() => setShowCloneVoiceInfo(false)}
+                  className="text-slate-400 hover:text-white text-xs font-bold px-2 py-1"
+                >
+                  ✕ Fechar
+                </button>
+              </div>
+
+              <div className="text-xs text-purple-100/90 space-y-2 leading-relaxed">
+                <p>
+                  <strong className="text-amber-300">Sim, é 100% possível!</strong> O Gemini API possui o recurso nativo de <strong className="text-white">Voice Replication (gemini-3.8-flash-tts)</strong>.
+                </p>
+                <div className="p-3 bg-purple-950/60 rounded-xl border border-purple-800/40 space-y-1.5 text-[11px]">
+                  <p className="font-bold text-purple-200 flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Como funciona o processo oficial:
+                  </p>
+                  <ol className="list-decimal pl-4 space-y-1 text-slate-300">
+                    <li>Você grava <strong>20 a 30 segundos</strong> lendo um texto neutro.</li>
+                    <li>Você grava uma frase curta de consentimento (exigência de segurança da IA).</li>
+                    <li>A API cria um <code>voice_id</code> único da sua voz no seu projeto.</li>
+                    <li>O SynCop passa a responder com o seu timbre e entonação exatos!</li>
+                  </ol>
+                </div>
+                <p className="text-[11px] text-purple-300">
+                  💡 <span className="font-semibold text-white">Dica imediata sem custo:</span> No navegador <strong>Microsoft Edge</strong>, as vozes <em>"Microsoft Francisca Online (Natural)"</em> e <em>"Antônio Online (Natural)"</em> já vêm integradas e soam incrivelmente humanas e realistas!
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowCloneVoiceInfo(false)}
+              className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+            >
+              Entendido!
+            </button>
+          </div>
+        )}
 
         {/* Alerta de Erro se houver */}
         {errorMessage && (
@@ -384,7 +652,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
         )}
 
         {/* Centro: Orbe Sonora Pulsante */}
-        <div className="my-auto flex flex-col items-center justify-center relative z-10 py-4">
+        <div className="my-auto flex flex-col items-center justify-center relative z-10 py-3">
           <div className="relative flex items-center justify-center">
             
             {/* Anéis de pulso de áudio */}
@@ -408,7 +676,10 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
 
             {/* Núcleo da Orbe */}
             <div 
-              className={`w-32 h-32 sm:w-36 sm:h-36 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl relative ${
+              onClick={() => {
+                if (callState === 'speaking') stopSpeaking();
+              }}
+              className={`w-32 h-32 sm:w-36 sm:h-36 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl relative cursor-pointer ${
                 callState === 'listening'
                   ? 'bg-gradient-to-tr from-emerald-600 to-teal-400 shadow-emerald-500/40 scale-105'
                   : callState === 'speaking'
@@ -417,6 +688,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
                   ? 'bg-gradient-to-tr from-purple-800 to-indigo-600 shadow-purple-900/60 scale-95'
                   : 'bg-slate-800 shadow-slate-900/40 scale-100'
               }`}
+              title={callState === 'speaking' ? 'Clique para interromper a fala' : undefined}
             >
               {callState === 'speaking' && <Volume2 className="w-12 h-12 text-white animate-bounce" />}
               {callState === 'listening' && <Mic className="w-12 h-12 text-white animate-pulse" />}
@@ -427,11 +699,11 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
           </div>
 
           {/* Status Textual */}
-          <div className="mt-6 text-center">
+          <div className="mt-5 text-center">
             <span className="text-xs uppercase tracking-widest font-bold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200">
-              {callState === 'listening' && '🟢 Ouvindo você... Fale à vontade'}
-              {callState === 'thinking' && '🟣 SynCop pensando...'}
-              {callState === 'speaking' && '🔊 SynCop falando...'}
+              {callState === 'listening' && '🟢 Ouvindo você... Pode falar'}
+              {callState === 'thinking' && '🟣 SynCop processando resposta...'}
+              {callState === 'speaking' && '🔊 SynCop falando (clique na esfera p/ pausar)'}
               {callState === 'paused' && '⏸️ Microfone mutado'}
               {callState === 'idle' && 'Pronto para conversar'}
             </span>
@@ -447,7 +719,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
               {interimTranscript ? (
                 <span className="text-slate-400 italic">{interimTranscript}...</span>
               ) : (
-                userTranscript || <span className="text-slate-500 italic">Comece a falar qualquer dúvida sobre Certifica ERP, Ponto, GED, SST ou normas...</span>
+                userTranscript || <span className="text-slate-500 italic">Pode falar qualquer dúvida operacional ou comercial...</span>
               )}
             </p>
           </div>

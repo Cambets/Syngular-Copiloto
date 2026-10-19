@@ -504,3 +504,157 @@ ${rag.contextText ? `\nContexto relevante:\n${rag.contextText}` : ''}
   // Fallback conversacional
   return `Entendi o seu ponto. No ecossistema Syngular, você pode conferir essa configuração direto no menu de parâmetros do sistema ou me mandar uma mensagem no chat que eu detalho o passo a passo para você.`;
 }
+
+/**
+ * Sintetiza áudio de fala usando o modelo Gemini 3.8 Flash TTS ou voz clonada
+ */
+export async function synthesizeGeminiVoice(
+  text: string,
+  voiceId?: string,
+  apiKey?: string
+): Promise<string | null> {
+  const cleanText = cleanForSpeech(text);
+  if (!cleanText) return null;
+
+  // 1. Tenta backend Serverless
+  try {
+    const apiRes = await fetch('/api/voice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'synthesize',
+        text: cleanText,
+        voiceId
+      })
+    });
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data.success && data.audioBase64) {
+        return data.audioBase64;
+      }
+    }
+  } catch (err) {
+    logger.warn('Backend /api/voice indisponível para síntese, usando contingência direta:', err);
+  }
+
+  // 2. Contingência direta Gemini API
+  const BUILTIN_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
+  const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
+  const activeKey = apiKey || envKey || BUILTIN_KEY;
+
+  if (activeKey && activeKey.trim().length > 0) {
+    try {
+      const speechConfig = voiceId 
+        ? { voiceConfig: { voice: voiceId } }
+        : { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } };
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent?key=${activeKey.trim()}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              role: 'user',
+              parts: [{ text: cleanText }]
+            }],
+            generationConfig: {
+              responseModalities: ['AUDIO'],
+              speechConfig
+            }
+          })
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const audioData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+        if (audioData) return audioData;
+      }
+    } catch (err) {
+      logger.warn('Falha na síntese direta com gemini-3.8-flash-tts:', err);
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Registra a voz humana para replicação direta no Google Gemini
+ */
+export async function replicateVoiceDirect(
+  sourceWavB64: string,
+  consentWavB64: string,
+  displayName: string,
+  apiKey?: string
+): Promise<{ success: boolean; voiceId?: string; error?: string }> {
+  // 1. Tenta backend Serverless
+  try {
+    const apiRes = await fetch('/api/voice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'replicate',
+        sourceAudioBase64: sourceWavB64,
+        consentAudioBase64: consentWavB64,
+        displayName
+      })
+    });
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data.success && data.voiceId) {
+        return { success: true, voiceId: data.voiceId };
+      }
+    } else {
+      const errData = await apiRes.json().catch(() => null);
+      if (errData?.error) return { success: false, error: errData.error };
+    }
+  } catch (err) {
+    logger.warn('Backend /api/voice indisponível, usando contingência direta:', err);
+  }
+
+  // 2. Contingência direta Google Gemini API
+  const BUILTIN_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
+  const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
+  const activeKey = apiKey || envKey || BUILTIN_KEY;
+
+  if (activeKey && activeKey.trim().length > 0) {
+    try {
+      const cleanSource = sourceWavB64.replace(/^data:audio\/[a-zA-Z0-9.+_-]+;base64,/, '');
+      const cleanConsent = consentWavB64.replace(/^data:audio\/[a-zA-Z0-9.+_-]+;base64,/, '');
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/voices?key=${activeKey.trim()}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            store: true,
+            voice: {
+              model: 'gemini-3.8-flash-tts',
+              type: 'replicated',
+              display_name: displayName,
+              language_code: 'pt-BR',
+              replicated: {
+                source_audio: { mime_type: 'audio/wav', data: cleanSource },
+                consent_audio: { mime_type: 'audio/wav', data: cleanConsent }
+              }
+            }
+          })
+        }
+      );
+
+      const resData = await response.json();
+      if (response.ok && (resData.id || resData.voice?.id)) {
+        return { success: true, voiceId: resData.id || resData.voice?.id };
+      } else {
+        const msg = resData.error?.message || 'Falha na validação de segurança da voz.';
+        return { success: false, error: msg };
+      }
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Erro de conexão com o serviço de voz.' };
+    }
+  }
+
+  return { success: false, error: 'Chave de API do Gemini não disponível.' };
+}

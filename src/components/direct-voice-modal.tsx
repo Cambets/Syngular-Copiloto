@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Product, CustomRule } from '../contexts/AppContext';
-import { queryGeminiVoiceTurn } from '../lib/assistantBrain';
+import { queryGeminiVoiceTurn, synthesizeGeminiVoice } from '../lib/assistantBrain';
 import { SynRobotMascot } from './syngular-logo';
 import { 
   PhoneOff, Mic, MicOff, Volume2, VolumeX,
@@ -46,6 +46,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
   const [selectedVoiceUri, setSelectedVoiceUri] = useState<string>('');
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [testingVoice, setTestingVoice] = useState(false);
+  const [customVoiceName, setCustomVoiceName] = useState<string | null>(null);
 
   // Refs de controle de concorrência e isolamento acústico
   const recognitionRef = useRef<any>(null);
@@ -53,6 +54,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
   const callTimerRef = useRef<any>(null);
   const keepAliveTimerRef = useRef<any>(null);
   const speechCooldownTimerRef = useRef<any>(null);
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const synthRef = useRef<SpeechSynthesis | null>(typeof window !== 'undefined' ? window.speechSynthesis : null);
   const isSpeakingRef = useRef<boolean>(false);
@@ -126,6 +128,19 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
     }
   }, [selectedVoiceUri, availableVoices]);
 
+  // Carrega status da voz clonada personalizada
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const vId = localStorage.getItem('syncop_custom_voice_id');
+      const vName = localStorage.getItem('syncop_custom_voice_name');
+      if (vId) {
+        setCustomVoiceName(vName || 'Sua Voz Oficial');
+      } else {
+        setCustomVoiceName(null);
+      }
+    }
+  }, [isOpen]);
+
   // Atualiza tempo de ligação
   useEffect(() => {
     if (!isOpen) {
@@ -141,8 +156,15 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
     return () => clearInterval(callTimerRef.current);
   }, [isOpen]);
 
-  // Cancela fala do sintetizador com limpeza de timers
+  // Cancela fala do sintetizador ou áudio reproduzido com limpeza de timers
   const stopSpeaking = useCallback(() => {
+    if (activeAudioRef.current) {
+      try {
+        activeAudioRef.current.pause();
+        activeAudioRef.current.currentTime = 0;
+      } catch {}
+      activeAudioRef.current = null;
+    }
     if (synthRef.current) {
       synthRef.current.cancel();
     }
@@ -150,22 +172,12 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
     isSpeakingRef.current = false;
   }, []);
 
-  // Falar texto com o sintetizador de voz (pt-BR) com mitigação de bugs do navegador
-  const speakText = useCallback((textToSpeak: string, onEndCallback?: () => void) => {
-    if (!synthRef.current || !textToSpeak.trim()) {
-      isSpeakingRef.current = false;
-      if (onEndCallback) onEndCallback();
+  // Reproduz voz nativa do navegador como contingência
+  const fallbackBrowserSpeak = useCallback((textToSpeak: string, onFinish: () => void) => {
+    if (!synthRef.current) {
+      onFinish();
       return;
     }
-
-    // 1. Interrompe escuta do microfone IMEDIATAMENTE para evitar eco acústico
-    try {
-      recognitionRef.current?.abort();
-    } catch {}
-
-    stopSpeaking();
-    setCallState('speaking');
-    isSpeakingRef.current = true;
 
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.lang = 'pt-BR';
@@ -186,9 +198,34 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
       }
     }, 8000);
 
+    utterance.onend = onFinish;
+    utterance.onerror = (e) => {
+      console.warn('SpeechSynthesis event error:', e);
+      onFinish();
+    };
+
+    synthRef.current.speak(utterance);
+  }, [speechRate]);
+
+  // Falar texto: prioriza a voz clonada do Gemini TTS se houver, ou a voz natural do sistema
+  const speakText = useCallback(async (textToSpeak: string, onEndCallback?: () => void) => {
+    if (!textToSpeak.trim()) {
+      isSpeakingRef.current = false;
+      if (onEndCallback) onEndCallback();
+      return;
+    }
+
+    // 1. Interrompe escuta do microfone IMEDIATAMENTE para evitar eco acústico
+    try {
+      recognitionRef.current?.abort();
+    } catch {}
+
+    stopSpeaking();
+    setCallState('speaking');
+    isSpeakingRef.current = true;
+
     const handleSpeechFinish = () => {
       clearInterval(keepAliveTimerRef.current);
-      
       // Delay de 400ms para limpar reverberação ambiente da sala antes de reabrir o microfone
       speechCooldownTimerRef.current = setTimeout(() => {
         isSpeakingRef.current = false;
@@ -196,14 +233,34 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
       }, 400);
     };
 
-    utterance.onend = handleSpeechFinish;
-    utterance.onerror = (e) => {
-      console.warn('SpeechSynthesis event error:', e);
-      handleSpeechFinish();
-    };
+    // 2. Prioridade Máxima: Se o usuário gravou a própria voz (ID salvo), gera áudio oficial com o Gemini
+    const customVoiceId = typeof window !== 'undefined' ? localStorage.getItem('syncop_custom_voice_id') : null;
+    if (customVoiceId) {
+      try {
+        const audioB64 = await synthesizeGeminiVoice(textToSpeak, customVoiceId, geminiApiKey);
+        if (audioB64) {
+          const audio = new Audio('data:audio/wav;base64,' + audioB64);
+          activeAudioRef.current = audio;
+          audio.onended = () => {
+            activeAudioRef.current = null;
+            handleSpeechFinish();
+          };
+          audio.onerror = (e) => {
+            console.warn('Erro ao tocar áudio de voz clonada, usando contingência:', e);
+            activeAudioRef.current = null;
+            fallbackBrowserSpeak(textToSpeak, handleSpeechFinish);
+          };
+          await audio.play();
+          return;
+        }
+      } catch (err) {
+        console.warn('Falha na síntese de voz clonada, aplicando contingência local:', err);
+      }
+    }
 
-    synthRef.current.speak(utterance);
-  }, [speechRate, stopSpeaking]);
+    // 3. Contingência: Voz natural do navegador
+    fallbackBrowserSpeak(textToSpeak, handleSpeechFinish);
+  }, [geminiApiKey, fallbackBrowserSpeak, stopSpeaking]);
 
   // Testar voz atual com frase de demonstração
   const handleTestVoice = (voiceToTest?: SpeechSynthesisVoice) => {
@@ -486,6 +543,11 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
               <div className="flex items-center gap-1.5">
                 <span className="text-sm font-bold text-white tracking-wide">SynCop Direto</span>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                {customVoiceName && (
+                  <span className="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">
+                    ✨ {customVoiceName}
+                  </span>
+                )}
               </div>
               <span className="text-[11px] font-mono text-purple-300/80">
                 {formatTimer(callDuration)} &bull; Ultra-baixo consumo

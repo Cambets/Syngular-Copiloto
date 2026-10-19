@@ -6,8 +6,9 @@ import {
   Check, Ban, Key, MessageSquare, ArrowLeft,
   Shield, UserCheck, AlertTriangle, Search,
   UserPlus, X, Mail, User, Lock, Briefcase,
-  CheckCircle2, AlertCircle
+  CheckCircle2, AlertCircle, Mic, Sparkles
 } from 'lucide-react';
+import { VoiceStudioModal } from './voice-studio-modal';
 
 interface AdminPanelProps {
   onBack: () => void;
@@ -16,10 +17,11 @@ interface AdminPanelProps {
 export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
   const { 
     users, knowledgeBase, chatHistory, geminiApiKey, setGeminiApiKey,
-    updateUserStatus, updateUserRole, resetUserPassword, deleteUser, invitePartner
+    updateUserStatus, updateUserRole, resetUserPassword, deleteUser, invitePartner, currentUser
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'users' | 'kb' | 'chat_logs' | 'settings'>('users');
+  const [isVoiceStudioOpen, setIsVoiceStudioOpen] = useState(false);
   
   // User filter state
   const [userStatusFilter, setUserStatusFilter] = useState<'all' | 'pending' | 'approved' | 'blocked'>('all');
@@ -448,6 +450,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
               Configurações de Inteligência Artificial
             </h2>
 
+            {/* Gravação da Voz Oficial */}
+            <div className="p-5 border border-purple-200 rounded-xl space-y-3 shadow-2xs bg-purple-50/40">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Mic className="w-3.5 h-3.5 text-[#5c24ff]" />
+                  Voz Oficial do Copiloto (Clonagem de Voz)
+                </label>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-bold">
+                  Exclusivo Gestão
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Grave 20 a 30 segundos da sua fala para que o SynCop responda com o seu timbre oficial na conversação direta. O usuário final não verá menus de gravação, apenas ouvirá sua voz.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsVoiceStudioOpen(true)}
+                className="px-4 py-2 bg-[#5c24ff] hover:bg-[#4d1cdb] text-white rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer transition-all shadow-xs active:scale-95"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Gravar / Gerenciar Minha Voz</span>
+              </button>
+            </div>
+
             <div className="p-5 border border-slate-200 rounded-xl space-y-3 shadow-2xs">
               <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
                 <Key className="w-3.5 h-3.5 text-[#5c24ff]" />
@@ -636,6 +662,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
           </div>
         </div>
       )}
+
+      {/* Modal: Gravação da Voz Oficial do Copiloto */}
+      <VoiceStudioModal
+        isOpen={isVoiceStudioOpen}
+        onClose={() => setIsVoiceStudioOpen(false)}
+        currentUser={currentUser ? { name: currentUser.name, email: currentUser.email } : undefined}
+      />
 
     </div>
   );

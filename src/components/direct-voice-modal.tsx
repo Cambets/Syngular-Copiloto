@@ -4,8 +4,7 @@ import { queryGeminiVoiceTurn } from '../lib/assistantBrain';
 import { SynRobotMascot } from './syngular-logo';
 import { 
   PhoneOff, Mic, MicOff, Volume2, VolumeX,
-  Radio, Sparkles, AlertCircle, Settings2, Play,
-  UserCheck, ShieldCheck
+  Radio, Sparkles, AlertCircle, Settings2, Play
 } from 'lucide-react';
 
 export interface VoiceConversationTurn {
@@ -46,7 +45,6 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceUri, setSelectedVoiceUri] = useState<string>('');
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
-  const [showCloneVoiceInfo, setShowCloneVoiceInfo] = useState(false);
   const [testingVoice, setTestingVoice] = useState(false);
 
   // Refs de controle de concorrência e isolamento acústico
@@ -532,12 +530,9 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
                 <Volume2 className="w-3.5 h-3.5 text-purple-400" />
                 Voz do Assistente:
               </span>
-              <button
-                onClick={() => setShowCloneVoiceInfo(true)}
-                className="text-[10px] text-amber-300 hover:text-amber-200 underline font-semibold flex items-center gap-1 cursor-pointer"
-              >
-                ✨ Clonar minha voz?
-              </button>
+              <span className="text-[10px] text-purple-300 font-medium">
+                Voz neural ativa
+              </span>
             </div>
 
             <div className="flex gap-2 items-center">
@@ -591,55 +586,6 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
                 ))}
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Modal Informativo: Clonagem de Voz */}
-        {showCloneVoiceInfo && (
-          <div className="absolute inset-4 z-30 bg-[#120b24] border border-purple-500/40 rounded-2xl p-5 flex flex-col justify-between shadow-2xl animate-fade-in">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-purple-800/40 pb-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-300">
-                    <UserCheck className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm font-bold text-white">Como Usar Sua Própria Voz</h3>
-                </div>
-                <button
-                  onClick={() => setShowCloneVoiceInfo(false)}
-                  className="text-slate-400 hover:text-white text-xs font-bold px-2 py-1"
-                >
-                  ✕ Fechar
-                </button>
-              </div>
-
-              <div className="text-xs text-purple-100/90 space-y-2 leading-relaxed">
-                <p>
-                  <strong className="text-amber-300">Sim, é 100% possível!</strong> O Gemini API possui o recurso nativo de <strong className="text-white">Voice Replication (gemini-3.8-flash-tts)</strong>.
-                </p>
-                <div className="p-3 bg-purple-950/60 rounded-xl border border-purple-800/40 space-y-1.5 text-[11px]">
-                  <p className="font-bold text-purple-200 flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Como funciona o processo oficial:
-                  </p>
-                  <ol className="list-decimal pl-4 space-y-1 text-slate-300">
-                    <li>Você grava <strong>20 a 30 segundos</strong> lendo um texto neutro.</li>
-                    <li>Você grava uma frase curta de consentimento (exigência de segurança da IA).</li>
-                    <li>A API cria um <code>voice_id</code> único da sua voz no seu projeto.</li>
-                    <li>O SynCop passa a responder com o seu timbre e entonação exatos!</li>
-                  </ol>
-                </div>
-                <p className="text-[11px] text-purple-300">
-                  💡 <span className="font-semibold text-white">Dica imediata sem custo:</span> No navegador <strong>Microsoft Edge</strong>, as vozes <em>"Microsoft Francisca Online (Natural)"</em> e <em>"Antônio Online (Natural)"</em> já vêm integradas e soam incrivelmente humanas e realistas!
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowCloneVoiceInfo(false)}
-              className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
-            >
-              Entendido!
-            </button>
           </div>
         )}
 

@@ -12,6 +12,7 @@ import {
   FileAudio, Volume2, Square, PhoneCall
 } from 'lucide-react';
 import { DirectVoiceModal, type VoiceConversationTurn } from './direct-voice-modal';
+import { VoiceStudioModal } from './voice-studio-modal';
 
 function renderFormattedMessage(text: string) {
   if (!text) return null;
@@ -121,6 +122,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   const [copiedZapId, setCopiedZapId] = useState<string | null>(null);
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showDirectVoiceModal, setShowDirectVoiceModal] = useState(false);
+  const [showVoiceStudio, setShowVoiceStudio] = useState(false);
   const [newRuleModalInput, setNewRuleModalInput] = useState('');
 
   // Estados da interface clean e acolhedora
@@ -562,6 +564,18 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
             <span className="hidden sm:inline">Conversação Direta</span>
             <span className="sm:hidden">Voz</span>
           </button>
+
+          {/* Botão para Administrador Gravar a Própria Voz */}
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => setShowVoiceStudio(true)}
+              className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 px-2.5 py-1 rounded-md border border-amber-300 dark:border-amber-800/80 transition-colors cursor-pointer"
+              title="Gravar sua voz para ser o timbre oficial do SynCop"
+            >
+              <Mic className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span className="hidden sm:inline">Gravar Minha Voz</span>
+            </button>
+          )}
 
           {/* Botão de Memória / Regras Ensinadas */}
           <button
@@ -1156,6 +1170,15 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
         customRules={customRules}
         geminiApiKey={geminiApiKey}
       />
+
+      {/* Modal: Estúdio de Gravação da Voz Oficial do Copiloto (Apenas Admin) */}
+      {currentUser?.role === 'admin' && (
+        <VoiceStudioModal
+          isOpen={showVoiceStudio}
+          onClose={() => setShowVoiceStudio(false)}
+          currentUser={currentUser}
+        />
+      )}
     </div>
   );
 };

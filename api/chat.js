@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { query, history, systemInstruction, imageBase64 } = body || {};
+    const { query, history, systemInstruction, imageBase64, audioBase64 } = body || {};
 
     // 1. Prioridade para a variável de ambiente configurada no painel da Vercel / .env
     // 2. Fallback para a chave de contingência padrão embutida
@@ -31,20 +31,40 @@ export default async function handler(req, res) {
     }
 
     const models = [
-      'gemini-3.5-flash-lite',
-      'gemini-3.1-flash-lite',
-      'gemini-flash-lite-latest',
+      'gemini-3.8-flash',
+      'gemini-flash-latest',
       'gemini-3.7-flash',
-      'gemini-3.6-flash'
+      'gemini-3.6-flash',
+      'gemini-3.5-flash-lite'
     ];
 
     const userParts = [{ text: query || 'Olá!' }];
+
     if (imageBase64) {
       const mimeMatch = imageBase64.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
       if (mimeMatch) {
         userParts.push({
           inlineData: {
             mimeType: mimeMatch[1],
+            data: mimeMatch[2]
+          }
+        });
+      }
+    }
+
+    if (audioBase64) {
+      const mimeMatch = audioBase64.match(/^data:(audio\/[a-zA-Z0-9.+_-]+);base64,(.+)$/);
+      if (mimeMatch) {
+        let mimeType = mimeMatch[1];
+        if (mimeType.includes('ogg') || mimeType.includes('opus')) mimeType = 'audio/ogg';
+        else if (mimeType.includes('m4a') || mimeType.includes('aac')) mimeType = 'audio/m4a';
+        else if (mimeType.includes('webm')) mimeType = 'audio/webm';
+        else if (mimeType.includes('wav')) mimeType = 'audio/wav';
+        else if (mimeType.includes('mp3') || mimeType.includes('mpeg')) mimeType = 'audio/mp3';
+
+        userParts.push({
+          inlineData: {
+            mimeType,
             data: mimeMatch[2]
           }
         });

@@ -8,7 +8,8 @@ import {
   Image as ImageIcon,
   X, Mic,
   Brain, Trash2, Plus,
-  SendHorizontal, User
+  SendHorizontal, User,
+  FileAudio, Volume2, Square
 } from 'lucide-react';
 
 function renderFormattedMessage(text: string) {
@@ -106,6 +107,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedAudio, setSelectedAudio] = useState<{
+    dataUrl: string;
+    name: string;
+    size?: string;
+    mimeType: string;
+  } | null>(null);
+  const [isRecordingAudio, setIsRecordingAudio] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedZapId, setCopiedZapId] = useState<string | null>(null);
@@ -115,47 +124,98 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   // Estados da interface clean e acolhedora
   const [heroCopied, setHeroCopied] = useState(false);
   const [heroFeedback, setHeroFeedback] = useState<'up' | 'down' | null>(null);
-  const [isListening, setIsListening] = useState(false);
 
-  // Manipulador de Microfone (Reconhecimento de Voz / Ditado)
-  const handleToggleVoice = useCallback(() => {
-    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRec) {
-      alert('Reconhecimento de voz não suportado neste navegador. Utilize o Google Chrome, Edge ou Safari.');
-      return;
-    }
-
-    if (isListening) {
-      setIsListening(false);
-      return;
-    }
-
-    try {
-      const recognition = new SpeechRec();
-      recognition.lang = 'pt-BR';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => setIsListening(true);
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        if (transcript) {
-          setInputValue(prev => prev ? `${prev} ${transcript}` : transcript);
-        }
-        setIsListening(false);
-      };
-      recognition.onerror = () => setIsListening(false);
-      recognition.onend = () => setIsListening(false);
-
-      recognition.start();
-    } catch {
-      setIsListening(false);
-    }
-  }, [isListening]);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<any>(null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+
+  // Iniciar gravação de áudio pelo microfone
+  const startAudioRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+
+      let mimeType = 'audio/webm';
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+          mimeType = 'audio/ogg;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        }
+      }
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            const dataUrl = event.target.result as string;
+            const ext = mimeType.includes('mp4') ? 'm4a' : (mimeType.includes('ogg') ? 'ogg' : 'webm');
+            setSelectedAudio({
+              dataUrl,
+              name: `audio_cliente_${new Date().toLocaleTimeString('pt-BR').replace(/:/g, '-')}.${ext}`,
+              mimeType,
+              size: `${(audioBlob.size / 1024).toFixed(1)} KB`
+            });
+          }
+        };
+        reader.readAsDataURL(audioBlob);
+
+        stream.getTracks().forEach(track => track.stop());
+        if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+        setIsRecordingAudio(false);
+        setRecordingDuration(0);
+      };
+
+      recorder.start(250);
+      setIsRecordingAudio(true);
+      setRecordingDuration(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration(d => d + 1);
+      }, 1000);
+    } catch (err) {
+      console.error('Erro ao acessar microfone:', err);
+      alert('Não foi possível acessar o microfone. Verifique as permissões de áudio no seu navegador.');
+    }
+  }, []);
+
+  // Parar gravação e anexar áudio
+  const stopAudioRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+  }, []);
+
+  // Cancelar gravação sem salvar
+  const cancelAudioRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.onstop = null;
+      mediaRecorderRef.current.stop();
+      if (mediaRecorderRef.current.stream) {
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      }
+    }
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    setIsRecordingAudio(false);
+    setRecordingDuration(0);
+    audioChunksRef.current = [];
+  }, []);
 
   // Rastreamento contínuo e persistente da sessão ativa
   const sessionIdRef = useRef<string | null>(activeSessionId || null);
@@ -260,11 +320,24 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
 
     const text = rawText;
     const currentImg = selectedImage;
+    const currentAudio = selectedAudio;
+
+    let defaultPrompt = '';
+    if (!rawText) {
+      if (currentAudio) {
+        defaultPrompt = '🎙️ Áudio do cliente enviado para análise';
+      } else if (currentImg) {
+        defaultPrompt = '📸 Imagem enviada para análise';
+      }
+    }
+
     const userMsg: ChatMessage = {
       id: Math.random().toString(36).substring(2, 9),
       sender: 'user',
-      text: rawText || (currentImg ? '📸 Imagem enviada para análise' : ''),
+      text: rawText || defaultPrompt,
       image: currentImg || undefined,
+      audio: currentAudio ? currentAudio.dataUrl : undefined,
+      audioName: currentAudio ? currentAudio.name : undefined,
       timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     };
 
@@ -272,6 +345,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
     setMessages(currentMsgSnapshot);
     setInputValue('');
     setSelectedImage(null);
+    setSelectedAudio(null);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
     // Salva imediatamente o envio do usuário no histórico persistente
@@ -305,7 +379,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
         streamedAccumulator = streamedText;
         setIsTyping(false);
         setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, text: streamedText } : m));
-      }
+      },
+      currentAudio ? currentAudio.dataUrl : undefined
     );
 
     const finalText = reply || streamedAccumulator;
@@ -330,7 +405,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
     }
   };
 
-  // Suporte a colar print direto da área de transferência (Ctrl+V)
+  // Suporte a colar print ou áudio direto da área de transferência (Ctrl+V)
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const items = e.clipboardData?.items;
     if (!items) return;
@@ -344,6 +419,23 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
           reader.onload = (event) => {
             if (event.target?.result) {
               setSelectedImage(event.target.result as string);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      } else if (items[i].type.indexOf('audio') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          e.preventDefault();
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            if (event.target?.result) {
+              setSelectedAudio({
+                dataUrl: event.target.result as string,
+                name: file.name || 'audio_colado.mp3',
+                mimeType: file.type || 'audio/mp3',
+                size: `${(file.size / 1024).toFixed(1)} KB`
+              });
             }
           };
           reader.readAsDataURL(file);
@@ -362,6 +454,25 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setSelectedAudio({
+            dataUrl: event.target.result as string,
+            name: file.name,
+            mimeType: file.type || 'audio/mp3',
+            size: `${(file.size / 1024).toFixed(1)} KB`
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
     }
   };
 
@@ -390,6 +501,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
     sessionIdRef.current = null;
     setMessages([]);
     setSelectedImage(null);
+    setSelectedAudio(null);
+    cancelAudioRecording();
     onGoHome?.();
   };
 
@@ -510,7 +623,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
 
         {/* Mensagens do Chat */}
         {messages.map((msg) => {
-          if (!msg.text && !msg.image && msg.sender === 'assistant') return null;
+          if (!msg.text && !msg.image && !msg.audio && msg.sender === 'assistant') return null;
           const isUser = msg.sender === 'user';
 
           return (
@@ -534,6 +647,19 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
                       alt="Print anexado" 
                       className="max-w-xs max-h-56 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs object-contain bg-black/5"
                     />
+                  </div>
+                )}
+
+                {/* Player do Áudio */}
+                {msg.audio && (
+                  <div className={`mb-1.5 ${isUser ? 'flex justify-end' : ''}`}>
+                    <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 flex flex-col gap-1.5 min-w-[240px] max-w-xs shadow-2xs">
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-purple-800 dark:text-purple-300">
+                        <Volume2 className="w-3.5 h-3.5 shrink-0 text-[#5c24ff] dark:text-[#a78bfa]" />
+                        <span className="truncate">{msg.audioName || 'Áudio do cliente'}</span>
+                      </div>
+                      <audio controls src={msg.audio} className="w-full h-8 rounded-lg" preload="metadata" />
+                    </div>
                   </div>
                 )}
 
@@ -651,6 +777,31 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
           </div>
         )}
 
+        {/* Preview do Áudio */}
+        {selectedAudio && (
+          <div className="mb-2 flex items-center gap-2.5 p-2.5 bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 rounded-xl w-fit animate-fade-in shadow-2xs">
+            <div className="w-8 h-8 rounded-lg bg-[#5c24ff] text-white flex items-center justify-center shrink-0">
+              <Volume2 className="w-4 h-4" />
+            </div>
+            <div className="pr-2 max-w-[200px] sm:max-w-xs">
+              <p className="text-[11px] font-bold text-[#5c24ff] dark:text-purple-300 leading-tight truncate">
+                {selectedAudio.name}
+              </p>
+              <span className="text-[9px] text-slate-500 dark:text-slate-400 block">
+                Áudio pronto para análise ({selectedAudio.size})
+              </span>
+              <audio controls src={selectedAudio.dataUrl} className="h-6 w-44 sm:w-56 mt-1 block" />
+            </div>
+            <button
+              onClick={() => setSelectedAudio(null)}
+              className="p-1 hover:bg-white dark:hover:bg-slate-800 rounded-md text-slate-400 hover:text-rose-600 transition-colors cursor-pointer self-start"
+              title="Remover áudio"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Clean Minimalist Input Bar (Matching Reference Design) */}
         <div className="relative flex items-center bg-white dark:bg-[#120d26] border border-slate-200/90 dark:border-purple-950/60 focus-within:border-[#5c24ff] rounded-2xl p-2 shadow-xs transition-all">
           <input 
@@ -660,17 +811,57 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
             accept="image/*" 
             className="hidden" 
           />
-
-          <input
-            ref={textareaRef as any}
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            placeholder="Digite sua dúvida sobre produtos, vendas ou operação..."
-            className="flex-1 bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden"
+          <input 
+            type="file" 
+            ref={audioInputRef} 
+            onChange={handleAudioFileChange} 
+            accept="audio/*,.mp3,.ogg,.wav,.m4a,.aac,.webm,.opus" 
+            className="hidden" 
           />
+
+          {isRecordingAudio ? (
+            <div className="flex-1 flex items-center justify-between px-3 py-1.5 animate-fade-in">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                <span className="text-xs sm:text-sm font-semibold text-rose-600 dark:text-rose-400">
+                  Gravando áudio do cliente...
+                </span>
+                <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                  {Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={cancelAudioRecording}
+                  className="px-2.5 py-1 text-xs font-medium text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                  title="Cancelar gravação"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={stopAudioRecording}
+                  className="px-3 py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                  title="Concluir e anexar áudio"
+                >
+                  <Square className="w-3 h-3 fill-current" />
+                  <span>Concluir</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <input
+              ref={textareaRef as any}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              placeholder={selectedAudio ? "Opcional: digite uma dúvida ou envie direto para ouvir o áudio..." : "Digite sua dúvida ou anexe áudio/print do cliente..."}
+              className="flex-1 bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden"
+            />
+          )}
 
           <div className="flex items-center gap-1.5 shrink-0 pr-1">
             {/* Botão de Print / Imagem */}
@@ -683,16 +874,30 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
               <ImageIcon className="w-4 h-4" />
             </button>
 
-            {/* Botão de Microfone (Ditado de Voz) */}
+            {/* Botão de Áudio (Arquivo / WhatsApp) */}
             <button
               type="button"
-              onClick={handleToggleVoice}
+              onClick={() => audioInputRef.current?.click()}
+              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                selectedAudio 
+                  ? 'text-[#5c24ff] dark:text-[#a78bfa] bg-purple-50 dark:bg-purple-950/60' 
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+              title="Anexar áudio do cliente (WhatsApp / MP3 / OGG)"
+            >
+              <FileAudio className="w-4 h-4" />
+            </button>
+
+            {/* Botão de Microfone (Gravar Áudio do Cliente) */}
+            <button
+              type="button"
+              onClick={isRecordingAudio ? stopAudioRecording : startAudioRecording}
               className={`p-2 rounded-xl transition-all cursor-pointer ${
-                isListening 
+                isRecordingAudio 
                   ? 'bg-rose-500 text-white animate-pulse' 
                   : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
-              title={isListening ? 'Ouvindo... Clique para pausar' : 'Falar por microfone'}
+              title={isRecordingAudio ? 'Clique para concluir gravação' : 'Gravar áudio com microfone'}
             >
               <Mic className="w-4 h-4" />
             </button>
@@ -701,7 +906,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
             <button
               type="button"
               onClick={() => handleSendMessage()}
-              disabled={(!inputValue.trim() && !selectedImage) || isTyping}
+              disabled={(!inputValue.trim() && !selectedImage && !selectedAudio) || isTyping || isRecordingAudio}
               className="p-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white rounded-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center shrink-0 shadow-xs"
               title="Enviar mensagem"
             >

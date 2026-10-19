@@ -58,6 +58,16 @@ ${customRules.map((r, i) => `${i + 1}. ${r.rule}`).join('\n')}
   5) 🚫 PROIBIÇÃO RIGOROSA: NUNCA mencione o nome "Rayssa", telefones pessoais (como 87 98172-7108) ou qualquer pessoa física. Todo atendimento comercial e de expansão deve ser atribuído genericamente à "Equipe Comercial Syngular" ou "Suporte Oficial Syngular pelo WhatsApp (37) 99862-8259".
 
 =========================================================================
+🎧 TRATAMENTO DE ÁUDIOS DE CLIENTES (WHATSAPP E VOZ)
+=========================================================================
+Quando o colaborador anexar ou gravar um áudio enviado por um cliente:
+1. Ouça com atenção total o áudio, identificando o tom, a dúvida ou a objeção real que o cliente trouxe.
+2. Seja prático e direto:
+   - Resuma em 1 ou 2 frases curtas o que o cliente relatou ou perguntou no áudio.
+   - Forneça a solução técnica precisa e/ou a argumentação comercial recomendada.
+   - Forneça um script pronto e humanizado para o atendente copiar e colar no WhatsApp do cliente ("💬 Sugestão de mensagem para enviar ao cliente:").
+
+=========================================================================
 2. DIRETRIZES DE SUPORTE TÉCNICO NÍVEL 2 (N2) - ERP & EMISSÃO FISCAL
 =========================================================================
 Quando o chamado for de SUPORTE TÉCNICO N2 (erros de emissão, rejeições SEFAZ, falhas de schema XML, certificado digital, inconsistências fiscais ou problemas no ERP):
@@ -192,11 +202,16 @@ export async function queryGemini(
   apiKey: string,
   imageBase64?: string,
   customRules?: CustomRule[],
-  onChunk?: (textSoFar: string) => void
+  onChunk?: (textSoFar: string) => void,
+  audioBase64?: string
 ): Promise<string> {
   const rag = retrieveRelevantContext(query, knowledgeBase, customRules, 5);
   const systemInstruction = getSystemPrompt(knowledgeBase, customRules, rag.contextText);
-  const userText = query || (imageBase64 ? 'Analise este print/imagem anexa e me oriente com a solução técnica passo a passo.' : 'Olá!');
+  const userText = query || (
+    audioBase64 
+      ? 'Ouça com atenção o áudio anexo do cliente. Transcreva resumidamente a dúvida/problema e forneça a resposta e orientação completa para resolvermos com ele.' 
+      : (imageBase64 ? 'Analise este print/imagem anexa e me oriente com a solução técnica passo a passo.' : 'Olá!')
+  );
 
   // Engine 1 (PRINCIPAL & SEGURO): Backend Serverless na Vercel (/api/chat) - 100% no Backend
   try {
@@ -207,7 +222,8 @@ export async function queryGemini(
         query: userText,
         history,
         systemInstruction,
-        imageBase64
+        imageBase64,
+        audioBase64
       })
     });
     if (apiRes.ok) {
@@ -221,17 +237,17 @@ export async function queryGemini(
     logger.warn('Backend /api/chat indisponível, tentando cliente de contingência...', apiErr);
   }
 
-  // Engine 2 (CONTINGÊNCIA DIRETA / DEV LOCAL): Google Gemini Flash-Lite com Streaming SSE
+  // Engine 2 (CONTINGÊNCIA DIRETA / DEV LOCAL): Google Gemini com Streaming SSE
   const BUILTIN_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
   const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
   const activeKey = apiKey || envKey || BUILTIN_KEY;
   if (activeKey && activeKey.trim().length > 0) {
     const geminiModels = [
-      'gemini-3.5-flash-lite',
-      'gemini-3.1-flash-lite',
-      'gemini-flash-lite-latest',
+      'gemini-3.8-flash',
+      'gemini-flash-latest',
       'gemini-3.7-flash',
-      'gemini-3.6-flash'
+      'gemini-3.6-flash',
+      'gemini-3.5-flash-lite'
     ];
     
     interface GeminiPart {
@@ -250,6 +266,25 @@ export async function queryGemini(
         userParts.push({
           inlineData: {
             mimeType: mimeMatch[1],
+            data: mimeMatch[2]
+          }
+        });
+      }
+    }
+
+    if (audioBase64) {
+      const mimeMatch = audioBase64.match(/^data:(audio\/[a-zA-Z0-9.+_-]+);base64,(.+)$/);
+      if (mimeMatch) {
+        let mimeType = mimeMatch[1];
+        if (mimeType.includes('ogg') || mimeType.includes('opus')) mimeType = 'audio/ogg';
+        else if (mimeType.includes('m4a') || mimeType.includes('aac')) mimeType = 'audio/m4a';
+        else if (mimeType.includes('webm')) mimeType = 'audio/webm';
+        else if (mimeType.includes('wav')) mimeType = 'audio/wav';
+        else if (mimeType.includes('mp3') || mimeType.includes('mpeg')) mimeType = 'audio/mp3';
+
+        userParts.push({
+          inlineData: {
+            mimeType,
             data: mimeMatch[2]
           }
         });

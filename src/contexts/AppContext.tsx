@@ -44,6 +44,8 @@ export interface ChatMessage {
   sender: 'user' | 'assistant';
   text: string;
   image?: string;
+  audio?: string;
+  audioName?: string;
   timestamp: string;
 }
 

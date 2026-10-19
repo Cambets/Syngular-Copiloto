@@ -394,3 +394,112 @@ export async function queryGemini(
 
   return `Entendido! Como seu parceiro técnico e comercial no ecossistema **Syngular**, consigo te apoiar direto nas seguintes frentes:\n\n• 📜 **Certificação Digital ICP-Brasil:** Credenciamento de AR/PA, emissão simplificada (SynPass), normas ITI e rotinas GFSIS/Sync.\n• 💻 **Softwares do Ecossistema:** Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Certifica Signer, Certifica Concilia e emissão fiscal.\n• 🛠️ **Suporte Técnico N2:** Análise precisa de rejeições SEFAZ, inconsistências cadastrais e erros de XML.\n• 💰 **Comercial & Parcerias:** Estruturação de propostas de alta margem e comparativos com concorrentes.\n\nMe dá mais contexto ou manda o print do erro que a gente resolve juntos!`;
 }
+
+export function cleanForSpeech(text: string): string {
+  let clean = text
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^#+\s*/gm, '')
+    .replace(/^[•\-🔹✨]\s*/gm, '')
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/\$\$/g, '')
+    .replace(/---{2,}/g, '')
+    .replace(/\bNF-e\b/gi, 'nota fiscal eletrônica')
+    .replace(/\bNFC-e\b/gi, 'nota de consumidor eletrônica')
+    .replace(/\bNFS-e\b/gi, 'nota fiscal de serviço')
+    .replace(/\bMDF-e\b/gi, 'manifesto fiscal')
+    .replace(/\bGFSIS\b/gi, 'G F S I S')
+    .replace(/\bICP-Brasil\b/gi, 'I C P Brasil')
+    .replace(/\bAR\b/g, 'autoridade de registro')
+    .replace(/\bAGR\b/g, 'agente de registro')
+    .replace(/\bPA\b/g, 'posto de atendimento')
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return sanitizeOutput(clean);
+}
+
+export async function queryGeminiVoiceTurn(
+  query: string,
+  lastTurnHistory: { role: 'user' | 'model'; parts: string }[],
+  knowledgeBase: Product[],
+  apiKey: string,
+  customRules?: CustomRule[]
+): Promise<string> {
+  const rag = retrieveRelevantContext(query, knowledgeBase, customRules, 2);
+  const voiceSystemPrompt = `Você é o SynCop, especialista sênior e parceiro de equipe da SYNGULAR, conversando por ligação de voz direta com um colega de trabalho.
+REGRAS CRÍTICAS PARA CONVERSA DE VOZ:
+- Responda em no máximo 2 ou 3 frases faladas curtas, diretas, claras e naturais.
+- NUNCA use marcadores de texto (nada de asteriscos, negrito, numeração, listas, tópicos ou emojis).
+- Fale de forma acolhedora, confiante e parceira, como um colega de time ao telefone.
+- Nomenclatura oficial dos produtos de software: Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Certifica Signer, Certifica Concilia, Certifica Nota.
+- Certificado em nuvem com renovação simplificada: SynPass.
+${rag.contextText ? `\nContexto relevante:\n${rag.contextText}` : ''}
+`;
+
+  // Janela deslizante: apenas o último turno (máx 2 mensagens)
+  const compactHistory = (lastTurnHistory || []).slice(-2);
+
+  // Engine 1: Backend Serverless
+  try {
+    const apiRes = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        history: compactHistory,
+        systemInstruction: voiceSystemPrompt,
+        maxOutputTokens: 180
+      })
+    });
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data.success && data.text) {
+        return cleanForSpeech(data.text);
+      }
+    }
+  } catch (apiErr) {
+    logger.warn('Backend /api/chat indisponível para voice turn:', apiErr);
+  }
+
+  // Engine 2: Contingência Gemini Direct
+  const BUILTIN_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
+  const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
+  const activeKey = apiKey || envKey || BUILTIN_KEY;
+
+  if (activeKey && activeKey.trim().length > 0) {
+    for (const model of ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.7-flash', 'gemini-3.5-flash-lite']) {
+      try {
+        const streamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey.trim()}`;
+        const contents = compactHistory.map(h => ({
+          role: h.role,
+          parts: [{ text: h.parts }]
+        })).concat([{ role: 'user', parts: [{ text: query }] }]);
+
+        const response = await fetch(streamUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: voiceSystemPrompt }] },
+            contents,
+            generationConfig: { maxOutputTokens: 180, temperature: 0.3 }
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (rawText) {
+            return cleanForSpeech(rawText);
+          }
+        }
+      } catch (err) {
+        logger.warn(`Voice turn falhou no modelo ${model}:`, err);
+      }
+    }
+  }
+
+  // Fallback conversacional
+  return `Entendi o seu ponto. No ecossistema Syngular, você pode conferir essa configuração direto no menu de parâmetros do sistema ou me mandar uma mensagem no chat que eu detalho o passo a passo para você.`;
+}

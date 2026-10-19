@@ -92,7 +92,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
               contents: geminiContents,
               systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
-              generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
+              generationConfig: { temperature: 0.3, maxOutputTokens: body.maxOutputTokens || 4096 },
               safetySettings: [
                 { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
                 { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },

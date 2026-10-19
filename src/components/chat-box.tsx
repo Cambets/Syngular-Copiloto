@@ -9,8 +9,9 @@ import {
   X, Mic,
   Brain, Trash2, Plus,
   SendHorizontal, User,
-  FileAudio, Volume2, Square
+  FileAudio, Volume2, Square, PhoneCall
 } from 'lucide-react';
+import { DirectVoiceModal, type VoiceConversationTurn } from './direct-voice-modal';
 
 function renderFormattedMessage(text: string) {
   if (!text) return null;
@@ -119,6 +120,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedZapId, setCopiedZapId] = useState<string | null>(null);
   const [showRulesModal, setShowRulesModal] = useState(false);
+  const [showDirectVoiceModal, setShowDirectVoiceModal] = useState(false);
   const [newRuleModalInput, setNewRuleModalInput] = useState('');
 
   // Estados da interface clean e acolhedora
@@ -506,6 +508,39 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
     onGoHome?.();
   };
 
+  const handleCloseDirectVoiceModal = (turns: VoiceConversationTurn[]) => {
+    setShowDirectVoiceModal(false);
+    if (!turns || turns.length === 0) return;
+
+    let targetSessionId = sessionIdRef.current;
+    if (!targetSessionId) {
+      targetSessionId = Math.random().toString(36).substring(2, 9);
+      sessionIdRef.current = targetSessionId;
+    }
+
+    const newMsgs: ChatMessage[] = [];
+    const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    for (const turn of turns) {
+      newMsgs.push({
+        id: Math.random().toString(36).substring(2, 9),
+        sender: 'user',
+        text: `🎙️ ${turn.user}`,
+        timestamp: timeStr
+      });
+      newMsgs.push({
+        id: Math.random().toString(36).substring(2, 9),
+        sender: 'assistant',
+        text: turn.assistant,
+        timestamp: timeStr
+      });
+    }
+
+    const updated = [...messages, ...newMsgs];
+    setMessages(updated);
+    saveChatSession(updated, targetSessionId);
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-white/85 dark:bg-[#0e0a1a]/85 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-purple-900/40 shadow-sm overflow-hidden relative">
 
@@ -517,6 +552,17 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Botão de Conversação Direta por Voz */}
+          <button
+            onClick={() => setShowDirectVoiceModal(true)}
+            className="flex items-center gap-1.5 text-[11px] font-bold text-white bg-gradient-to-r from-[#5c24ff] to-[#8b5cf6] hover:opacity-95 px-3 py-1 rounded-md shadow-xs transition-all cursor-pointer active:scale-95"
+            title="Iniciar Conversação Direta por Voz (Modo Chamada com Baixo Consumo de Tokens)"
+          >
+            <PhoneCall className="w-3.5 h-3.5 animate-pulse" />
+            <span className="hidden sm:inline">Conversação Direta</span>
+            <span className="sm:hidden">Voz</span>
+          </button>
+
           {/* Botão de Memória / Regras Ensinadas */}
           <button
             onClick={() => setShowRulesModal(true)}
@@ -1102,7 +1148,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
         </div>
       )}
 
-      {/* Modal: Conectar Chave da IA Google Gemini */}
+      {/* Modal: Conversação Direta por Voz (Baixo Consumo de Tokens) */}
+      <DirectVoiceModal
+        isOpen={showDirectVoiceModal}
+        onClose={handleCloseDirectVoiceModal}
+        knowledgeBase={knowledgeBase}
+        customRules={customRules}
+        geminiApiKey={geminiApiKey}
+      />
     </div>
   );
 };

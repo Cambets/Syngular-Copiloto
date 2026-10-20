@@ -19,11 +19,13 @@ BASE ATUAL DE CONHECIMENTO:
 ${existingListSummary || 'Nenhum item indexado ainda.'}
 
 DIRETRIZES DE CLASSIFICAÇÃO:
-1. "category": Escolha EXATAMENTE UMA destas 4 opções:
+1. "category": Escolha EXATAMENTE UMA destas 5 opções:
+   - "Syn+": Softwares de gestão e SaaS do ecossistema (Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Certifica Concilia, Certifica Signer, Certifica Nota, etc.).
+   - "Syngular": Certificação digital ICP-Brasil e tecnologia própria (SynPass, Jornada Synples, Emissão sem Java, Token A3).
    - "Parcerias": Credenciamento de novas ARs, abertura de PAs, modelo de fábrica de AC própria, tabela de remuneração/comissão, atração de contabilidades e benefícios de parceria.
    - "Pos-Venda": Manuais de emissão, fluxos de validação por videoconferência, resolução de pendências, cancelamentos, revogação e suporte nível 1.
    - "Reativacao": Roteiros para reativar parceiros e clientes inativos, retenção contra concorrência e quebra de objeções de migração.
-   - "Syngular": Produtos e softwares diretos (SynPass, Syn na Nuvem, Certifica Ponto, Certifica ERP, Token A3, SST, etc.).
+
 
 2. "id": Se o conteúdo atualizar um registro JÁ EXISTENTE na lista acima, REUTILIZE o mesmo ID. Se for novo, crie um slug limpo (ex: "credenciamento-nova-ar", "validacao-videoconferencia-pendencia").
 3. "name": Título oficial objetivo e claro do procedimento ou produto.

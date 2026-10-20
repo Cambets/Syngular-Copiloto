@@ -6,7 +6,7 @@ import { logger } from '../lib/logger';
 export interface Product {
   id: string;
   name: string;
-  category: 'Syngular' | 'Certifica+' | 'Parcerias' | 'Pos-Venda' | 'Reativacao';
+  category: 'Syngular' | 'Syn+' | 'Parcerias' | 'Pos-Venda' | 'Reativacao';
   description: string;
   pitch: string;
   objections: { question: string; answer: string }[];
@@ -109,9 +109,9 @@ const defaultProducts: Product[] = [
     id: 'diferenciais-emissao-syngular',
     name: 'Diferenciais do Sistema Syngular (100% Sem Java & SynPass)',
     category: 'Syngular',
-    description: 'Sistema próprio de emissão 100% sem Java (elimina conflitos e travamentos de navegador), interface limpa sem excesso de abas, tempo de emissão de apenas 3 a 5 minutos (1/3 do mercado) e taxa de aprovação automática de 80% a 87%. Inclui SynPass (renovação online em nuvem sem videoconferência), Jornada Synples (PJ A1 emitido no celular gerando 2 certificados em 1 única validação) e Certifica+ (proteção com reemissão gratuita por perda/dano). Suporte via Muvdesk em até 5 minutos.',
+    description: 'Sistema próprio de emissão 100% sem Java (elimina conflitos e travamentos de navegador), interface limpa sem excesso de abas, tempo de emissão de apenas 3 a 5 minutos (1/3 do mercado) e taxa de aprovação automática de 80% a 87%. Inclui SynPass (renovação online em nuvem sem videoconferência), Jornada Synples (PJ A1 emitido no celular gerando 2 certificados em 1 única validação) e Syn+ (proteção com reemissão gratuita por perda/dano). Suporte via Muvdesk em até 5 minutos.',
     pitch: 'Emita certificados em 3 a 5 minutos, 100% sem Java, com aprovação automática de até 87% e suporte garantido em 5 minutos.',
-    keywords: ['sem java', 'synpass', 'jornada synples', 'certifica mais', 'muvdesk', 'emissao rapida', 'aprovacao automatica'],
+    keywords: ['sem java', 'synpass', 'jornada synples', 'syn+', 'muvdesk', 'emissao rapida', 'aprovacao automatica'],
     objections: [
       { question: 'O sistema necessita de instalação do Java?', answer: 'Não! O sistema Syngular é 100% livre de Java, acabando com incompatibilidades e lentidão no navegador.' },
       { question: 'Como funciona a renovação no SynPass?', answer: 'É 100% online em nuvem, dispensando videoconferência para clientes que já possuem biometria cadastrada.' }
@@ -180,7 +180,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-erp-web',
     name: 'Certifica ERP Web',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Sistema de gestão empresarial e fiscal em nuvem para comércio, atacado, varejo e serviços (atende o segmento do antigo Shop). Planos: MEI (15 docs/mês), Contador (10 docs/mês), Básico, Intermediário, Avançado e Premium (ilimitados). Emite NFe, NFCe, NFSe, CTe, MDFe com suporte a SPED. Suporta PIX integrado (tipo 17 SEFAZ) com bloqueio antifraude e conciliação automática no XML.',
     pitch: 'Gestão comercial, financeira e faturamento fiscal em nuvem, pronto para as novas exigências de PIX na NFC-e da SEFAZ.',
     keywords: ['erp web', 'certifica erp', 'nfe', 'nfce', 'nfse', 'pix integrado', 'sefaz', 'estoque', 'financeiro', 'sped', 'varejo', 'comercio', 'loja'],
@@ -191,7 +191,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-erp-food',
     name: 'Certifica ERP Food',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Software para bares, restaurantes, lanchonetes e delivery. Planos Básico, Intermediário, Avançado e Premium. Comandas mobile, controle de mesas, painel do garçom, controle de entregador, cardápio digital via QR Code, módulo Fast Food, Anota Aí, frete por KM e integração nativa com iFood.',
     pitch: 'Controle ágil de comandas, mesas, delivery e cozinha integrado ao frente de caixa.',
     keywords: ['food', 'certifica food', 'restaurante', 'bar', 'comandas', 'mesas', 'ifood', 'garçom', 'delivery', 'cardápio digital', 'fast food'],
@@ -202,7 +202,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-erp-agro',
     name: 'Certifica ERP Agro & Agro Fiscal',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Gestão para produtores rurais e agronegócio. Planos Agro: Light (40 docs/mês), Básico, Intermediário e Avançado. Planos Agro Fiscal de A30 a A3200 docs/mês e Ilimitado. Emissão de NFe/CTe/MDFe rural, Livro Caixa Digital do Produtor Rural (LCDPR), controle de romaneios de grãos/gado e múltiplas Inscrições Estaduais.',
     pitch: 'Controle de romaneios, finanças e Livro Caixa Rural em uma única plataforma homologada.',
     keywords: ['agro', 'certifica agro', 'produtor rural', 'livro caixa', 'lcdpr', 'romaneio', 'graos', 'gado', 'nfe rural', 'agro fiscal'],
@@ -213,7 +213,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-erp-clinicas',
     name: 'Certifica ERP Clínicas',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Sistema para clínicas e consultórios médicos e odontológicos. Planos: Light (até 2 prof.), Básico (até 4), Intermediário (até 6), Avançado (até 8) e Premium (acima de 8 prof.). Prontuário eletrônico unificado, agenda por profissional, personalização de receitas/atestados e Prescritor Memed com receitas digitais válidas nacionalmente.',
     pitch: 'Prontuário eletrônico, agenda unificada e Prescritor Memed integrado para consultórios.',
     keywords: ['clinicas', 'certifica clinicas', 'medicos', 'consultorio', 'prontuario', 'memed', 'receita digital', 'pacientes', 'odontologia'],
@@ -224,7 +224,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-erp-pet',
     name: 'Certifica ERP Pet',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Sistema especializado para clínicas veterinárias e pet shops. Planos: Básico (até 10 prof.), Intermediário (11 a 20), Avançado (21 a 30) e Premium (acima de 30). Prontuário veterinário, anamnese, controle de atendimento, agenda, estoque, venda de produtos e emissão fiscal.',
     pitch: 'Prontuário veterinário, controle de atendimentos, banho e tosa e emissão fiscal integrados.',
     keywords: ['pet', 'certifica pet', 'pet shop', 'veterinaria', 'anamnese', 'prontuario pet', 'banho e tosa'],
@@ -235,7 +235,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-erp-agenda',
     name: 'Certifica ERP Agenda',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Sistema de gestão de agendamentos e faturamento para salões de beleza, barbearias, clínicas de estética, estúdios, quadras esportivas, salas/boxes/consultórios e prestadores de serviços em geral (substitui integralmente o antigo ERP Salões). Inclui link online de agendamento, agenda por profissional ou por espaço físico, controle de serviços/procedimentos, pagamento antecipado (Asaas/Mercado Pago), comissão automática e emissão fiscal via certificado A1 (.pfx).',
     pitch: 'Agendamentos online, controle de profissionais/espaços e emissão fiscal ágil para salões, estética e prestadores de serviços.',
     keywords: ['agenda', 'certifica agenda', 'erp agenda', 'salao', 'barbearia', 'estetica', 'agendamento online', 'prestador de servico', 'a1', 'nfe', 'link na bio', 'servicos', 'quadras'],
@@ -247,7 +247,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-nota',
     name: 'Certifica Nota (Emissor Fiscal)',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Emissor fiscal eletrônico multiformato especializado (NFe, NFCe, CTe, CTe OS, MDFe e SPED). Desenvolvido para empresas que buscam simplicidade e agilidade, sem a complexidade ou custo de módulos extras de ERP (estoque, CRM). Utilização imediata e integração validada com a SEFAZ.',
     pitch: 'Emissor fiscal rápido, 100% legalizado e sem complexidade de ERP.',
     keywords: ['nota', 'certifica nota', 'emissor fiscal', 'nfe', 'nfce', 'cte', 'mdfe', 'sped', 'sefaz', 'sem erp'],
@@ -258,7 +258,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-ponto',
     name: 'Certifica Ponto',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Controle de ponto eletrônico homologado pela Portaria 671 do MTE. Reconhecimento facial com prova de vida (liveness), cerca virtual com raio a partir de 85m (bloqueio ou notificação), registro offline com sincronização, armazenamento Amazon S3 com retenção de 5 anos, +40 relatórios gerenciais e app do colaborador. Planos por vidas: Básico (1 a 10 vidas), Intermediário (11 a 20 vidas) e Avançado (21 a 30 vidas). Sem fidelidade.',
     pitch: 'Controle de jornada com biometria facial, cerca virtual de 85m e 100% conforme a Portaria 671.',
     keywords: ['ponto', 'certifica ponto', 'portaria 671', 'mte', 'cerca virtual', 'biometria facial', 'liveness', 'banco de horas', 'offline', 'vidas'],
@@ -270,7 +270,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-ged',
     name: 'Certifica GED & Assinador',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Guarda eletrônica de documentos com assinador digital integrado. Planos oficiais: Básico, Intermediário e Avançado (escalonados em até 5, 6 a 10 ou ilimitados usuários). Inclui pastas, templates, checklists, CLM, gestão de tarefas Kanban, assinatura em massa e alertas de validade de certidões. Solução altamente recomendada para empresas que participam de licitações.',
     pitch: 'Centralize documentos corporativos, certidões para licitações e contratos com assinatura digital.',
     keywords: ['ged', 'certifica ged', 'documentos', 'assinador', 'licitacao', 'certidoes', 'contratos', 'nuvem', 'clm', 'kanban'],
@@ -281,7 +281,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-sst',
     name: 'Certifica SST (Saúde e Segurança)',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Gestão completa de SST e mensageria eSocial conforme a NR-01 (Portaria MTE 765/2025). Geração de PGR (inventário de riscos vivo e plano de ação), PCMSO, LTCAT (sob demanda quando houver agentes nocivos), Análise de Riscos Psicossociais em 6 etapas, capacitação EAD (Anexo II) e envio dos eventos S-2210 (CAT), S-2220 (ASO) e S-2240. Planos mensais por vidas: Básico (até 5 func.), Intermediário (até 10 func.) e Avançado (até 20 func.). NUNCA divulgue valores.',
     pitch: 'Envie os eventos de SST ao eSocial e mantenha o PGR e treinamentos da NR-01 em dia sem multas.',
     keywords: ['sst', 'certifica sst', 'esocial', 'nr-01', 'pgr', 'pcmso', 'ltcat', 'cat', 's-2240', 's-2220', 'psicossociais', 's-2210'],
@@ -293,7 +293,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-concilia',
     name: 'Certifica Concilia',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Plataforma especializada de conciliação financeira de vendas em cartões de crédito, débito e PIX. Preço acessível de R$ 199/mês. Conciliação em 3 níveis: vendas no POS/TEF, financeira (adquirentes como Stone, Rede, Cielo, GetNet, PagSeguro, Mercado Pago) e extrato bancário. Alertas automáticos de divergências de taxas, atrasos e chargebacks.',
     pitch: 'Auditoria e conciliação automática de vendas em cartão e PIX por R$ 199/mês para recuperar taxas cobradas a mais.',
     keywords: ['conciliacao', 'certifica concilia', 'cartao', 'taxas', 'adquirente', 'chargeback', 'tef', 'pos', 'pix', '199'],
@@ -304,7 +304,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-signer',
     name: 'Certifica Signer (Assinaturas Digitais)',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Plataforma completa para assinatura eletrônica e digital de documentos com validade jurídica nacional (MP 2.200-2). Assinatura híbrida (com ou sem certificado ICP-Brasil), múltiplos signatários simultâneos ou sequenciais, assinatura em lote, geolocalização do signatário, carimbo do tempo e trilha de auditoria completa.',
     pitch: 'Assine contratos e documentos com validade jurídica, múltiplos signatários e trilha de auditoria.',
     keywords: ['signer', 'certifica signer', 'assinatura eletronica', 'assinatura digital', 'mp 2200', 'contratos', 'lote', 'geolocalizacao'],
@@ -315,7 +315,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-registro-marca',
     name: 'Certifica Registro (Marcas & Patentes)',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Assessoria jurídica para registro e proteção de marcas no INPI. Planos: Básico (pesquisa, cadastro, GRUs, depósito e alertas), Intermediário (+ manifestações e recursos) e Avançado (+ notificações extrajudiciais e garantia estendida de novo protocolo sem honorários se indeferido). Serviço continuado Marca Monitorada (Legal Lab) para vigilância semanal na RPI contra marcas concorrentes pós-registro.',
     pitch: 'Garanta o direito de uso exclusivo da sua marca no INPI e mantenha a vigilância contínua na RPI.',
     keywords: ['registro de marca', 'certifica registro', 'inpi', 'marcas', 'marca monitorada', 'legal lab', 'rpi', 'propriedade industrial'],
@@ -326,7 +326,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-up-digital',
     name: 'Certifica UP Digital (Presença Online)',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Solução completa de presença digital para micro e pequenas empresas locais. Criação e configuração profissional de perfis no Google Meu Negócio / Google Maps (SEO local), Instagram, Facebook e WhatsApp Business. Inclui catálogo digital de até 10 produtos/serviços e configuração de mensagens automáticas.',
     pitch: 'Coloque sua empresa no mapa digital e atraia clientes locais no Google e nas redes sociais.',
     keywords: ['up digital', 'certifica up digital', 'google meu negocio', 'google maps', 'seo local', 'instagram', 'presenca digital', 'catalogo'],
@@ -337,7 +337,7 @@ const defaultProducts: Product[] = [
   {
     id: 'certifica-design',
     name: 'Certifica Design',
-    category: 'Certifica+',
+    category: 'Syn+',
     description: 'Criação de marcas e identidade visual estratégica via ClickUp. Fluxos de Naming (15 dias para até 2 rodadas de 5 opções de nome) e Identidade Visual (30 dias para logotipo, paleta, manual e vetores). Prazo total integrado de 45 dias com 2 reuniões de apresentação. NUNCA divulgue valores.',
     pitch: 'Identidade visual profissional e criação de nome (Naming) com metodologia ágil.',
     keywords: ['design', 'certifica design', 'naming', 'logotipo', 'identidade visual', 'marca', 'branding', 'clickup'],

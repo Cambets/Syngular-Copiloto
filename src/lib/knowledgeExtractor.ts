@@ -12,7 +12,7 @@ export async function extractProductFromRawContent(
     .join('\n');
 
   const systemInstruction = `
-Você é o Arquiteto de Conhecimento Estratégico da Syngular ID & Syn+.
+Você é o Arquiteto de Conhecimento Estratégico da Syngular ID & Certifica+.
 Analise o material fornecido (texto, manual, comunicados de ARs, prints, slides ou regras internas) e extraia um registro estruturado em JSON rigoroso.
 
 BASE ATUAL DE CONHECIMENTO:
@@ -20,7 +20,7 @@ ${existingListSummary || 'Nenhum item indexado ainda.'}
 
 DIRETRIZES DE CLASSIFICAÇÃO:
 1. "category": Escolha EXATAMENTE UMA destas 5 opções:
-   - "Syn+": Softwares de gestão e SaaS do ecossistema (Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Certifica Concilia, Certifica Signer, Certifica Nota, etc.).
+   - "Certifica+": Softwares de gestão e SaaS do ecossistema (Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Certifica Concilia, Certifica Signer, Certifica Nota, etc.).
    - "Syngular": Certificação digital ICP-Brasil e tecnologia própria (SynPass, Jornada Synples, Emissão sem Java, Token A3).
    - "Parcerias": Credenciamento de novas ARs, abertura de PAs, modelo de fábrica de AC própria, tabela de remuneração/comissão, atração de contabilidades e benefícios de parceria.
    - "Pos-Venda": Manuais de emissão, fluxos de validação por videoconferência, resolução de pendências, cancelamentos, revogação e suporte nível 1.

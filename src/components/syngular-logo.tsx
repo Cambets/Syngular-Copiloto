@@ -8,7 +8,7 @@ interface SyngularLogoProps {
 }
 
 /**
- * 🏷️ Official Brand Logo: The official '·y' mark + "Syn+" wordmark
+ * 🏷️ Official Brand Logo: The official '·y' mark + "Certifica+" wordmark
  * Used in Topbars, Sidebar, Navigation, Login and Page Headers.
  */
 export const SyngularLogo: React.FC<SyngularLogoProps> = ({
@@ -24,7 +24,7 @@ export const SyngularLogo: React.FC<SyngularLogoProps> = ({
     <div 
       onClick={onClick}
       className={`flex items-center gap-2 min-w-0 select-none ${onClick ? 'cursor-pointer group' : ''} ${className}`}
-      title={onClick ? 'Ir para o Início' : 'Syn+'}
+      title={onClick ? 'Ir para o Início' : 'Certifica+'}
     >
       {/* 🟣 Official '·y' Emblem */}
       <div className={`${iconSize} rounded-xl bg-purple-50 border border-purple-200/80 p-1 flex items-center justify-center shadow-2xs transition-transform duration-150 group-hover:scale-105 shrink-0 relative overflow-hidden`}>
@@ -47,7 +47,7 @@ export const SyngularLogo: React.FC<SyngularLogoProps> = ({
 
       {showText && (
         <span className={`${textSize} font-black tracking-tight text-slate-900 leading-none group-hover:text-[#7c3aed] transition-colors flex items-center`}>
-          <span>Syn</span>
+          <span>Certifica</span>
           <span className="text-[#7c3aed] ml-0.5 font-black">+</span>
         </span>
       )}

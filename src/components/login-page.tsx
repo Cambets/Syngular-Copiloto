@@ -286,7 +286,7 @@ export const LoginPage: React.FC = () => {
                 syngular
               </h1>
               <span className="text-xs font-extrabold text-[#a882ff] uppercase tracking-widest block">
-                Syn+ Ecosystem
+                Certifica+ Ecosystem
               </span>
             </div>
           </div>
@@ -337,7 +337,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Footer Meta */}
         <div className="relative pt-4 border-t border-white/10 text-[11px] text-slate-400 flex flex-wrap items-center justify-between gap-2 z-10">
-          <span>© 2026 Syngular ID & Syn+. Todos os direitos reservados.</span>
+          <span>© 2026 Syngular ID & Certifica+. Todos os direitos reservados.</span>
           <span className="flex items-center gap-1 text-slate-300">
             <Shield className="w-3 h-3 text-emerald-400" />
             Ambiente 100% Seguro

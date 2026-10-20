@@ -550,7 +550,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ activeSessionId, onGoHome }) =
       <div className="h-11 px-4 border-b border-slate-100 dark:border-purple-900/30 flex items-center justify-between bg-slate-50/70 dark:bg-[#120b22]/80 backdrop-blur-md flex-shrink-0 z-10">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-purple-200">
           <span className="w-2 h-2 rounded-full bg-[#5c24ff] dark:bg-[#c084fc] animate-pulse"></span>
-          <span>Copiloto Syngular & Syn+</span>
+          <span>Copiloto Syngular & Certifica+</span>
         </div>
 
         <div className="flex items-center gap-2">

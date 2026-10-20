@@ -9,7 +9,7 @@ import {
   Package, ShieldCheck, Edit3, FileCheck
 } from 'lucide-react';
 
-type KnowledgeCategory = 'ALL' | 'Syngular' | 'Syn+' | 'Parcerias' | 'Pos-Venda' | 'Reativacao';
+type KnowledgeCategory = 'ALL' | 'Syngular' | 'Certifica+' | 'Parcerias' | 'Pos-Venda' | 'Reativacao';
 
 export const AdminKnowledgeHub: React.FC = () => {
   const appContext = useApp() as any;
@@ -362,7 +362,7 @@ export const AdminKnowledgeHub: React.FC = () => {
 
               {/* Categorias Tabs */}
               <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
-                {(['ALL', 'Syngular', 'Syn+', 'Parcerias', 'Pos-Venda', 'Reativacao'] as KnowledgeCategory[]).map((cat) => (
+                {(['ALL', 'Syngular', 'Certifica+', 'Parcerias', 'Pos-Venda', 'Reativacao'] as KnowledgeCategory[]).map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
@@ -577,7 +577,7 @@ export const AdminKnowledgeHub: React.FC = () => {
                         onChange={(e) => setPendingProduct({ ...pendingProduct, category: e.target.value as any })}
                         className="w-full p-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
                       >
-                        <option value="Syn+">Syn+ (Software SaaS)</option>
+                        <option value="Certifica+">Certifica+ (Software SaaS)</option>
                         <option value="Syngular">Syngular (Certificação Digital)</option>
                         <option value="Parcerias">Parcerias & ARs</option>
                         <option value="Pos-Venda">Pós-Venda & Suporte</option>

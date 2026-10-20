@@ -36,7 +36,7 @@ export const InstallAppModal: React.FC<InstallAppModalProps> = ({
               <Download className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">Instalar Syn+ Copiloto</h3>
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">Instalar Syngular Copiloto</h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">Funciona como App Nativo no Celular e PC</p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export const InstallAppModal: React.FC<InstallAppModalProps> = ({
 
               <div className="flex items-start gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                <p className="text-[11px]">Pronto! O ícone do <strong>Syn+</strong> ficará na sua tela inicial abrindo em tela cheia como qualquer app da Play Store.</p>
+                <p className="text-[11px]">Pronto! O ícone do <strong>Copiloto</strong> ficará na sua tela inicial abrindo em tela cheia como qualquer app da Play Store.</p>
               </div>
             </div>
           )}

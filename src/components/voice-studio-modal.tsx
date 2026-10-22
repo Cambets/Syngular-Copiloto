@@ -219,6 +219,15 @@ export const VoiceStudioModal: React.FC<VoiceStudioModalProps> = ({
       if (result.success && result.voiceId) {
         localStorage.setItem('syncop_custom_voice_id', result.voiceId);
         localStorage.setItem('syncop_custom_voice_name', displayName);
+        try { localStorage.removeItem('syncop_cached_greeting_wav'); } catch {}
+        
+        // Pré-aquece a saudação de abertura em background para carregamento instantâneo
+        synthesizeGeminiVoice('Fala parceiro! SynCop na linha. Pode mandar.', result.voiceId, geminiApiKey).then(b64 => {
+          if (b64 && typeof window !== 'undefined') {
+            try { localStorage.setItem('syncop_cached_greeting_wav', b64); } catch {}
+          }
+        }).catch(() => {});
+
         setSavedVoiceId(result.voiceId);
         setFeedback({
           type: 'success',

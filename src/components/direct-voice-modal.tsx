@@ -23,6 +23,38 @@ interface DirectVoiceModalProps {
 type CallState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'paused';
 type InteractionMode = 'hands-free' | 'push-to-talk';
 
+// Chime de áudio Web Audio instantâneo (0ms de latência sensorial na abertura)
+function playConnectChime() {
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+    
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(523.25, now);
+    gain1.gain.setValueAtTime(0.06, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.12);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(783.99, now + 0.07);
+    gain2.gain.setValueAtTime(0.08, now + 0.07);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.07);
+    osc2.stop(now + 0.24);
+  } catch {}
+}
+
 export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
   isOpen,
   onClose,
@@ -407,7 +439,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
           clearTimeout(silenceTimerRef.current);
           silenceTimerRef.current = setTimeout(() => {
             handleProcessUserSpeech(cleanedFinal);
-          }, 900);
+          }, 450);
         }
       }
     };
@@ -441,17 +473,59 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
 
     recognitionRef.current = recognition;
 
-    // Saudação inicial de boas-vindas
-    const initialGreeting = 'Fala parceiro! SynCop na linha. O que você precisa resolver hoje?';
+    // Saudação inicial instantânea e responsiva (Zero Delay)
+    playConnectChime();
+    const initialGreeting = 'Fala parceiro! SynCop na linha. Pode mandar.';
     setAssistantReply(initialGreeting);
-    speakText(initialGreeting, () => {
+
+    const customVoiceId = typeof window !== 'undefined' ? localStorage.getItem('syncop_custom_voice_id') : null;
+    const cachedGreeting = typeof window !== 'undefined' ? localStorage.getItem('syncop_cached_greeting_wav') : null;
+
+    const startListening = () => {
       if (isOpenRef.current && modeRef.current === 'hands-free' && !isMutedRef.current) {
         setCallState('listening');
         try {
           recognition.start();
         } catch {}
       }
-    });
+    };
+
+    if (customVoiceId && cachedGreeting) {
+      // 🚀 ROTA ZERO-DELAY: Áudio da sua voz já pré-gravado no cache do dispositivo
+      setCallState('speaking');
+      isSpeakingRef.current = true;
+      try {
+        const audio = new Audio('data:audio/wav;base64,' + cachedGreeting);
+        activeAudioRef.current = audio;
+        audio.onended = () => {
+          activeAudioRef.current = null;
+          isSpeakingRef.current = false;
+          startListening();
+        };
+        audio.onerror = () => {
+          activeAudioRef.current = null;
+          isSpeakingRef.current = false;
+          fallbackBrowserSpeak(initialGreeting, startListening);
+        };
+        audio.play().catch(() => startListening());
+      } catch {
+        startListening();
+      }
+    } else if (customVoiceId) {
+      // Primeira chamada: fala imediatamente com voz local e sintetiza em background para a próxima
+      setCallState('speaking');
+      isSpeakingRef.current = true;
+      fallbackBrowserSpeak(initialGreeting, startListening);
+
+      synthesizeGeminiVoice(initialGreeting, customVoiceId, geminiApiKey).then(b64 => {
+        if (b64 && typeof window !== 'undefined') {
+          try { localStorage.setItem('syncop_cached_greeting_wav', b64); } catch {}
+        }
+      }).catch(() => {});
+    } else {
+      // Sem voz clonada: fala imediata com sintetizador do navegador
+      speakText(initialGreeting, startListening);
+    }
 
     return () => {
       clearTimeout(silenceTimerRef.current);

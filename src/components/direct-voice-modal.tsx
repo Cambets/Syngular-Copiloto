@@ -530,27 +530,49 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-xl animate-fade-in select-none">
-      <div className="relative w-full max-w-lg bg-gradient-to-b from-[#130d2a] via-[#0f0920] to-[#090514] border border-purple-500/30 rounded-3xl p-5 sm:p-7 shadow-2xl flex flex-col items-center justify-between min-h-[600px] overflow-hidden">
+      <div className="relative w-full max-w-lg bg-gradient-to-br from-slate-950 via-[#150d2a] to-[#0a0614] border border-purple-500/25 rounded-3xl p-5 sm:p-7 shadow-[0_0_80px_-20px_rgba(124,58,237,0.4)] flex flex-col items-center justify-between min-h-[620px] overflow-hidden">
         
-        {/* Glow de fundo */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#5c24ff]/20 rounded-full blur-3xl pointer-events-none"></div>
+        {/* Glows de Fundo da Identidade Syngular (Mesmo tom da Login Page) */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-[#8b5cf6]/20 rounded-full blur-3xl pointer-events-none -ml-24 -mt-24"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#7c3aed]/20 rounded-full blur-3xl pointer-events-none -mr-24 -mb-24"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#5c24ff]/25 rounded-full blur-3xl pointer-events-none"></div>
+
+        {/* Camada de Granulação Orgânica (Textura Granulada / Film Grain) */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-[0.28] mix-blend-overlay z-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+          }}
+        />
+
+        {/* Vinheta de Profundidade */}
+        <div className="absolute inset-0 bg-radial from-transparent via-[#0a0614]/30 to-[#0a0614]/75 pointer-events-none z-0"></div>
+        
+        {/* Borda reflexiva sutil interna */}
+        <div className="absolute inset-0 rounded-3xl border border-white/10 pointer-events-none z-10"></div>
 
         {/* Top Header */}
         <div className="w-full flex items-center justify-between relative z-10">
           <div className="flex items-center gap-2.5">
             <SynRobotMascot size="sm" />
             <div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-sm font-bold text-white tracking-wide">SynCop Direto</span>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                {customVoiceName && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">
-                    ✨ {customVoiceName}
+                {customVoiceName ? (
+                  <span className="px-2 py-0.5 rounded-full bg-purple-500/25 text-[#d8b4fe] border border-purple-400/40 text-[10px] font-bold flex items-center gap-1 shadow-[0_0_12px_rgba(124,58,237,0.35)] backdrop-blur-md">
+                    <Sparkles className="w-3 h-3 text-[#c084fc] animate-pulse" />
+                    <span>{customVoiceName}</span>
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/15 text-[10px] font-medium backdrop-blur-md">
+                    Voz Padrão
                   </span>
                 )}
               </div>
               <span className="text-[11px] font-mono text-purple-300/80">
-                {formatTimer(callDuration)} &bull; Ultra-baixo consumo
+                {formatTimer(callDuration)} &bull; Baixa latência
               </span>
             </div>
           </div>
@@ -559,10 +581,10 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
             {/* Seletor de Vozes & Configurações */}
             <button
               onClick={() => setShowVoiceSettings(!showVoiceSettings)}
-              className={`p-2 rounded-full border transition-colors cursor-pointer ${
+              className={`p-2 rounded-full border transition-all cursor-pointer backdrop-blur-md ${
                 showVoiceSettings 
-                  ? 'bg-purple-600 border-purple-400 text-white' 
-                  : 'bg-purple-950/60 border-purple-800/60 text-purple-200 hover:bg-purple-900/60'
+                  ? 'bg-[#5c24ff] border-purple-300 text-white shadow-[0_0_15px_rgba(92,36,255,0.5)]' 
+                  : 'bg-white/5 border-white/10 text-purple-200 hover:bg-white/10 hover:border-white/20'
               }`}
               title="Configurar Voz e Timbre"
             >
@@ -575,10 +597,10 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
                 stopSpeaking();
                 setMode(m => m === 'hands-free' ? 'push-to-talk' : 'hands-free');
               }}
-              className="flex items-center gap-1 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-800/60 text-purple-200 text-[11px] font-medium hover:bg-purple-900/60 transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-purple-200 text-[11px] font-medium hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer"
               title="Alternar entre Viva-Voz contínuo e Pressione para Falar"
             >
-              <Radio className="w-3 h-3 text-[#a78bfa]" />
+              <Radio className="w-3 h-3 text-[#c084fc]" />
               <span>{mode === 'hands-free' ? 'Viva-Voz' : 'PTT'}</span>
             </button>
           </div>
@@ -586,14 +608,14 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
 
         {/* Gaveta de Configurações de Voz & Clonagem */}
         {showVoiceSettings && (
-          <div className="w-full mt-3 p-3.5 bg-purple-950/80 border border-purple-800/70 rounded-2xl relative z-20 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full mt-3 p-4 bg-slate-950/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl relative z-20 space-y-3 animate-in fade-in zoom-in-95 duration-150 shadow-2xl shadow-purple-950/50">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Volume2 className="w-3.5 h-3.5 text-purple-400" />
+                <Volume2 className="w-3.5 h-3.5 text-[#a882ff]" />
                 Voz do Assistente:
               </span>
               <span className="text-[10px] text-purple-300 font-medium">
-                Voz neural ativa
+                {customVoiceName ? 'Sua voz gravada ativa' : 'Voz neural selecionada'}
               </span>
             </div>
 
@@ -605,13 +627,13 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
                   const v = availableVoices.find(item => item.voiceURI === e.target.value);
                   if (v) handleTestVoice(v);
                 }}
-                className="flex-1 bg-slate-900/90 border border-purple-700/60 text-white text-xs rounded-xl px-2.5 py-1.5 focus:outline-hidden focus:border-purple-400"
+                className="flex-1 bg-white/5 border border-white/15 text-white text-xs rounded-xl px-2.5 py-1.5 focus:outline-hidden focus:border-purple-400 backdrop-blur-md"
               >
                 {availableVoices.length === 0 ? (
                   <option value="">Carregando vozes do sistema...</option>
                 ) : (
                   availableVoices.map(v => (
-                    <option key={v.voiceURI} value={v.voiceURI}>
+                    <option key={v.voiceURI} value={v.voiceURI} className="bg-slate-900 text-white">
                       {formatVoiceName(v)}
                     </option>
                   ))
@@ -621,7 +643,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
               <button
                 onClick={() => handleTestVoice()}
                 disabled={testingVoice}
-                className="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer shrink-0"
+                className="px-2.5 py-1.5 bg-[#5c24ff] hover:bg-[#4d1cdb] active:scale-95 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer shrink-0 transition-all shadow-xs"
                 title="Ouvir teste desta voz"
               >
                 <Play className="w-3 h-3 fill-current" />
@@ -630,7 +652,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
             </div>
 
             {/* Ajuste de Velocidade */}
-            <div className="flex items-center justify-between pt-1 border-t border-purple-900/60 text-[11px] text-purple-200">
+            <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[11px] text-purple-200">
               <span>Velocidade de fala:</span>
               <div className="flex gap-1">
                 {[0.9, 1.05, 1.25, 1.4].map(rate => (
@@ -639,8 +661,8 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
                     onClick={() => setSpeechRate(rate)}
                     className={`px-2 py-0.5 rounded-md text-[10px] font-mono cursor-pointer transition-colors ${
                       speechRate === rate 
-                        ? 'bg-purple-500 text-white font-bold' 
-                        : 'bg-purple-900/60 text-purple-300 hover:bg-purple-800'
+                        ? 'bg-[#5c24ff] text-white font-bold shadow-xs' 
+                        : 'bg-white/5 text-purple-300 hover:bg-white/10 border border-white/5'
                     }`}
                   >
                     {rate}x
@@ -653,7 +675,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
 
         {/* Alerta de Erro se houver */}
         {errorMessage && (
-          <div className="w-full mt-3 p-3 bg-rose-950/60 border border-rose-800/80 rounded-2xl flex items-center gap-2 text-rose-200 text-xs relative z-10 animate-fade-in">
+          <div className="w-full mt-3 p-3 bg-rose-950/60 border border-rose-800/80 rounded-2xl flex items-center gap-2 text-rose-200 text-xs relative z-10 animate-fade-in backdrop-blur-md">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <p>{errorMessage}</p>
           </div>
@@ -666,20 +688,21 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
             {/* Anéis de pulso de áudio */}
             {callState === 'listening' && (
               <>
-                <div className="absolute w-44 h-44 rounded-full border border-emerald-500/40 animate-ping opacity-60"></div>
-                <div className="absolute w-56 h-56 rounded-full border border-emerald-500/20 animate-pulse"></div>
+                <div className="absolute w-44 h-44 rounded-full border border-emerald-400/40 animate-ping opacity-60 pointer-events-none"></div>
+                <div className="absolute w-56 h-56 rounded-full border border-emerald-500/20 animate-pulse pointer-events-none"></div>
               </>
             )}
 
             {callState === 'speaking' && (
               <>
-                <div className="absolute w-44 h-44 rounded-full border border-[#a78bfa]/50 animate-ping opacity-75"></div>
-                <div className="absolute w-56 h-56 rounded-full border border-[#5c24ff]/30 animate-pulse"></div>
+                <div className="absolute w-44 h-44 rounded-full border border-[#c084fc]/50 animate-ping opacity-75 pointer-events-none"></div>
+                <div className="absolute w-56 h-56 rounded-full border border-[#7c3aed]/40 animate-pulse pointer-events-none"></div>
+                <div className="absolute w-64 h-64 rounded-full border border-[#5c24ff]/20 animate-pulse delay-150 pointer-events-none"></div>
               </>
             )}
 
             {callState === 'thinking' && (
-              <div className="absolute w-48 h-48 rounded-full border-2 border-t-purple-400 border-r-transparent border-b-purple-600 border-l-transparent animate-spin"></div>
+              <div className="absolute w-48 h-48 rounded-full border-2 border-t-[#c084fc] border-r-transparent border-b-[#5c24ff] border-l-transparent animate-spin pointer-events-none"></div>
             )}
 
             {/* Núcleo da Orbe */}
@@ -689,12 +712,12 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
               }}
               className={`w-32 h-32 sm:w-36 sm:h-36 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl relative cursor-pointer ${
                 callState === 'listening'
-                  ? 'bg-gradient-to-tr from-emerald-600 to-teal-400 shadow-emerald-500/40 scale-105'
+                  ? 'bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 shadow-emerald-500/40 scale-105'
                   : callState === 'speaking'
-                  ? 'bg-gradient-to-tr from-[#5c24ff] via-[#8b5cf6] to-[#ec4899] shadow-purple-500/50 scale-105 animate-pulse'
+                  ? 'bg-gradient-to-tr from-[#5c24ff] via-[#7c3aed] to-[#c084fc] shadow-[0_0_60px_rgba(124,58,237,0.6)] scale-105 animate-pulse'
                   : callState === 'thinking'
-                  ? 'bg-gradient-to-tr from-purple-800 to-indigo-600 shadow-purple-900/60 scale-95'
-                  : 'bg-slate-800 shadow-slate-900/40 scale-100'
+                  ? 'bg-gradient-to-tr from-[#1f1042] via-[#2d1b69] to-[#5c24ff] shadow-purple-900/60 scale-95'
+                  : 'bg-gradient-to-tr from-slate-900 to-[#1f1538] shadow-slate-950/60 scale-100 border border-white/10'
               }`}
               title={callState === 'speaking' ? 'Clique para interromper a fala' : undefined}
             >
@@ -706,12 +729,35 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
             </div>
           </div>
 
-          {/* Status Textual */}
-          <div className="mt-5 text-center">
-            <span className="text-xs uppercase tracking-widest font-bold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200">
+          {/* Equalizador Estético de Áudio */}
+          <div className="flex items-center justify-center gap-1.5 mt-5 h-6">
+            {[35, 65, 95, 55, 90, 45, 80, 60, 30].map((h, i) => (
+              <span
+                key={i}
+                className="w-1 rounded-full transition-all duration-150"
+                style={{
+                  height: callState === 'speaking' 
+                    ? `${Math.max(12, h * (0.5 + (i % 3) * 0.25))}%` 
+                    : callState === 'listening'
+                    ? `${Math.max(16, h * 0.4)}%`
+                    : '4px',
+                  backgroundColor: callState === 'speaking' 
+                    ? '#c084fc' 
+                    : callState === 'listening' 
+                    ? '#34d399' 
+                    : 'rgba(255,255,255,0.2)',
+                  opacity: callState === 'idle' ? 0.3 : 0.95
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Status Textual em Pill Glassmorphic */}
+          <div className="mt-3 text-center">
+            <span className="text-xs uppercase tracking-widest font-bold px-3.5 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-slate-200 shadow-xs inline-flex items-center gap-1.5">
               {callState === 'listening' && '🟢 Ouvindo você... Pode falar'}
               {callState === 'thinking' && '🟣 SynCop processando resposta...'}
-              {callState === 'speaking' && '🔊 SynCop falando (clique na esfera p/ pausar)'}
+              {callState === 'speaking' && (customVoiceName ? `🔊 Falando com sua voz (${customVoiceName})` : '🔊 SynCop falando (toque p/ pausar)')}
               {callState === 'paused' && '⏸️ Microfone mutado'}
               {callState === 'idle' && 'Pronto para conversar'}
             </span>
@@ -719,10 +765,12 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
         </div>
 
         {/* Caixa de Transcrição e Retorno ao Vivo */}
-        <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-3.5 space-y-2 text-xs relative z-10 max-h-36 overflow-y-auto">
+        <div className="w-full bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 space-y-2.5 text-xs relative z-10 max-h-36 overflow-y-auto">
           {/* O que o usuário está dizendo ou disse */}
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Você:</span>
+            <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider flex items-center gap-1">
+              <Mic className="w-3 h-3" /> Você:
+            </span>
             <p className="text-slate-200 leading-snug">
               {interimTranscript ? (
                 <span className="text-slate-400 italic">{interimTranscript}...</span>
@@ -734,8 +782,11 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
 
           {/* O que a IA respondeu */}
           {assistantReply && (
-            <div className="pt-2 border-t border-white/5 space-y-0.5">
-              <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider">SynCop:</span>
+            <div className="pt-2 border-t border-white/10 space-y-0.5">
+              <span className="text-[10px] uppercase font-bold text-[#c084fc] tracking-wider flex items-center gap-1">
+                <Volume2 className="w-3 h-3 text-[#a882ff]" /> 
+                {customVoiceName ? `SynCop (${customVoiceName}):` : 'SynCop:'}
+              </span>
               <p className="text-purple-100 font-medium leading-snug">{assistantReply}</p>
             </div>
           )}
@@ -747,10 +798,10 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
           {/* Botão Mudo / Desmudo */}
           <button
             onClick={toggleMute}
-            className={`p-3.5 rounded-full transition-all cursor-pointer ${
+            className={`p-3.5 rounded-full transition-all cursor-pointer backdrop-blur-md ${
               isMuted 
-                ? 'bg-amber-500 hover:bg-amber-600 text-white' 
-                : 'bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10'
+                ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-950/60' 
+                : 'bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10'
             }`}
             title={isMuted ? 'Desmutar Microfone' : 'Mutar Microfone'}
           >
@@ -767,7 +818,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
               className={`px-5 py-3.5 rounded-full font-bold text-xs flex items-center gap-2 transition-all cursor-pointer active:scale-95 shadow-lg ${
                 callState === 'listening'
                   ? 'bg-emerald-500 text-white ring-4 ring-emerald-500/30'
-                  : 'bg-[#5c24ff] hover:bg-[#6e39ff] text-white'
+                  : 'bg-[#5c24ff] hover:bg-[#4d1cdb] text-white border border-purple-400/30 shadow-[0_0_20px_rgba(92,36,255,0.4)]'
               }`}
             >
               <Mic className="w-4 h-4" />
@@ -779,7 +830,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
           {callState === 'speaking' && (
             <button
               onClick={stopSpeaking}
-              className="p-3.5 rounded-full bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-500/40 transition-all cursor-pointer"
+              className="p-3.5 rounded-full bg-white/10 hover:bg-white/15 border border-purple-400/40 text-purple-200 backdrop-blur-md transition-all cursor-pointer shadow-lg shadow-purple-950/50"
               title="Interromper fala do SynCop"
             >
               <VolumeX className="w-5 h-5" />
@@ -789,7 +840,7 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
           {/* Botão Encerrar Ligação */}
           <button
             onClick={handleEndCall}
-            className="p-3.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-600/40 transition-all cursor-pointer active:scale-95 flex items-center justify-center"
+            className="p-3.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-950/60 transition-all cursor-pointer active:scale-95 flex items-center justify-center border border-rose-400/30"
             title="Encerrar ligação e salvar transcrição no chat"
           >
             <PhoneOff className="w-5 h-5" />

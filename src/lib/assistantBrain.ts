@@ -438,8 +438,8 @@ export async function queryGeminiVoiceTurn(
   const rag = retrieveRelevantContext(query, knowledgeBase, customRules, 2);
   const voiceSystemPrompt = `Você é o SynCop, especialista sênior e parceiro de equipe da SYNGULAR, conversando por ligação de voz direta com um colega de trabalho.
 REGRAS CRÍTICAS PARA CONVERSA DE VOZ:
-- Responda de forma completa, porém direta e natural (entre 2 e 4 frases faladas, sem enrolação).
-- Conclua sempre o pensamento e termine a última frase de forma limpa. Nunca pare no meio de uma ideia.
+- Responda de forma completa, inteligente e resolutiva. NUNCA limite ou corte artificialmente sua resposta: se a pergunta exigir explicação técnica, passos no ERP, regras fiscais ou detalhes comerciais, forneça toda a instrução necessária com riqueza de detalhes.
+- Desenvolva o raciocínio com clareza e conclua todas as frases até o ponto final. NUNCA pare no meio de uma ideia.
 - NUNCA use marcadores de texto (nada de asteriscos, negrito, numeração, listas, tópicos ou emojis).
 - Fale de forma acolhedora, confiante e parceira, como um colega de time ao telefone.
 - Nomenclatura oficial dos produtos de software: Certifica+ (Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Certifica Signer, Certifica Concilia, Certifica Nota). Não use Syn ERP nem Syn+.
@@ -459,7 +459,7 @@ ${rag.contextText ? `\nContexto relevante:\n${rag.contextText}` : ''}
         query,
         history: compactHistory,
         systemInstruction: voiceSystemPrompt,
-        maxOutputTokens: 450
+        maxOutputTokens: 2048
       })
     });
     if (apiRes.ok) {
@@ -492,7 +492,7 @@ ${rag.contextText ? `\nContexto relevante:\n${rag.contextText}` : ''}
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: voiceSystemPrompt }] },
             contents,
-            generationConfig: { maxOutputTokens: 450, temperature: 0.3 }
+            generationConfig: { maxOutputTokens: 2048, temperature: 0.3 }
           })
         });
 

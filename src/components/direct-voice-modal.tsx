@@ -681,51 +681,137 @@ export const DirectVoiceModal: React.FC<DirectVoiceModalProps> = ({
           </div>
         )}
 
-        {/* Centro: Orbe Sonora Pulsante */}
-        <div className="my-auto flex flex-col items-center justify-center relative z-10 py-3">
+        {/* Centro: Orbe Sonora Granulada Holográfica tipo Jarvis */}
+        <div className="my-auto flex flex-col items-center justify-center relative z-10 py-2 sm:py-4">
           <div className="relative flex items-center justify-center">
             
-            {/* Anéis de pulso de áudio */}
-            {callState === 'listening' && (
+            {/* 🌌 Anéis Holográficos Externos tipo HUD Jarvis */}
+            {/* Anel 1: Órbita Externa Rotativa com Marcadores HUD */}
+            <div className="absolute w-56 h-56 sm:w-64 sm:h-64 rounded-full border border-dashed border-purple-400/25 animate-[spin_30s_linear_infinite] pointer-events-none flex items-center justify-center">
+              <span className="absolute -top-1 w-2 h-2 rounded-full bg-[#c084fc] shadow-[0_0_8px_#c084fc]"></span>
+              <span className="absolute -bottom-1 w-2 h-2 rounded-full bg-[#7c3aed] shadow-[0_0_8px_#7c3aed]"></span>
+              <span className="absolute -left-1 w-2 h-2 rounded-full bg-[#a855f7] shadow-[0_0_8px_#a855f7]"></span>
+              <span className="absolute -right-1 w-2 h-2 rounded-full bg-[#5c24ff] shadow-[0_0_8px_#5c24ff]"></span>
+            </div>
+
+            {/* Anel 2: Giroscópio Segmentado em Rotação Reversa */}
+            <div className="absolute w-48 h-48 sm:w-56 sm:h-56 rounded-full border-2 border-dotted border-purple-300/20 animate-[spin_14s_linear_infinite_reverse] pointer-events-none"></div>
+
+            {/* Ondas de Choque Acústicas quando Falando */}
+            {callState === 'speaking' && (
               <>
-                <div className="absolute w-44 h-44 rounded-full border border-emerald-400/40 animate-ping opacity-60 pointer-events-none"></div>
-                <div className="absolute w-56 h-56 rounded-full border border-emerald-500/20 animate-pulse pointer-events-none"></div>
+                <div className="absolute w-44 h-44 sm:w-52 sm:h-52 rounded-full border-2 border-[#c084fc]/60 animate-ping opacity-60 pointer-events-none"></div>
+                <div className="absolute w-56 h-56 sm:w-64 sm:h-64 rounded-full border border-[#7c3aed]/40 animate-pulse pointer-events-none"></div>
+                <div className="absolute w-68 h-68 sm:w-76 sm:h-76 rounded-full border border-[#5c24ff]/20 animate-pulse delay-150 pointer-events-none"></div>
               </>
             )}
 
-            {callState === 'speaking' && (
+            {callState === 'listening' && (
               <>
-                <div className="absolute w-44 h-44 rounded-full border border-[#c084fc]/50 animate-ping opacity-75 pointer-events-none"></div>
-                <div className="absolute w-56 h-56 rounded-full border border-[#7c3aed]/40 animate-pulse pointer-events-none"></div>
-                <div className="absolute w-64 h-64 rounded-full border border-[#5c24ff]/20 animate-pulse delay-150 pointer-events-none"></div>
+                <div className="absolute w-44 h-44 rounded-full border border-emerald-400/50 animate-ping opacity-60 pointer-events-none"></div>
+                <div className="absolute w-56 h-56 rounded-full border border-emerald-500/30 animate-pulse pointer-events-none"></div>
               </>
             )}
 
             {callState === 'thinking' && (
-              <div className="absolute w-48 h-48 rounded-full border-2 border-t-[#c084fc] border-r-transparent border-b-[#5c24ff] border-l-transparent animate-spin pointer-events-none"></div>
+              <div className="absolute w-50 h-50 rounded-full border-2 border-t-[#c084fc] border-r-transparent border-b-[#5c24ff] border-l-transparent animate-spin pointer-events-none"></div>
             )}
 
-            {/* Núcleo da Orbe */}
+            {/* 🔮 O GLOBO GRANULADO HOLOGRÁFICO JARVIS */}
             <div 
               onClick={() => {
                 if (callState === 'speaking') stopSpeaking();
               }}
-              className={`w-32 h-32 sm:w-36 sm:h-36 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl relative cursor-pointer ${
-                callState === 'listening'
-                  ? 'bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 shadow-emerald-500/40 scale-105'
-                  : callState === 'speaking'
-                  ? 'bg-gradient-to-tr from-[#5c24ff] via-[#7c3aed] to-[#c084fc] shadow-[0_0_60px_rgba(124,58,237,0.6)] scale-105 animate-pulse'
+              className={`w-36 h-36 sm:w-44 sm:h-44 rounded-full flex items-center justify-center relative cursor-pointer select-none transition-all duration-300 overflow-hidden ${
+                callState === 'speaking'
+                  ? 'scale-105 shadow-[0_0_70px_rgba(168,85,247,0.7),inset_0_0_35px_rgba(192,132,252,0.5)] border-2 border-[#c084fc]/80'
+                  : callState === 'listening'
+                  ? 'scale-105 shadow-[0_0_60px_rgba(16,185,129,0.7),inset_0_0_30px_rgba(52,211,153,0.5)] border-2 border-emerald-400/80'
                   : callState === 'thinking'
-                  ? 'bg-gradient-to-tr from-[#1f1042] via-[#2d1b69] to-[#5c24ff] shadow-purple-900/60 scale-95'
-                  : 'bg-gradient-to-tr from-slate-900 to-[#1f1538] shadow-slate-950/60 scale-100 border border-white/10'
+                  ? 'scale-95 shadow-[0_0_50px_rgba(92,36,255,0.6),inset_0_0_30px_rgba(139,92,246,0.5)] border-2 border-purple-500/60'
+                  : 'scale-100 shadow-[0_0_40px_rgba(124,58,237,0.35),inset_0_0_25px_rgba(124,58,237,0.25)] border border-purple-400/30 hover:border-purple-400/60'
               }`}
+              style={{
+                background: callState === 'speaking'
+                  ? 'radial-gradient(circle at 40% 35%, #c084fc 0%, #7c3aed 45%, #2e1065 75%, #0d0722 100%)'
+                  : callState === 'listening'
+                  ? 'radial-gradient(circle at 40% 35%, #34d399 0%, #059669 45%, #064e3b 75%, #022c22 100%)'
+                  : callState === 'thinking'
+                  ? 'radial-gradient(circle at 50% 50%, #818cf8 0%, #4f46e5 45%, #1e1b4b 75%, #0b0920 100%)'
+                  : 'radial-gradient(circle at 40% 35%, #6d28d9 0%, #4c1d95 45%, #1e1338 75%, #0a0614 100%)'
+              }}
               title={callState === 'speaking' ? 'Clique para interromper a fala' : undefined}
             >
-              {callState === 'speaking' && <Volume2 className="w-12 h-12 text-white animate-bounce" />}
-              {callState === 'listening' && <Mic className="w-12 h-12 text-white animate-pulse" />}
-              {callState === 'thinking' && <Sparkles className="w-12 h-12 text-purple-200 animate-spin" />}
-              {callState === 'paused' && <MicOff className="w-12 h-12 text-slate-400" />}
-              {callState === 'idle' && <Mic className="w-12 h-12 text-white/80" />}
+              {/* ✨ CAMADA 1: Textura Granulada Orgânica Densa do Globo (Partículas Estilo Jarvis) */}
+              <div 
+                className="absolute inset-0 pointer-events-none opacity-55 mix-blend-color-dodge z-10"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='jarvisNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23jarvisNoise)'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'repeat',
+                }}
+              />
+
+              {/* 🌐 CAMADA 2: Malha Tridimensional Holográfica (Latitude & Longitude Jarvis) */}
+              <svg 
+                className={`absolute inset-0 w-full h-full pointer-events-none z-10 transition-transform duration-700 ${
+                  callState === 'speaking' ? 'animate-[spin_10s_linear_infinite] opacity-65' : 'opacity-40 animate-[spin_20s_linear_infinite]'
+                }`} 
+                viewBox="0 0 100 100"
+              >
+                {/* Linhas de grade polar */}
+                <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" strokeDasharray="3 2" />
+                <ellipse cx="50" cy="50" rx="32" ry="46" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.6" />
+                <ellipse cx="50" cy="50" rx="16" ry="46" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.5" />
+                <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(255,255,255,0.4)" strokeWidth="0.7" strokeDasharray="2 3" />
+                <circle cx="50" cy="50" r="14" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.6" strokeDasharray="1 2" />
+              </svg>
+
+              {/* ⚡ CAMADA 3: Brilho Especular Superior de Esfera 3D */}
+              <div className="absolute inset-0 bg-radial from-white/35 via-transparent to-transparent pointer-events-none z-20 rounded-full"></div>
+
+              {/* 🎙️ CAMADA 4: Núcleo Central de Reação e Ícone */}
+              <div className="relative z-30 flex flex-col items-center justify-center">
+                {callState === 'speaking' && (
+                  <div className="flex flex-col items-center">
+                    <Volume2 className="w-11 h-11 sm:w-12 sm:h-12 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.9)] animate-pulse" />
+                    <span className="text-[9px] font-mono tracking-widest text-purple-100 font-extrabold uppercase mt-1 animate-pulse">
+                      JARVIS CORE
+                    </span>
+                  </div>
+                )}
+                {callState === 'listening' && (
+                  <div className="flex flex-col items-center">
+                    <Mic className="w-11 h-11 sm:w-12 sm:h-12 text-white drop-shadow-[0_0_15px_rgba(52,211,153,0.9)] animate-pulse" />
+                    <span className="text-[9px] font-mono tracking-widest text-emerald-100 font-extrabold uppercase mt-1">
+                      RECEPTOR
+                    </span>
+                  </div>
+                )}
+                {callState === 'thinking' && (
+                  <div className="flex flex-col items-center">
+                    <Sparkles className="w-11 h-11 sm:w-12 sm:h-12 text-[#e0e7ff] drop-shadow-[0_0_15px_rgba(199,210,254,0.9)] animate-spin" />
+                    <span className="text-[9px] font-mono tracking-widest text-indigo-100 font-extrabold uppercase mt-1">
+                      CALCULANDO
+                    </span>
+                  </div>
+                )}
+                {callState === 'paused' && (
+                  <div className="flex flex-col items-center">
+                    <MicOff className="w-11 h-11 sm:w-12 sm:h-12 text-slate-300 drop-shadow-sm" />
+                    <span className="text-[9px] font-mono tracking-widest text-slate-300 font-extrabold uppercase mt-1">
+                      MUTADO
+                    </span>
+                  </div>
+                )}
+                {callState === 'idle' && (
+                  <div className="flex flex-col items-center">
+                    <Mic className="w-11 h-11 sm:w-12 sm:h-12 text-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]" />
+                    <span className="text-[9px] font-mono tracking-widest text-purple-200 font-bold uppercase mt-1">
+                      ATIVO
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

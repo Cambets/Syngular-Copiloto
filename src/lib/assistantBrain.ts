@@ -395,20 +395,23 @@ export async function queryGemini(
     normalized.includes('painel do contador') || 
     (normalized.includes('contador') && (normalized.includes('acesso') || normalized.includes('senha') || normalized.includes('xml') || normalized.includes('licen') || normalized.includes('pdv') || normalized.includes('vincular')))
   ) {
-    return `O **Painel do Contador** é um recurso auxiliar gratuito do sistema (Avante Gestão / Certifica+) que centraliza o acompanhamento fiscal e facilita a rotina contábil das empresas vinculadas:\n\n` +
-      `🔑 **1. Como o Acesso é Criado (100% Automático):**\n` +
-      `• O usuário do contador é gerado automaticamente quando a contabilidade cadastrada é vinculada à licença do cliente. Não precisa criar usuário manual para o Painel do Contador.\n` +
-      `• No Avante Gestão: acesse **Faturamento → Cadastros → Contabilidade**, clique em **Criar**, preencha e salve.\n` +
+    return `O **Painel do Contador** é um recurso auxiliar gratuito integrado nativamente às soluções **Certifica ERP** (em todos os seus nichos: Web, Food, Agro, Clínicas, Pet, Agenda e Varejo) e **Certifica Nota** (Certifica Notas), centralizando o acompanhamento fiscal das empresas atendidas:\n\n` +
+      `🏢 **1. Onde está disponível:**\n` +
+      `• Presente no **Certifica ERP** em TODOS os nichos (Web, Food, Agro, Clínicas com Memed, Pet, Agenda, Varejo).\n` +
+      `• Presente no emissor fiscal **Certifica Nota** (Certifica Notas).\n\n` +
+      `🔑 **2. Como o Acesso é Criado (100% Automático):**\n` +
+      `• O usuário do contador é gerado automaticamente quando a contabilidade cadastrada é vinculada à licença do cliente no sistema. Não precisa criar usuário manual para o Painel do Contador.\n` +
+      `• No sistema (Certifica ERP / Certifica Nota): acesse **Faturamento → Cadastros → Contabilidade**, clique em **Criar**, preencha e salve.\n` +
       `• Na licença do cliente, vincule a contabilidade no campo **Contabilidade**.\n` +
       `• O contador acessa pela tela de login padrão do sistema. No primeiro acesso, a senha é **123** (o sistema obriga a criação de uma nova senha pessoal imediata).\n\n` +
-      `📦 **2. O que o Contador Pode Fazer no Painel:**\n` +
+      `📦 **3. O que o Contador Pode Fazer no Painel:**\n` +
       `• **Download de XMLs em Lote:** Seleciona o tipo de documento, o mês e o ano. O sistema gera um arquivo **.zip** organizado em pastas individuais pelo CNPJ de cada empresa.\n` +
       `• **Conferências Fiscais:** Acessa os documentos fiscais em uso pela empresa, baixa XMLs, gera relatórios, visualiza gráficos de emissões e confere NF-es de entrada importadas.\n` +
       `• **Apurações e SPED:** Consulta resumos tributários de entradas e saídas, relatórios financeiros e gera **SPED Fiscal** e **SPED de Contribuições** (conforme parametrização da base do cliente).\n` +
       `• **Acesso Direto à Base do Cliente:** Permite entrar no ambiente da empresa para prestar suporte, fazer ajustes tributários em produtos e serviços e emitir notas.\n\n` +
-      `🚫 **3. Limitação Crítica de Acesso:**\n` +
+      `🚫 **4. Limitação Crítica de Acesso:**\n` +
       `• Ao acessar a base do cliente pelo Painel do Contador, o contador **NÃO TEM ACESSO AO PDV (PONTO DE VENDA)**.\n\n` +
-      `⚠️ **Atenção Importante:** A opção *"Criar Usuário"* no cadastro da contabilidade é voltada ao acesso ao próprio Avante Gestão. O acesso ao **Painel do Contador** é liberado pelo vínculo da contabilidade à licença do cliente.`;
+      `⚠️ **Atenção Importante:** A opção *"Criar Usuário"* no cadastro da contabilidade é voltada ao acesso como operador no sistema do cliente. O acesso ao **Painel do Contador** nasce automaticamente pelo vínculo da contabilidade à licença do cliente.`;
   }
 
   // Busca contextual nos produtos
@@ -466,6 +469,7 @@ REGRAS CRÍTICAS PARA CONVERSA DE VOZ:
 - NUNCA use marcadores de texto (nada de asteriscos, negrito, numeração, listas, tópicos ou emojis).
 - Fale de forma acolhedora, confiante e parceira, como um colega de time ao telefone.
 - Nomenclatura oficial dos produtos de software: Certifica+ (Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Certifica Signer, Certifica Concilia, Certifica Nota). Não use Syn ERP nem Syn+.
+- O Painel do Contador está presente no Certifica ERP em todos os nichos (Web, Food, Agro, Clínicas, Pet, Agenda, Varejo) e no Certifica Nota.
 - Certificado em nuvem com renovação simplificada: SynPass.
 ${rag.contextText ? `\nContexto relevante:\n${rag.contextText}` : ''}
 `;

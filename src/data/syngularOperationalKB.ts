@@ -107,20 +107,31 @@ D) Emissão no App Syn:
 • Videoconferência: Verde (gravação concluída com sucesso).
 
 =========================================================================
-8. PAINEL DO CONTADOR (AVANTE GESTÃO / CERTIFICA+ - GUIA OFICIAL COMPLETO)
+8. PAINEL DO CONTADOR (CERTIFICA ERP - TODOS OS NICHOS & CERTIFICA NOTA)
 =========================================================================
-O Painel do Contador é um recurso auxiliar gratuito que permite ao contador acompanhar informações fiscais e gerar consultas e relatórios das empresas vinculadas à contabilidade.
+O Painel do Contador é um recurso auxiliar gratuito integrado aos produtos **Certifica ERP (todos os nichos: Web, Food, Agro, Clínicas, Pet, Agenda, Varejo)** e **Certifica Nota (Certifica Notas)**, permitindo ao contador acompanhar informações fiscais e gerar consultas e relatórios das empresas vinculadas à sua contabilidade.
 
-1. PARA QUE SERVE:
+1. DISPONIBILIDADE NOS PRODUTOS:
+• Presente no Certifica ERP em TODOS os seus nichos de atuação:
+  - Certifica ERP Web (comércio, atacado, varejo)
+  - Certifica ERP Food (bares, restaurantes, delivery)
+  - Certifica ERP Agro (produtores rurais, romaneios, LCDPR)
+  - Certifica ERP Clínicas (médicos, odontologia, Memed)
+  - Certifica ERP Pet (veterinárias, pet shops)
+  - Certifica ERP Agenda (salões, estética, prestadores de serviços)
+  - Certifica ERP Varejo
+• Presente no Certifica Nota / Certifica Notas (emissor fiscal especializado).
+
+2. PARA QUE SERVE:
 • Centraliza o acesso fiscal de uma ou mais empresas atendidas pela mesma contabilidade.
 • Permite consultar documentos e movimentações fiscais realizadas no sistema.
 • Ajuda o contador a apoiar o cliente em tarefas fiscais, como conferências e emissão de documentos.
 • O contador pode visualizar todas as empresas vinculadas à sua contabilidade no painel.
 
-2. COMO O ACESSO É CRIADO (100% AUTOMÁTICO):
-• O usuário do contador é gerado automaticamente quando a contabilidade cadastrada é vinculada à licença do cliente.
+3. COMO O ACESSO É CRIADO (100% AUTOMÁTICO):
+• O usuário do contador é gerado automaticamente quando a contabilidade cadastrada é vinculada à licença do cliente no sistema.
 • O usuário NÃO precisa ser criado manualmente para acessar o Painel do Contador.
-• Passo a passo de ativação no Avante Gestão:
+• Passo a passo de ativação no Certifica ERP / Certifica Nota:
   1) Acesse Faturamento → Cadastros → Contabilidade.
   2) Clique em Criar, preencha os campos obrigatórios e salve o cadastro da contabilidade.
   3) Na licença do cliente, vincule a contabilidade no campo Contabilidade.
@@ -130,7 +141,7 @@ O Painel do Contador é um recurso auxiliar gratuito que permite ao contador aco
   - No primeiro acesso, utiliza a senha padrão 123.
   - O sistema solicitará obrigatoriamente a criação de uma nova senha pessoal no primeiro login.
 
-3. O QUE O CONTADOR PODE FAZER NO PAINEL:
+4. O QUE O CONTADOR PODE FAZER NO PAINEL:
 A) Baixar documentos fiscais (XML em Lote):
   - Baixar os XMLs das empresas vinculadas.
   - Para download em lote: seleciona o tipo de documento, o mês e o ano.
@@ -148,17 +159,17 @@ D) Acessar a base do cliente:
     * Ajustes tributários em produtos e serviços;
     * Outras tarefas de suporte técnico.
 
-4. DADOS DA EMPRESA E DOCUMENTOS HABILITADOS:
+5. DADOS DA EMPRESA E DOCUMENTOS HABILITADOS:
 • Na área da empresa, a opção Editar permite alterar dados cadastrais básicos e definir quais tipos de documentos fiscais estarão habilitados internamente no sistema.
 • O painel apresenta os documentos fiscais efetivamente utilizados pelo cliente (a lista pode variar de uma empresa para outra).
 
-5. LIMITAÇÃO DE ACESSO (IMPORTANTE):
+6. LIMITAÇÃO DE ACESSO (IMPORTANTE):
 • Ao acessar a base do cliente pelo Painel do Contador, o contador NÃO TEM ACESSO AO PDV (Ponto de Venda). As demais atividades dependem das permissões e funcionalidades liberadas para o usuário.
 
-6. ATENÇÃO E PONTOS CRÍTICOS:
-• Para que uma empresa apareça no painel, a contabilidade precisa estar cadastrada no Avante Gestão e vinculada à licença do cliente.
+7. ATENÇÃO E PONTOS CRÍTICOS:
+• Para que uma empresa apareça no painel, a contabilidade precisa estar cadastrada no sistema e vinculada à licença do cliente.
 • É possível vincular duas ou mais empresas à mesma contabilidade.
 • A geração de relatórios e arquivos fiscais depende das informações e configurações existentes na base do cliente.
-• DIFERENÇA CRÍTICA ENTRE ACESSOS: O cadastro da contabilidade no Avante Gestão pode incluir a opção "Criar Usuário". Essa opção se refere ao acesso ao próprio Avante Gestão; o acesso ao Painel do Contador é gerado exclusivamente pelo vínculo da contabilidade à licença do cliente.
+• DIFERENÇA CRÍTICA ENTRE ACESSOS: O cadastro da contabilidade no sistema pode incluir a opção "Criar Usuário". Essa opção se refere ao acesso como operador ao próprio sistema do cliente; o acesso ao Painel do Contador é gerado exclusivamente pelo vínculo da contabilidade à licença do cliente.
 `;
 }

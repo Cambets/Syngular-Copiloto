@@ -382,42 +382,50 @@ const defaultProducts: Product[] = [
   },
   {
     id: 'painel-do-contador',
-    name: 'Painel do Contador (Avante Gestão / Certifica+)',
+    name: 'Painel do Contador (Certifica ERP & Certifica Nota)',
     category: 'Certifica+',
-    description: 'Recurso auxiliar gratuito que permite ao contador acompanhar informações fiscais e gerar consultas e relatórios das empresas vinculadas à contabilidade.\n\n' +
-      '1. PARA QUE SERVE:\n' +
+    description: 'Recurso auxiliar gratuito integrado diretamente aos softwares Certifica ERP (todos os nichos: Web, Food, Agro, Clínicas, Pet, Agenda, Varejo) e Certifica Nota (Certifica Notas), que permite ao contador acompanhar informações fiscais e gerar consultas e relatórios das empresas vinculadas à sua contabilidade.\n\n' +
+      '1. PRODUTOS ONDE ESTÁ INTEGRADO:\n' +
+      '• Certifica ERP em TODOS os seus nichos de mercado (Web, Food, Agro, Clínicas, Pet, Agenda e Varejo).\n' +
+      '• Certifica Nota / Certifica Notas (emissor fiscal especializado).\n\n' +
+      '2. PARA QUE SERVE:\n' +
       '• Centraliza o acesso fiscal de uma ou mais empresas atendidas pela mesma contabilidade.\n' +
       '• Permite consultar documentos e movimentações fiscais realizadas no sistema.\n' +
       '• Ajuda o contador a apoiar o cliente em tarefas fiscais, como conferências e emissão de documentos.\n' +
       '• Visualização unificada de todas as empresas vinculadas.\n\n' +
-      '2. COMO O ACESSO É CRIADO (100% AUTOMÁTICO):\n' +
-      '• O usuário do contador é gerado automaticamente quando a contabilidade cadastrada é vinculada à licença do cliente (não é necessário criar usuário manual para o Painel do Contador).\n' +
-      '• Passo a Passo no Avante Gestão: Faturamento → Cadastros → Contabilidade → Clique em Criar, preencha e salve. Na licença do cliente, vincule a contabilidade no campo "Contabilidade".\n' +
-      '• Login: Tela de login padrão do sistema. Primeiro acesso com senha padrão 123 (o sistema exige obrigatoriamente a criação de uma nova senha no primeiro login).\n\n' +
-      '3. RECURSOS E FUNCIONALIDADES DO CONTADOR:\n' +
+      '3. COMO O ACESSO É CRIADO (100% AUTOMÁTICO):\n' +
+      '• O usuário do contador é gerado automaticamente quando a contabilidade cadastrada é vinculada à licença do cliente no sistema (não é necessário criar usuário manual para o Painel do Contador).\n' +
+      '• Passo a Passo no Certifica ERP / Certifica Nota: Acesse Faturamento → Cadastros → Contabilidade → Clique em Criar, preencha e salve. Na licença do cliente, vincule a contabilidade no campo "Contabilidade".\n' +
+      '• Login: Tela de login padrão do sistema. Primeiro acesso com senha padrão 123 (o sistema exige obrigatoriamente a criação de uma nova senha pessoal no primeiro login).\n\n' +
+      '4. RECURSOS E FUNCIONALIDADES DO CONTADOR:\n' +
       '• Baixar Documentos Fiscais (Download em Lote): Baixa XMLs selecionando tipo de documento, mês e ano. Gera arquivo .zip com pastas separadas pelo CNPJ de cada empresa.\n' +
       '• Consultar Documentos e Conferências Fiscais: Acesso aos documentos fiscais utilizados pela empresa, download de XMLs, relatórios fiscais, estrutura gráfica de emissões e relação de NF-es de entrada importadas.\n' +
       '• Consultar Apurações e Relatórios: Resumos tributários de entrada e saída, relatórios financeiros e geração de SPED Fiscal e SPED de Contribuições (desde que a base do cliente esteja configurada).\n' +
       '• Acessar a Base do Cliente: Entrada direta no ambiente do cliente para apoiar na emissão de documentos fiscais, ajustes tributários em produtos/serviços e suporte técnico.\n\n' +
-      '4. DADOS DA EMPRESA E DOCUMENTOS HABILITADOS:\n' +
+      '5. DADOS DA EMPRESA E DOCUMENTOS HABILITADOS:\n' +
       '• Opção "Editar" na área da empresa permite alterar dados cadastrais básicos e definir quais documentos fiscais estarão habilitados internamente.\n\n' +
-      '5. LIMITAÇÃO DE ACESSO (IMPORTANTE):\n' +
+      '6. LIMITAÇÃO DE ACESSO (IMPORTANTE):\n' +
       '• Ao entrar na base do cliente pelo Painel do Contador, o contador NÃO TEM ACESSO AO PDV (PONTO DE VENDA).\n\n' +
-      '6. REGRAS CRÍTICAS E ATENÇÃO:\n' +
-      '• A contabilidade DEVE estar cadastrada no Avante Gestão e vinculada à licença do cliente para que a empresa apareça no painel.\n' +
+      '7. REGRAS CRÍTICAS E ATENÇÃO:\n' +
+      '• A contabilidade DEVE estar cadastrada no sistema e vinculada à licença do cliente para que a empresa apareça no painel.\n' +
       '• É possível vincular duas ou mais empresas à mesma contabilidade.\n' +
-      '• A opção "Criar Usuário" no cadastro da contabilidade refere-se ao acesso ao Avante Gestão; o acesso ao Painel do Contador nasce pelo vínculo da contabilidade à licença do cliente.',
-    pitch: 'Recurso auxiliar gratuito para contadores consultarem XMLs em lote (.zip por CNPJ), SPED Fiscal/Contribuições, apurações e acessarem a base do cliente sem acesso ao PDV.',
+      '• A opção "Criar Usuário" no cadastro da contabilidade refere-se ao acesso como operador ao próprio sistema do cliente; o acesso ao Painel do Contador nasce exclusivamente pelo vínculo da contabilidade à licença do cliente.',
+    pitch: 'Recurso auxiliar gratuito integrado ao Certifica ERP (todos os nichos) e Certifica Nota para contadores gerenciarem XMLs em lote (.zip por CNPJ), SPED Fiscal/Contribuições e apurações sem acesso ao PDV.',
     keywords: [
-      'painel do contador', 'contador', 'contabilidade', 'avante gestao', 'faturamento', 
-      'cadastros', 'licenca', 'senha 123', 'xml', 'download em lote', 'zip', 'cnpj', 
-      'sped fiscal', 'sped contribuicoes', 'apuracoes', 'relatorios fiscais', 'base do cliente', 
+      'painel do contador', 'contador', 'contabilidade', 'certifica erp', 'certifica nota', 
+      'certifica notas', 'todos os nichos', 'faturamento', 'cadastros', 'licenca', 
+      'senha 123', 'xml', 'download em lote', 'zip', 'cnpj', 'sped fiscal', 
+      'sped contribuicoes', 'apuracoes', 'relatorios fiscais', 'base do cliente', 
       'pdv', 'limitacao pdv', 'vincular licenca'
     ],
     objections: [
       {
+        question: 'Em quais produtos o Painel do Contador está disponível?',
+        answer: 'O Painel do Contador está integrado nativamente em todas as soluções Certifica ERP (em todos os seus nichos: Web, Food, Agro, Clínicas, Pet, Agenda e Varejo) e também no Certifica Nota (Certifica Notas).'
+      },
+      {
         question: 'Como é criado o usuário de acesso do contador ao Painel do Contador?',
-        answer: 'O acesso é gerado 100% automaticamente quando a contabilidade cadastrada (em Faturamento → Cadastros → Contabilidade) é vinculada à licença do cliente. Não é necessário criar usuário manual para o Painel do Contador. O contador faz login na tela padrão com a senha inicial 123 e troca obrigatoriamente no primeiro acesso.'
+        answer: 'O acesso é gerado 100% automaticamente quando a contabilidade cadastrada (em Faturamento → Cadastros → Contabilidade) é vinculada à licença do cliente no Certifica ERP ou Certifica Nota. Não é necessário criar usuário manual para o Painel do Contador. O contador faz login na tela padrão com a senha inicial 123 e troca obrigatoriamente no primeiro acesso.'
       },
       {
         question: 'O contador tem acesso ao PDV do cliente pelo Painel do Contador?',
@@ -425,11 +433,11 @@ const defaultProducts: Product[] = [
       },
       {
         question: 'Qual a diferença entre a opção "Criar Usuário" no cadastro de contabilidade e o acesso ao Painel do Contador?',
-        answer: 'A opção "Criar Usuário" no cadastro da contabilidade dá acesso ao próprio sistema Avante Gestão. Já o acesso ao Painel do Contador é gerado automaticamente pelo vínculo da contabilidade à licença do cliente.'
+        answer: 'A opção "Criar Usuário" no cadastro da contabilidade dá acesso de operador ao próprio sistema da empresa. Já o acesso ao Painel do Contador é gerado automaticamente pelo vínculo da contabilidade à licença do cliente.'
       },
       {
         question: 'Como o contador baixa os XMLs das notas fiscais dos clientes em lote?',
-        answer: 'No Painel do Contador, basta selecionar o tipo de documento, o mês e o ano. O sistema gera um arquivo .zip com todos os XMLs organizados em pastas individuais pelo CNPJ de cada empresa.'
+        answer: 'No Painel do Contador, basta selecionar o tipo de documento, o mês e o ano. O sistema gera um arquivo .zip com todos os XMLs organizados em pastas individuais pelo CNPJ de cada empresa vinculada.'
       }
     ]
   }
@@ -492,40 +500,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [knowledgeBase, setKnowledgeBase] = useState<Product[]>(() => {
-    // 1. Tentar ler da versão atual v7
-    const savedV7 = localStorage.getItem('syngular_kb_v7');
-    if (savedV7) {
+    const defaultMap = new Map(defaultProducts.map(dp => [dp.id, dp]));
+    const syncWithDefaults = (list: Product[]) => {
+      const updated = list.map(p => defaultMap.has(p.id) ? { ...p, ...defaultMap.get(p.id) } : p);
+      const existingIds = new Set(updated.map(p => p.id));
+      const missingDefaults = defaultProducts.filter(dp => !existingIds.has(dp.id));
+      return [...updated, ...missingDefaults];
+    };
+
+    // 1. Tentar ler da versão v8
+    const savedV8 = localStorage.getItem('syngular_kb_v8');
+    if (savedV8) {
       try {
-        const parsed = JSON.parse(savedV7);
+        const parsed = JSON.parse(savedV8);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingIds = new Set(parsed.map(p => p.id));
-          const missingDefaults = defaultProducts.filter(dp => !existingIds.has(dp.id));
-          if (missingDefaults.length > 0) {
-            const merged = [...parsed, ...missingDefaults];
-            localStorage.setItem('syngular_kb_v7', JSON.stringify(merged));
-            return merged;
-          }
-          return parsed;
+          const synced = syncWithDefaults(parsed);
+          localStorage.setItem('syngular_kb_v8', JSON.stringify(synced));
+          return synced;
         }
       } catch (e) {
-        logger.error('Erro ao ler base de conhecimento v7:', e);
+        logger.error('Erro ao ler base de conhecimento v8:', e);
       }
     }
 
-    // 2. Migração automática da v6 preservando customizações e injetando novos padrões
-    const savedV6 = localStorage.getItem('syngular_kb_v6');
-    if (savedV6) {
+    // 2. Migração automática de v7 ou v6 preservando customizações e atualizando padrões
+    const previous = localStorage.getItem('syngular_kb_v7') || localStorage.getItem('syngular_kb_v6');
+    if (previous) {
       try {
-        const parsed = JSON.parse(savedV6);
+        const parsed = JSON.parse(previous);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingIds = new Set(parsed.map(p => p.id));
-          const missingDefaults = defaultProducts.filter(dp => !existingIds.has(dp.id));
-          const merged = [...parsed, ...missingDefaults];
-          localStorage.setItem('syngular_kb_v7', JSON.stringify(merged));
-          return merged;
+          const synced = syncWithDefaults(parsed);
+          localStorage.setItem('syngular_kb_v8', JSON.stringify(synced));
+          return synced;
         }
       } catch (e) {
-        logger.error('Erro ao migrar base v6:', e);
+        logger.error('Erro ao migrar base anterior:', e);
       }
     }
 
@@ -593,7 +602,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('syngular_kb_v7', JSON.stringify(knowledgeBase));
+    localStorage.setItem('syngular_kb_v8', JSON.stringify(knowledgeBase));
   }, [knowledgeBase]);
 
   useEffect(() => {

@@ -387,7 +387,28 @@ export async function queryGemini(
 
   // Saudações e apresentações descontraídas (parceiro inteligente)
   if (normalized.match(/^(oi|olá|ola|bom dia|boa tarde|boa noite|fala|opa|e ai|e aí)/)) {
-    return `Fala parceiro! Beleza? 👊\n\nEstou por aqui pronto para te apoiar em qualquer demanda da **Syngular**:\n\n• **Certificados Digitais ICP-Brasil:** Rotinas do Sync/GFSIS, credenciamento de AR/PA, videoconferência e SynPass.\n• **Softwares do Ecossistema:** Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Signer e Concilia.\n• **Suporte Técnico N2:** Diagnóstico rápido de rejeições SEFAZ, notas travadas e schemas XML.\n• **Comercial & Vendas:** Quebra de objeções, comparativos de mercado e roteiros de abordagem para contadores.\n\nQual é o desafio de agora? Manda pra cá que a gente resolve juntos!`;
+    return `Fala parceiro! Beleza? 👊\n\nEstou por aqui pronto para te apoiar em qualquer demanda da **Syngular**:\n\n• **Certificados Digitais ICP-Brasil:** Rotinas do Sync/GFSIS, credenciamento de AR/PA, videoconferência e SynPass.\n• **Softwares do Ecossistema:** Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Signer e Concilia.\n• **Painel do Contador:** Acesso automático via licença do cliente, download de XMLs em lote, apurações e SPED.\n• **Suporte Técnico N2:** Diagnóstico rápido de rejeições SEFAZ, notas travadas e schemas XML.\n• **Comercial & Vendas:** Quebra de objeções, comparativos de mercado e roteiros de abordagem para contadores.\n\nQual é o desafio de agora? Manda pra cá que a gente resolve juntos!`;
+  }
+
+  // Tratamento Direto e Completo para Dúvidas do Painel do Contador
+  if (
+    normalized.includes('painel do contador') || 
+    (normalized.includes('contador') && (normalized.includes('acesso') || normalized.includes('senha') || normalized.includes('xml') || normalized.includes('licen') || normalized.includes('pdv') || normalized.includes('vincular')))
+  ) {
+    return `O **Painel do Contador** é um recurso auxiliar gratuito do sistema (Avante Gestão / Certifica+) que centraliza o acompanhamento fiscal e facilita a rotina contábil das empresas vinculadas:\n\n` +
+      `🔑 **1. Como o Acesso é Criado (100% Automático):**\n` +
+      `• O usuário do contador é gerado automaticamente quando a contabilidade cadastrada é vinculada à licença do cliente. Não precisa criar usuário manual para o Painel do Contador.\n` +
+      `• No Avante Gestão: acesse **Faturamento → Cadastros → Contabilidade**, clique em **Criar**, preencha e salve.\n` +
+      `• Na licença do cliente, vincule a contabilidade no campo **Contabilidade**.\n` +
+      `• O contador acessa pela tela de login padrão do sistema. No primeiro acesso, a senha é **123** (o sistema obriga a criação de uma nova senha pessoal imediata).\n\n` +
+      `📦 **2. O que o Contador Pode Fazer no Painel:**\n` +
+      `• **Download de XMLs em Lote:** Seleciona o tipo de documento, o mês e o ano. O sistema gera um arquivo **.zip** organizado em pastas individuais pelo CNPJ de cada empresa.\n` +
+      `• **Conferências Fiscais:** Acessa os documentos fiscais em uso pela empresa, baixa XMLs, gera relatórios, visualiza gráficos de emissões e confere NF-es de entrada importadas.\n` +
+      `• **Apurações e SPED:** Consulta resumos tributários de entradas e saídas, relatórios financeiros e gera **SPED Fiscal** e **SPED de Contribuições** (conforme parametrização da base do cliente).\n` +
+      `• **Acesso Direto à Base do Cliente:** Permite entrar no ambiente da empresa para prestar suporte, fazer ajustes tributários em produtos e serviços e emitir notas.\n\n` +
+      `🚫 **3. Limitação Crítica de Acesso:**\n` +
+      `• Ao acessar a base do cliente pelo Painel do Contador, o contador **NÃO TEM ACESSO AO PDV (PONTO DE VENDA)**.\n\n` +
+      `⚠️ **Atenção Importante:** A opção *"Criar Usuário"* no cadastro da contabilidade é voltada ao acesso ao próprio Avante Gestão. O acesso ao **Painel do Contador** é liberado pelo vínculo da contabilidade à licença do cliente.`;
   }
 
   // Busca contextual nos produtos
@@ -419,6 +440,8 @@ export function cleanForSpeech(text: string): string {
     .replace(/\bMDF-e\b/gi, 'manifesto fiscal')
     .replace(/\bGFSIS\b/gi, 'G F S I S')
     .replace(/\bICP-Brasil\b/gi, 'I C P Brasil')
+    .replace(/\bPDV\b/gi, 'ponto de venda')
+    .replace(/\bSPED\b/gi, 'Sped')
     .replace(/\bAR\b/g, 'autoridade de registro')
     .replace(/\bAGR\b/g, 'agente de registro')
     .replace(/\bPA\b/g, 'posto de atendimento')

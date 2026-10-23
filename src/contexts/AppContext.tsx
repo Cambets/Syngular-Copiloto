@@ -379,6 +379,59 @@ const defaultProducts: Product[] = [
       { question: 'Qual a pontuação mínima do Datavalid para aprovação direta na videoconferência?', answer: 'Pontuação estritamente maior que 93% no Datavalid garante aprovação direta sem necessidade de envio de dossiê.' },
       { question: 'Documentos emitidos por ministérios federais podem ser aceitos?', answer: 'Não. Conforme o Decreto Federal nº 10.266/2020, documentos emitidos pela Administração Pública Federal e órgãos vinculados à União não podem ser aceitos como documento de identificação.' }
     ]
+  },
+  {
+    id: 'painel-do-contador',
+    name: 'Painel do Contador (Avante Gestão / Certifica+)',
+    category: 'Certifica+',
+    description: 'Recurso auxiliar gratuito que permite ao contador acompanhar informações fiscais e gerar consultas e relatórios das empresas vinculadas à contabilidade.\n\n' +
+      '1. PARA QUE SERVE:\n' +
+      '• Centraliza o acesso fiscal de uma ou mais empresas atendidas pela mesma contabilidade.\n' +
+      '• Permite consultar documentos e movimentações fiscais realizadas no sistema.\n' +
+      '• Ajuda o contador a apoiar o cliente em tarefas fiscais, como conferências e emissão de documentos.\n' +
+      '• Visualização unificada de todas as empresas vinculadas.\n\n' +
+      '2. COMO O ACESSO É CRIADO (100% AUTOMÁTICO):\n' +
+      '• O usuário do contador é gerado automaticamente quando a contabilidade cadastrada é vinculada à licença do cliente (não é necessário criar usuário manual para o Painel do Contador).\n' +
+      '• Passo a Passo no Avante Gestão: Faturamento → Cadastros → Contabilidade → Clique em Criar, preencha e salve. Na licença do cliente, vincule a contabilidade no campo "Contabilidade".\n' +
+      '• Login: Tela de login padrão do sistema. Primeiro acesso com senha padrão 123 (o sistema exige obrigatoriamente a criação de uma nova senha no primeiro login).\n\n' +
+      '3. RECURSOS E FUNCIONALIDADES DO CONTADOR:\n' +
+      '• Baixar Documentos Fiscais (Download em Lote): Baixa XMLs selecionando tipo de documento, mês e ano. Gera arquivo .zip com pastas separadas pelo CNPJ de cada empresa.\n' +
+      '• Consultar Documentos e Conferências Fiscais: Acesso aos documentos fiscais utilizados pela empresa, download de XMLs, relatórios fiscais, estrutura gráfica de emissões e relação de NF-es de entrada importadas.\n' +
+      '• Consultar Apurações e Relatórios: Resumos tributários de entrada e saída, relatórios financeiros e geração de SPED Fiscal e SPED de Contribuições (desde que a base do cliente esteja configurada).\n' +
+      '• Acessar a Base do Cliente: Entrada direta no ambiente do cliente para apoiar na emissão de documentos fiscais, ajustes tributários em produtos/serviços e suporte técnico.\n\n' +
+      '4. DADOS DA EMPRESA E DOCUMENTOS HABILITADOS:\n' +
+      '• Opção "Editar" na área da empresa permite alterar dados cadastrais básicos e definir quais documentos fiscais estarão habilitados internamente.\n\n' +
+      '5. LIMITAÇÃO DE ACESSO (IMPORTANTE):\n' +
+      '• Ao entrar na base do cliente pelo Painel do Contador, o contador NÃO TEM ACESSO AO PDV (PONTO DE VENDA).\n\n' +
+      '6. REGRAS CRÍTICAS E ATENÇÃO:\n' +
+      '• A contabilidade DEVE estar cadastrada no Avante Gestão e vinculada à licença do cliente para que a empresa apareça no painel.\n' +
+      '• É possível vincular duas ou mais empresas à mesma contabilidade.\n' +
+      '• A opção "Criar Usuário" no cadastro da contabilidade refere-se ao acesso ao Avante Gestão; o acesso ao Painel do Contador nasce pelo vínculo da contabilidade à licença do cliente.',
+    pitch: 'Recurso auxiliar gratuito para contadores consultarem XMLs em lote (.zip por CNPJ), SPED Fiscal/Contribuições, apurações e acessarem a base do cliente sem acesso ao PDV.',
+    keywords: [
+      'painel do contador', 'contador', 'contabilidade', 'avante gestao', 'faturamento', 
+      'cadastros', 'licenca', 'senha 123', 'xml', 'download em lote', 'zip', 'cnpj', 
+      'sped fiscal', 'sped contribuicoes', 'apuracoes', 'relatorios fiscais', 'base do cliente', 
+      'pdv', 'limitacao pdv', 'vincular licenca'
+    ],
+    objections: [
+      {
+        question: 'Como é criado o usuário de acesso do contador ao Painel do Contador?',
+        answer: 'O acesso é gerado 100% automaticamente quando a contabilidade cadastrada (em Faturamento → Cadastros → Contabilidade) é vinculada à licença do cliente. Não é necessário criar usuário manual para o Painel do Contador. O contador faz login na tela padrão com a senha inicial 123 e troca obrigatoriamente no primeiro acesso.'
+      },
+      {
+        question: 'O contador tem acesso ao PDV do cliente pelo Painel do Contador?',
+        answer: 'Não! Ao acessar a base do cliente pelo Painel do Contador, o acesso ao PDV (Ponto de Venda) é restrito/bloqueado. Ele pode apoiar em cadastros, ajustes tributários e emissão de notas normais.'
+      },
+      {
+        question: 'Qual a diferença entre a opção "Criar Usuário" no cadastro de contabilidade e o acesso ao Painel do Contador?',
+        answer: 'A opção "Criar Usuário" no cadastro da contabilidade dá acesso ao próprio sistema Avante Gestão. Já o acesso ao Painel do Contador é gerado automaticamente pelo vínculo da contabilidade à licença do cliente.'
+      },
+      {
+        question: 'Como o contador baixa os XMLs das notas fiscais dos clientes em lote?',
+        answer: 'No Painel do Contador, basta selecionar o tipo de documento, o mês e o ano. O sistema gera um arquivo .zip com todos os XMLs organizados em pastas individuais pelo CNPJ de cada empresa.'
+      }
+    ]
   }
 ];
 
@@ -439,15 +492,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [knowledgeBase, setKnowledgeBase] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('syngular_kb_v6');
-    if (saved) {
+    // 1. Tentar ler da versão atual v7
+    const savedV7 = localStorage.getItem('syngular_kb_v7');
+    if (savedV7) {
       try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        const parsed = JSON.parse(savedV7);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map(p => p.id));
+          const missingDefaults = defaultProducts.filter(dp => !existingIds.has(dp.id));
+          if (missingDefaults.length > 0) {
+            const merged = [...parsed, ...missingDefaults];
+            localStorage.setItem('syngular_kb_v7', JSON.stringify(merged));
+            return merged;
+          }
+          return parsed;
+        }
       } catch (e) {
-        logger.error('Erro ao ler base de conhecimento:', e);
+        logger.error('Erro ao ler base de conhecimento v7:', e);
       }
     }
+
+    // 2. Migração automática da v6 preservando customizações e injetando novos padrões
+    const savedV6 = localStorage.getItem('syngular_kb_v6');
+    if (savedV6) {
+      try {
+        const parsed = JSON.parse(savedV6);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map(p => p.id));
+          const missingDefaults = defaultProducts.filter(dp => !existingIds.has(dp.id));
+          const merged = [...parsed, ...missingDefaults];
+          localStorage.setItem('syngular_kb_v7', JSON.stringify(merged));
+          return merged;
+        }
+      } catch (e) {
+        logger.error('Erro ao migrar base v6:', e);
+      }
+    }
+
     return defaultProducts;
   });
 
@@ -512,7 +593,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('syngular_kb_v6', JSON.stringify(knowledgeBase));
+    localStorage.setItem('syngular_kb_v7', JSON.stringify(knowledgeBase));
   }, [knowledgeBase]);
 
   useEffect(() => {

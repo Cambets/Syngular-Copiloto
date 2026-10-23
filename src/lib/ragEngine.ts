@@ -107,7 +107,29 @@ export function buildRAGIndex(knowledgeBase: Product[], customRules: CustomRule[
     content: `DIRETRIZES DE SUPORTE N2:\n- Diagnóstico obrigatório em 3 blocos: 1) Causa provável do erro, 2) Como verificar no banco/ERP, 3) Passo a passo de resolução.\n- Certificado A1 (.pfx) obrigatório no ambiente web.\n- Parâmetros NFC-e: Série, Último Número, Código CSC e ID do Token.`
   });
 
-  // 7. Indexar JSON detalhado da Jornada Synples se disponível
+  // 7. Indexar Painel do Contador (Avante Gestão / Certifica+)
+  chunks.push({
+    id: 'op-painel-do-contador',
+    category: 'operacional',
+    title: 'Painel do Contador (Avante Gestão / Certifica+) - Acesso, XMLs em Lote, SPED e Base do Cliente',
+    keywords: [
+      'painel do contador', 'contador', 'contabilidade', 'avante gestao', 'faturamento', 
+      'cadastros', 'licenca', 'senha 123', 'xml', 'download em lote', 'zip', 'cnpj', 
+      'sped fiscal', 'sped contribuicoes', 'apuracoes', 'relatorios fiscais', 'base do cliente', 
+      'pdv', 'limitacao pdv', 'vincular contabilidade', 'recurso auxiliar gratuito'
+    ],
+    content: `PAINEL DO CONTADOR (AVANTE GESTÃO / CERTIFICA+):
+• O Painel do Contador é um recurso auxiliar GRATUITO para centralizar o acompanhamento fiscal, consultas e relatórios das empresas atendidas pela contabilidade.
+• Acesso Automático: O usuário do contador é gerado automaticamente quando a contabilidade cadastrada (em Faturamento → Cadastros → Contabilidade → Criar) é vinculada à licença do cliente no campo 'Contabilidade'. Não é necessário criar usuário manual para o Painel do Contador.
+• Primeiro Acesso: Feito pela tela de login padrão do sistema com a senha inicial '123' (obrigatoriamente solicita nova senha no primeiro login).
+• Download de XML em Lote: Permite baixar XMLs por tipo de documento, mês e ano, gerando arquivo .zip com pastas separadas pelo CNPJ de cada empresa.
+• Consultas & Apurações: Relatórios fiscais, resumos tributários de entradas e saídas, relatórios financeiros e geração de SPED Fiscal e SPED de Contribuições (se a base do cliente estiver configurada).
+• Acesso à Base do Cliente: Contador pode entrar no ambiente do cliente para apoiar em emissões, ajustes tributários em produtos/serviços e suporte.
+• RESTRIÇÃO CRÍTICA: Ao entrar na base do cliente, o contador NÃO TEM ACESSO AO PDV (PONTO DE VENDA).
+• Ponto de Atenção: A opção 'Criar Usuário' no cadastro de contabilidade do Avante Gestão dá acesso ao próprio Avante Gestão; o acesso ao Painel do Contador é liberado exclusivamente pelo vínculo à licença do cliente.`
+  });
+
+  // 8. Indexar JSON detalhado da Jornada Synples se disponível
   if (Array.isArray(JORNADA_SYNPLES_KB)) {
     interface JornadaItem {
       titulo?: string;

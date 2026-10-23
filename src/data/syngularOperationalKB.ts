@@ -105,5 +105,60 @@ D) Emissão no App Syn:
 • Verificação Biométrica: Verde (validado no PSBIO/Datavalid -> aprovação automática sem dossiê), Vermelho (não cadastrado no Datavalid).
 • Verificação PJ: Verde (vínculo CPF/CNPJ confirmado via barramento -> ato constitutivo dispensado).
 • Videoconferência: Verde (gravação concluída com sucesso).
+
+=========================================================================
+8. PAINEL DO CONTADOR (AVANTE GESTÃO / CERTIFICA+ - GUIA OFICIAL COMPLETO)
+=========================================================================
+O Painel do Contador é um recurso auxiliar gratuito que permite ao contador acompanhar informações fiscais e gerar consultas e relatórios das empresas vinculadas à contabilidade.
+
+1. PARA QUE SERVE:
+• Centraliza o acesso fiscal de uma ou mais empresas atendidas pela mesma contabilidade.
+• Permite consultar documentos e movimentações fiscais realizadas no sistema.
+• Ajuda o contador a apoiar o cliente em tarefas fiscais, como conferências e emissão de documentos.
+• O contador pode visualizar todas as empresas vinculadas à sua contabilidade no painel.
+
+2. COMO O ACESSO É CRIADO (100% AUTOMÁTICO):
+• O usuário do contador é gerado automaticamente quando a contabilidade cadastrada é vinculada à licença do cliente.
+• O usuário NÃO precisa ser criado manualmente para acessar o Painel do Contador.
+• Passo a passo de ativação no Avante Gestão:
+  1) Acesse Faturamento → Cadastros → Contabilidade.
+  2) Clique em Criar, preencha os campos obrigatórios e salve o cadastro da contabilidade.
+  3) Na licença do cliente, vincule a contabilidade no campo Contabilidade.
+  4) Após o vínculo, o acesso do contador é gerado automaticamente.
+• Primeiro Acesso e Senha:
+  - O contador entrará pela tela de login padrão do sistema.
+  - No primeiro acesso, utiliza a senha padrão 123.
+  - O sistema solicitará obrigatoriamente a criação de uma nova senha pessoal no primeiro login.
+
+3. O QUE O CONTADOR PODE FAZER NO PAINEL:
+A) Baixar documentos fiscais (XML em Lote):
+  - Baixar os XMLs das empresas vinculadas.
+  - Para download em lote: seleciona o tipo de documento, o mês e o ano.
+  - O sistema gera um arquivo .zip com os XMLs organizados em pastas identificadas pelo CNPJ de cada empresa.
+B) Consultar documentos e conferências fiscais:
+  - Ao selecionar uma empresa, o contador acessa as informações dos documentos fiscais utilizados.
+  - Conforme disponível: baixar XMLs, gerar relatórios de documentos, visualizar estrutura gráfica baseada nos documentos emitidos e consultar relação de NF-es de entrada importadas no sistema.
+C) Consultar apurações e relatórios:
+  - Menu de Apurações: resumos tributários baseados em movimentações de entrada e saída.
+  - Relatórios financeiros disponibilizados no painel.
+  - Geração de SPED Fiscal e SPED de Contribuições (desde que a base do cliente esteja devidamente configurada).
+D) Acessar a base do cliente:
+  - O contador pode entrar diretamente no ambiente do cliente para auxiliar em:
+    * Emissão de documentos fiscais;
+    * Ajustes tributários em produtos e serviços;
+    * Outras tarefas de suporte técnico.
+
+4. DADOS DA EMPRESA E DOCUMENTOS HABILITADOS:
+• Na área da empresa, a opção Editar permite alterar dados cadastrais básicos e definir quais tipos de documentos fiscais estarão habilitados internamente no sistema.
+• O painel apresenta os documentos fiscais efetivamente utilizados pelo cliente (a lista pode variar de uma empresa para outra).
+
+5. LIMITAÇÃO DE ACESSO (IMPORTANTE):
+• Ao acessar a base do cliente pelo Painel do Contador, o contador NÃO TEM ACESSO AO PDV (Ponto de Venda). As demais atividades dependem das permissões e funcionalidades liberadas para o usuário.
+
+6. ATENÇÃO E PONTOS CRÍTICOS:
+• Para que uma empresa apareça no painel, a contabilidade precisa estar cadastrada no Avante Gestão e vinculada à licença do cliente.
+• É possível vincular duas ou mais empresas à mesma contabilidade.
+• A geração de relatórios e arquivos fiscais depende das informações e configurações existentes na base do cliente.
+• DIFERENÇA CRÍTICA ENTRE ACESSOS: O cadastro da contabilidade no Avante Gestão pode incluir a opção "Criar Usuário". Essa opção se refere ao acesso ao próprio Avante Gestão; o acesso ao Painel do Contador é gerado exclusivamente pelo vínculo da contabilidade à licença do cliente.
 `;
 }

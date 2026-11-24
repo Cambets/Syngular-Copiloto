@@ -21,12 +21,9 @@ export default async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { query, history, systemInstruction, imageBase64, audioBase64 } = body || {};
 
-    // 1. Prioridade para a variável de ambiente configurada no painel da Vercel / .env
-    // 2. Fallback para a chave de contingência padrão embutida
-    const BUILTIN_KEY = Buffer.from('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=', 'base64').toString('utf-8');
-    const activeKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || BUILTIN_KEY;
+    const activeKey = process.env.GEMINI_API_KEY;
 
-    if (!activeKey) {
+    if (!activeKey || !activeKey.trim()) {
       return res.status(500).json({ success: false, message: 'Chave de API do Gemini não configurada no servidor' });
     }
 

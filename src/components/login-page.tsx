@@ -1,59 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { SyngularLogo } from './syngular-logo';
 import { PurpleParticleOrb } from './PurpleParticleOrb';
-import { logger } from '../lib/logger';
 import { 
   Mail, User, Lock, ArrowRight, ShieldCheck, 
   Eye, EyeOff, AlertCircle, CheckCircle2, Briefcase, 
-  Sparkles, KeyRound, Shield, Check, Globe, X
+  Sparkles, KeyRound, Shield, Check, Globe
 } from 'lucide-react';
 
-interface GoogleCredentialResponse {
-  credential?: string;
-}
-
-interface GoogleTokenResponse {
-  access_token?: string;
-}
-
-interface GoogleGIS {
-  accounts?: {
-    id?: {
-      initialize: (config: { client_id: string; callback: (res: GoogleCredentialResponse) => void; auto_select?: boolean; cancel_on_tap_outside?: boolean }) => void;
-      prompt: () => void;
-    };
-    oauth2?: {
-      initTokenClient: (config: { client_id: string; scope: string; callback: (res: GoogleTokenResponse) => void }) => { requestAccessToken: () => void };
-    };
-  };
-}
-
-interface WindowWithGoogle extends Window {
-  google?: GoogleGIS;
-}
-
-const envClientId = (import.meta as unknown as { env?: { VITE_GOOGLE_CLIENT_ID?: string } }).env?.VITE_GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_ID = envClientId || '703504380960-vh9irbh7tv4lj32uphu4e9h9f8m01g4n.apps.googleusercontent.com';
-
-function parseJwt(token: string) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
-  }
-}
-
 export const LoginPage: React.FC = () => {
-  const { login, loginWithGoogle, registerUser } = useApp();
+  const { login, registerUser } = useApp();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
 
   // Form states
@@ -67,63 +23,6 @@ export const LoginPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Google SSO Modal State
-  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
-  const [googleEmail, setGoogleEmail] = useState('');
-  const [googleName, setGoogleName] = useState('');
-  const [googleModalError, setGoogleModalError] = useState<string | null>(null);
-
-  // Inicializa Google Identity Services
-  useEffect(() => {
-    const initGoogle = () => {
-      if (typeof window !== 'undefined') {
-        const googleWin = window as unknown as WindowWithGoogle;
-        if (googleWin.google?.accounts?.id) {
-          try {
-            googleWin.google.accounts.id.initialize({
-              client_id: GOOGLE_CLIENT_ID,
-              callback: async (response: GoogleCredentialResponse) => {
-                if (response?.credential) {
-                  const payload = parseJwt(response.credential);
-                  if (payload?.email) {
-                    setIsSubmitting(true);
-                    try {
-                      const res = await loginWithGoogle(payload.email, payload.name);
-                      if (res.success) setSuccessMessage(res.message);
-                      else setErrorMessage(res.message);
-                    } catch {
-                      setErrorMessage('Erro ao autenticar com Google.');
-                    } finally {
-                      setIsSubmitting(false);
-                    }
-                  }
-                }
-              },
-              auto_select: false,
-              cancel_on_tap_outside: true,
-            });
-          } catch (e) {
-            logger.warn('Erro ao inicializar Google GIS:', e);
-          }
-        }
-      }
-    };
-
-    const googleWin = typeof window !== 'undefined' ? (window as unknown as WindowWithGoogle) : null;
-    if (googleWin?.google?.accounts?.id) {
-      initGoogle();
-    } else {
-      const interval = setInterval(() => {
-        const checkWin = window as unknown as WindowWithGoogle;
-        if (checkWin.google?.accounts?.id) {
-          initGoogle();
-          clearInterval(interval);
-        }
-      }, 400);
-      return () => clearInterval(interval);
-    }
-  }, []);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,6 +48,12 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
+
+    if (!password || password.length < 6) {
+      setErrorMessage('A senha deve conter no mínimo 6 caracteres.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -166,94 +71,6 @@ export const LoginPage: React.FC = () => {
       }
     } catch {
       setErrorMessage('Erro ao cadastrar. Tente novamente.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleGoogleSSO = () => {
-    setErrorMessage(null);
-    setSuccessMessage(null);
-
-    if (typeof window !== 'undefined') {
-      const googleWin = window as unknown as WindowWithGoogle;
-      const google = googleWin.google;
-      
-      // 1. Tentar OAuth2 Token Client Popup (abre o popup oficial do Google com contas)
-      if (google?.accounts?.oauth2) {
-        try {
-          const client = google.accounts.oauth2.initTokenClient({
-            client_id: GOOGLE_CLIENT_ID,
-            scope: 'email profile openid',
-            callback: async (tokenResponse: GoogleTokenResponse) => {
-              if (tokenResponse?.access_token) {
-                try {
-                  setIsSubmitting(true);
-                  const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-                  });
-                  if (userInfoRes.ok) {
-                    const googleUser = await userInfoRes.json();
-                    const res = await loginWithGoogle(googleUser.email, googleUser.name);
-                    if (res.success) {
-                      setSuccessMessage(res.message);
-                    } else {
-                      setErrorMessage(res.message);
-                    }
-                  }
-                } catch {
-                  setErrorMessage('Erro ao obter dados da conta Google.');
-                } finally {
-                  setIsSubmitting(false);
-                }
-              }
-            }
-          });
-          client.requestAccessToken();
-          return;
-        } catch (err) {
-          logger.warn('Google OAuth Token Client erro:', err);
-        }
-      }
-
-      // 2. Tentar Google GIS Prompt
-      if (google?.accounts?.id) {
-        try {
-          google.accounts.id.prompt();
-          return;
-        } catch (err) {
-          logger.warn('Google GIS prompt erro:', err);
-        }
-      }
-    }
-
-    // 3. Fallback: modal seguro sem pré-preenchimento
-    setGoogleEmail('');
-    setGoogleName('');
-    setGoogleModalError(null);
-    setIsGoogleModalOpen(true);
-  };
-
-  const handleGoogleModalSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setGoogleModalError(null);
-
-    if (!googleEmail.trim()) {
-      setGoogleModalError('Por favor, informe seu e-mail do Google.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const res = await loginWithGoogle(googleEmail.trim(), googleName.trim());
-      if (res.success) {
-        setIsGoogleModalOpen(false);
-        setSuccessMessage(res.message);
-      } else {
-        setGoogleModalError(res.message);
-      }
-    } catch {
-      setGoogleModalError('Erro ao autenticar com Google. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -329,7 +146,7 @@ export const LoginPage: React.FC = () => {
             <div>
               <h3 className="text-xs font-bold text-white">Acesso Híbrido Corporativo & Parceiros</h3>
               <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
-                Login direto via Google Workspace para equipes internas e aprovação personalizada para parceiros externos.
+                Acesso seguro para equipes internas e credenciamento de parceiros da rede.
               </p>
             </div>
           </div>
@@ -360,37 +177,6 @@ export const LoginPage: React.FC = () => {
                 : 'Preencha seus dados para receber autorização na plataforma.'
               }
             </p>
-          </div>
-
-          {/* Primary Action: Google Workspace SSO Button */}
-          <button
-            type="button"
-            onClick={handleGoogleSSO}
-            disabled={isSubmitting}
-            className="w-full py-3 px-4 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-[#5c24ff]/40 text-slate-800 font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-3 shadow-xs active:scale-[0.99] group"
-          >
-            {/* Official Google Icon */}
-            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-            </svg>
-            <span className="group-hover:text-[#5c24ff] transition-colors">
-              Continuar com Google Corporativo
-            </span>
-          </button>
-          
-          <div className="text-[10px] text-center text-slate-400 -mt-2">
-            Entrada imediata para <strong className="text-slate-600">@certifica.com.br</strong> e <strong className="text-slate-600">@syngular.id</strong>
-          </div>
-
-          {/* Divider */}
-          <div className="relative flex items-center justify-center my-3">
-            <div className="border-t border-slate-200 w-full"></div>
-            <span className="bg-white px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0">
-              ou com e-mail e senha
-            </span>
           </div>
 
           {/* Sub Navigation Tab Toggle */}
@@ -564,7 +350,7 @@ export const LoginPage: React.FC = () => {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
-                    placeholder="Mínimo 4 caracteres..."
+                    placeholder="Mínimo 6 caracteres..."
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden transition-colors"
@@ -593,93 +379,6 @@ export const LoginPage: React.FC = () => {
 
         </div>
       </div>
-
-      {/* Google Authentication Modal */}
-      {isGoogleModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in select-none">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-150">
-            
-            {/* Modal Header */}
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shadow-xs">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-slate-900">Entrar com Conta Google</h3>
-                  <p className="text-[10px] text-slate-500">Google Workspace & Contas Pessoais</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setIsGoogleModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal Form */}
-            <form onSubmit={handleGoogleModalSubmit} className="p-4 space-y-3">
-              {googleModalError && (
-                <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-[11px] flex items-center gap-1.5 animate-fade-in">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
-                  <span>{googleModalError}</span>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">
-                  Seu E-mail Google / Corporativo
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    autoFocus
-                    placeholder="seu.email@certifica.com.br ou @syngular.id"
-                    value={googleEmail}
-                    onChange={(e) => setGoogleEmail(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">
-                  Seu Nome Completo (Opcional)
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Como deseja ser chamado(a)..."
-                    value={googleName}
-                    onChange={(e) => setGoogleName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden transition-colors"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-2.5 px-4 bg-[#5c24ff] hover:bg-[#4d1cdb] active:scale-[0.99] disabled:opacity-50 text-white font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs mt-2"
-              >
-                <span>{isSubmitting ? 'Autenticando...' : 'Acessar com esta Conta'}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </form>
-
-          </div>
-        </div>
-      )}
 
     </div>
   );

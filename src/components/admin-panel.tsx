@@ -34,17 +34,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
   const [newUserDepartment, setNewUserDepartment] = useState('Autoridade de Registro (AR)');
   const [newUserCustomDept, setNewUserCustomDept] = useState('');
   const [newUserRole, setNewUserRole] = useState<'admin' | 'user'>('user');
-  const [newUserPassword, setNewUserPassword] = useState('syngular123');
+  const [newUserPassword, setNewUserPassword] = useState('');
   const [addUserFeedback, setAddUserFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSubmittingUser, setIsSubmittingUser] = useState(false);
 
   const pendingUsersCount = users.filter(u => u.status === 'pending').length;
 
   const handleCustomPasswordReset = async (email: string) => {
-    const newPass = prompt(`Defina a nova senha para o usuário ${email}:`, 'syngular123');
-    if (newPass && newPass.trim().length > 0) {
+    const newPass = prompt(`Defina a nova senha para o usuário ${email} (mínimo 6 caracteres):`);
+    if (newPass && newPass.trim().length >= 6) {
       await resetUserPassword(email, newPass.trim());
-      alert(`Senha de ${email} redefinida com sucesso para: ${newPass.trim()}`);
+      alert(`Senha de ${email} redefinida com sucesso!`);
+    } else if (newPass !== null) {
+      alert('A nova senha deve ter no mínimo 6 caracteres.');
     }
   };
 
@@ -57,6 +59,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
       return;
     }
 
+    if (!newUserPassword || newUserPassword.trim().length < 6) {
+      setAddUserFeedback({ type: 'error', message: 'A senha inicial deve conter no mínimo 6 caracteres.' });
+      return;
+    }
+
     const finalDept = newUserDepartment === 'Outro' ? (newUserCustomDept.trim() || 'Geral') : newUserDepartment;
 
     setIsSubmittingUser(true);
@@ -66,7 +73,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
         email: newUserEmail.trim(),
         department: finalDept,
         role: newUserRole,
-        password: newUserPassword.trim() || 'syngular123'
+        password: newUserPassword.trim()
       });
 
       if (res.success) {
@@ -76,7 +83,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
           setNewUserName('');
           setNewUserEmail('');
           setNewUserCustomDept('');
-          setNewUserPassword('syngular123');
+          setNewUserPassword('');
           setAddUserFeedback(null);
         }, 1200);
       } else {
@@ -322,7 +329,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                         <td className="p-3.5 text-slate-600 font-mono text-[11px]">{user.email}</td>
                         <td className="p-3.5 text-slate-600 font-medium">{user.department || 'Geral'}</td>
                         <td className="p-3.5">
-                          {user.email !== 'marcus.almeida@certifica.com.br' && user.email !== 'marcus.almeida@syngular.id' && !user.email.startsWith('marcus.almeida@') ? (
+                          {user.email !== 'marcus.almeida@certifica.com.br' && user.email !== 'marcus.almeida@syngular.id' ? (
                             <button
                               onClick={() => updateUserRole(user.email, user.role === 'admin' ? 'user' : 'admin')}
                               className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider cursor-pointer transition-all flex items-center gap-1 ${
@@ -350,7 +357,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                           </span>
                         </td>
                         <td className="p-3.5 text-right space-x-1.5">
-                          {user.email !== 'marcus.almeida@certifica.com.br' && user.email !== 'marcus.almeida@syngular.id' && !user.email.startsWith('marcus.almeida@') ? (
+                          {user.email !== 'marcus.almeida@certifica.com.br' && user.email !== 'marcus.almeida@syngular.id' ? (
                             <div className="inline-flex items-center gap-1">
                               {user.status !== 'approved' && (
                                 <button 
@@ -631,7 +638,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                   <input
                     type="text"
                     required
-                    placeholder="Mínimo 4 caracteres (padrão: syngular123)"
+                    placeholder="Mínimo 6 caracteres..."
                     value={newUserPassword}
                     onChange={(e) => setNewUserPassword(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden font-mono"

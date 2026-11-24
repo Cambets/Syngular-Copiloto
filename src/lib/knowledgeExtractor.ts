@@ -4,7 +4,7 @@ import { logger } from './logger';
 export async function extractProductFromRawContent(
   rawText: string,
   base64Image?: { data: string; mimeType: string },
-  apiKey?: string,
+  _apiKey?: string,
   existingProducts: Product[] = []
 ): Promise<Product | null> {
   const existingListSummary = existingProducts
@@ -51,56 +51,32 @@ Retorne APENAS o JSON puro:
 }
 `;
 
-  // Motor 1: Gemini 3.6 / 2.5 Flash Multimodal
-  if (apiKey && apiKey.trim().length > 0) {
-    try {
-      interface ContentPart {
-        text?: string;
-        inlineData?: {
-          mimeType: string;
-          data: string;
-        };
-      }
+  // Motor 1: Extração estruturada segura via /api/chat
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: rawText && rawText.trim().length > 0 
+          ? `Analise o material e extraia rigorosamente o JSON conforme especificado:\n\nCONTEÚDO:\n"""\n${rawText}\n"""`
+          : 'Analise o anexo e estruture o conhecimento conforme a especificação JSON.',
+        systemInstruction,
+        imageBase64: base64Image ? `data:${base64Image.mimeType};base64,${base64Image.data}` : undefined
+      })
+    });
 
-      const parts: ContentPart[] = [];
-      if (rawText && rawText.trim().length > 0) {
-        parts.push({ text: `${systemInstruction}\n\nCONTEÚDO RECEBIDO:\n"""\n${rawText}\n"""` });
-      } else {
-        parts.push({ text: `${systemInstruction}\n\nAnalise o anexo e estruture o conhecimento.` });
-      }
-
-      if (base64Image) {
-        parts.push({
-          inlineData: {
-            mimeType: base64Image.mimeType,
-            data: base64Image.data
-          }
-        });
-      }
-
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts }],
-            generationConfig: {
-              temperature: 0.2,
-              responseMimeType: 'application/json'
-            }
-          })
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.text) {
+        const cleaned = data.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          return JSON.parse(jsonMatch[0]) as Product;
         }
-      );
-
-      if (res.ok) {
-        const data = await res.json();
-        const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (jsonText) return JSON.parse(jsonText.trim()) as Product;
       }
-    } catch (e) {
-      logger.warn('Fallback do extrator Gemini...', e);
     }
+  } catch (e) {
+    logger.warn('Falha na extração de produto via /api/chat:', e);
   }
 
 

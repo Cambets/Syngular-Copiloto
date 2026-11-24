@@ -207,7 +207,7 @@ export async function queryGemini(
   query: string, 
   history: { role: 'user' | 'model'; parts: string }[],
   knowledgeBase: Product[],
-  apiKey: string,
+  _apiKey?: string,
   imageBase64?: string,
   customRules?: CustomRule[],
   onChunk?: (textSoFar: string) => void,
@@ -221,7 +221,7 @@ export async function queryGemini(
       : (imageBase64 ? 'Analise este print/imagem anexa e me oriente com a solução técnica passo a passo.' : 'Olá!')
   );
 
-  // Engine 1 (PRINCIPAL & SEGURO): Backend Serverless na Vercel (/api/chat) - 100% no Backend
+  // Engine 1 (ÚNICO & SEGURO): Backend Serverless na Vercel (/api/chat) - 100% no Servidor
   try {
     const apiRes = await fetch('/api/chat', {
       method: 'POST',
@@ -242,147 +242,10 @@ export async function queryGemini(
       }
     }
   } catch (apiErr) {
-    logger.warn('Backend /api/chat indisponível, tentando cliente de contingência...', apiErr);
+    logger.warn('Backend /api/chat indisponível, usando respostas de contingência offline...', apiErr);
   }
 
-  // Engine 2 (CONTINGÊNCIA DIRETA / DEV LOCAL): Google Gemini com Streaming SSE
-  const BUILTIN_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
-  const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
-  const activeKey = apiKey || envKey || BUILTIN_KEY;
-  if (activeKey && activeKey.trim().length > 0) {
-    const geminiModels = [
-      'gemini-3.8-flash',
-      'gemini-flash-latest',
-      'gemini-3.7-flash',
-      'gemini-3.6-flash',
-      'gemini-3.5-flash-lite'
-    ];
-    
-    interface GeminiPart {
-      text?: string;
-      inlineData?: {
-        mimeType: string;
-        data: string;
-      };
-    }
-
-    const userParts: GeminiPart[] = [{ text: userText }];
-
-    if (imageBase64) {
-      const mimeMatch = imageBase64.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
-      if (mimeMatch) {
-        userParts.push({
-          inlineData: {
-            mimeType: mimeMatch[1],
-            data: mimeMatch[2]
-          }
-        });
-      }
-    }
-
-    if (audioBase64) {
-      const mimeMatch = audioBase64.match(/^data:(audio\/[a-zA-Z0-9.+_-]+);base64,(.+)$/);
-      if (mimeMatch) {
-        let mimeType = mimeMatch[1];
-        if (mimeType.includes('ogg') || mimeType.includes('opus')) mimeType = 'audio/ogg';
-        else if (mimeType.includes('m4a') || mimeType.includes('aac')) mimeType = 'audio/m4a';
-        else if (mimeType.includes('webm')) mimeType = 'audio/webm';
-        else if (mimeType.includes('wav')) mimeType = 'audio/wav';
-        else if (mimeType.includes('mp3') || mimeType.includes('mpeg')) mimeType = 'audio/mp3';
-
-        userParts.push({
-          inlineData: {
-            mimeType,
-            data: mimeMatch[2]
-          }
-        });
-      }
-    }
-
-    const geminiContents: { role: 'user' | 'model'; parts: GeminiPart[] }[] = [];
-    if (history && history.length > 0) {
-      for (const h of history.slice(-10)) {
-        geminiContents.push({
-          role: h.role === 'model' ? 'model' : 'user',
-          parts: [{ text: h.parts }]
-        });
-      }
-    }
-    geminiContents.push({ role: 'user', parts: userParts });
-
-    for (const model of geminiModels) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-        // Streaming SSE em tempo real
-        const streamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${activeKey.trim()}`;
-        const response = await fetch(streamUrl, {
-          method: 'POST',
-          signal: controller.signal,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemInstruction }] },
-            contents: geminiContents,
-            generationConfig: { maxOutputTokens: 4096, temperature: 0.3 },
-            safetySettings: [
-              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
-            ]
-          })
-        });
-        clearTimeout(timeoutId);
-
-        if (response.ok && response.body) {
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let fullText = '';
-          let buffer = '';
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-              const trimmed = line.trim();
-              if (trimmed.startsWith('data: ')) {
-                try {
-                  const json = JSON.parse(trimmed.substring(6));
-                  const chunkParts = json.candidates?.[0]?.content?.parts;
-                  const partText = Array.isArray(chunkParts)
-                    ? chunkParts.map((p: any) => p.text || '').join('')
-                    : '';
-                  if (partText) {
-                    fullText += partText;
-                    if (onChunk) {
-                      onChunk(sanitizeOutput(fullText));
-                    }
-                  }
-                } catch (e) {}
-              }
-            }
-          }
-
-          if (fullText.trim().length > 0) {
-            return sanitizeOutput(fullText);
-          }
-        } else if (!response.ok) {
-          const errText = await response.text();
-          logger.warn(`Gemini ${model} stream status ${response.status}:`, errText);
-        }
-      } catch (error) {
-        logger.warn(`Gemini ${model} tentativa falhou, tentando próximo modelo:`, error);
-      }
-    }
-  }
-
-  // Engine 3: Resposta Dinâmica Inteligente e Amigável do Copiloto (Conversacional)
+  // Motor 3: Respostas fixas offline de contingência (saudações, Painel do Contador, catálogo local)
   const normalized = userText.toLowerCase();
 
   // Saudações e apresentações descontraídas (parceiro inteligente)
@@ -424,7 +287,7 @@ export async function queryGemini(
     return `Show, vamos alinhar os pontos principais do **${found.name}**:\n\n${found.description}\n\n💡 **Argumento de valor / diferencial comercial:**\n${found.pitch}\n\n${found.objections && found.objections.length > 0 ? `🎯 **Dica prática para contornar objeção:**\n• *Quando o cliente questionar:* "${found.objections[0].question}"\n• *Melhor direcionamento:* "${found.objections[0].answer}"\n\n` : ''}Se precisar, posso montar um roteiro de mensagem sob medida para você disparar no WhatsApp do cliente agora. Só me avisar!`;
   }
 
-  return `Entendido! Como seu parceiro técnico e comercial no ecossistema **Syngular**, consigo te apoiar direto nas seguintes frentes:\n\n• 📜 **Certificação Digital ICP-Brasil:** Credenciamento de AR/PA, emissão simplificada (SynPass), normas ITI e rotinas GFSIS/Sync.\n• 💻 **Softwares do Ecossistema:** Certifica ERP, Certifica Ponto, Certifica GED, Certifica SST, Certifica Signer, Certifica Concilia e emissão fiscal.\n• 🛠️ **Suporte Técnico N2:** Análise precisa de rejeições SEFAZ, inconsistências cadastrais e erros de XML.\n• 💰 **Comercial & Parcerias:** Estruturação de propostas de alta margem e comparativos com concorrentes.\n\nMe dá mais contexto ou manda o print do erro que a gente resolve juntos!`;
+  return 'Não consegui me comunicar com o servidor no momento. Por favor, tente novamente em instantes.';
 }
 
 export function cleanForSpeech(text: string): string {
@@ -458,7 +321,7 @@ export async function queryGeminiVoiceTurn(
   query: string,
   lastTurnHistory: { role: 'user' | 'model'; parts: string }[],
   knowledgeBase: Product[],
-  apiKey: string,
+  _apiKey?: string,
   customRules?: CustomRule[]
 ): Promise<string> {
   const rag = retrieveRelevantContext(query, knowledgeBase, customRules, 2);
@@ -499,59 +362,22 @@ ${rag.contextText ? `\nContexto relevante:\n${rag.contextText}` : ''}
     logger.warn('Backend /api/chat indisponível para voice turn:', apiErr);
   }
 
-  // Engine 2: Contingência Gemini Direct
-  const BUILTIN_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
-  const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
-  const activeKey = apiKey || envKey || BUILTIN_KEY;
-
-  if (activeKey && activeKey.trim().length > 0) {
-    for (const model of ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.7-flash', 'gemini-3.5-flash-lite']) {
-      try {
-        const streamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey.trim()}`;
-        const contents = compactHistory.map(h => ({
-          role: h.role,
-          parts: [{ text: h.parts }]
-        })).concat([{ role: 'user', parts: [{ text: query }] }]);
-
-        const response = await fetch(streamUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: voiceSystemPrompt }] },
-            contents,
-            generationConfig: { maxOutputTokens: 2048, temperature: 0.3 }
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (rawText) {
-            return cleanForSpeech(rawText);
-          }
-        }
-      } catch (err) {
-        logger.warn(`Voice turn falhou no modelo ${model}:`, err);
-      }
-    }
-  }
-
-  // Fallback conversacional
-  return `Entendi o seu ponto. No ecossistema Syngular, você pode conferir essa configuração direto no menu de parâmetros do sistema ou me mandar uma mensagem no chat que eu detalho o passo a passo para você.`;
+  // Fallback conversacional offline amigável
+  return `Entendi o seu ponto. No momento não consegui me comunicar com o servidor, mas você pode me mandar uma mensagem no chat que eu detalho o passo a passo para você.`;
 }
 
 /**
- * Sintetiza áudio de fala usando o modelo Gemini 3.8 Flash TTS ou voz clonada
+ * Sintetiza áudio de fala usando o modelo Gemini 3.8 Flash TTS ou voz clonada (somente via backend)
  */
 export async function synthesizeGeminiVoice(
   text: string,
   voiceId?: string,
-  apiKey?: string
+  _apiKey?: string
 ): Promise<string | null> {
   const cleanText = cleanForSpeech(text);
   if (!cleanText) return null;
 
-  // 1. Tenta backend Serverless
+  // Chamada exclusiva via backend Serverless seguro
   try {
     const apiRes = await fetch('/api/voice', {
       method: 'POST',
@@ -569,61 +395,22 @@ export async function synthesizeGeminiVoice(
       }
     }
   } catch (err) {
-    logger.warn('Backend /api/voice indisponível para síntese, usando contingência direta:', err);
-  }
-
-  // 2. Contingência direta Gemini API
-  const BUILTIN_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
-  const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
-  const activeKey = apiKey || envKey || BUILTIN_KEY;
-
-  if (activeKey && activeKey.trim().length > 0) {
-    try {
-      const speechConfig = voiceId 
-        ? { voiceConfig: { voice: voiceId } }
-        : { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } };
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent?key=${activeKey.trim()}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              role: 'user',
-              parts: [{ text: cleanText }]
-            }],
-            generationConfig: {
-              responseModalities: ['AUDIO'],
-              speechConfig
-            }
-          })
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        const audioData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        if (audioData) return audioData;
-      }
-    } catch (err) {
-      logger.warn('Falha na síntese direta com gemini-3.8-flash-tts:', err);
-    }
+    logger.warn('Backend /api/voice indisponível para síntese:', err);
   }
 
   return null;
 }
 
 /**
- * Registra a voz humana para replicação direta no Google Gemini
+ * Registra a voz humana para replicação direta no Google Gemini (somente via backend)
  */
 export async function replicateVoiceDirect(
   sourceWavB64: string,
   consentWavB64: string,
   displayName: string,
-  apiKey?: string
+  _apiKey?: string
 ): Promise<{ success: boolean; voiceId?: string; error?: string }> {
-  // 1. Tenta backend Serverless
+  // Chamada exclusiva via backend Serverless seguro
   try {
     const apiRes = await fetch('/api/voice', {
       method: 'POST',
@@ -642,54 +429,11 @@ export async function replicateVoiceDirect(
       }
     } else {
       const errData = await apiRes.json().catch(() => null);
-      if (errData?.error) return { success: false, error: errData.error };
+      if (errData?.error || errData?.message) return { success: false, error: errData.error || errData.message };
     }
   } catch (err) {
-    logger.warn('Backend /api/voice indisponível, usando contingência direta:', err);
+    logger.warn('Backend /api/voice indisponível:', err);
   }
 
-  // 2. Contingência direta Google Gemini API
-  const BUILTIN_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
-  const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
-  const activeKey = apiKey || envKey || BUILTIN_KEY;
-
-  if (activeKey && activeKey.trim().length > 0) {
-    try {
-      const cleanSource = sourceWavB64.replace(/^data:audio\/[a-zA-Z0-9.+_-]+;base64,/, '');
-      const cleanConsent = consentWavB64.replace(/^data:audio\/[a-zA-Z0-9.+_-]+;base64,/, '');
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/voices?key=${activeKey.trim()}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            store: true,
-            voice: {
-              model: 'gemini-3.8-flash-tts',
-              type: 'replicated',
-              display_name: displayName,
-              language_code: 'pt-BR',
-              replicated: {
-                source_audio: { mime_type: 'audio/wav', data: cleanSource },
-                consent_audio: { mime_type: 'audio/wav', data: cleanConsent }
-              }
-            }
-          })
-        }
-      );
-
-      const resData = await response.json();
-      if (response.ok && (resData.id || resData.voice?.id)) {
-        return { success: true, voiceId: resData.id || resData.voice?.id };
-      } else {
-        const msg = resData.error?.message || 'Falha na validação de segurança da voz.';
-        return { success: false, error: msg };
-      }
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Erro de conexão com o serviço de voz.' };
-    }
-  }
-
-  return { success: false, error: 'Chave de API do Gemini não disponível.' };
+  return { success: false, error: 'Não foi possível conectar ao servidor de voz. Tente novamente em instantes.' };
 }

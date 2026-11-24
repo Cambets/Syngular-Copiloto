@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { hashPassword, verifyPassword } from '../lib/security';
-import { pushSharedUsersToCloud, pullSharedUsersFromCloud, pushSingleUserRequest } from '../lib/cloudSync';
 import { logger } from '../lib/logger';
 
 export interface Product {
@@ -26,7 +25,8 @@ export interface User {
   department?: string;
   createdAt?: string;
   lastLogin?: string;
-  authProvider?: 'credentials' | 'google';
+  authProvider?: 'credentials';
+  mustChangePassword?: boolean;
 }
 
 export interface LegacyUser extends User {
@@ -73,13 +73,12 @@ interface AppContextType {
   geminiApiKey: string;
   setGeminiApiKey: (key: string) => void;
   login: (email: string, password?: string) => Promise<AuthResponse>;
-  loginWithGoogle: (googleEmail?: string, googleName?: string) => Promise<AuthResponse>;
   logout: () => void;
-  registerUser: (userData: { email: string; name: string; password?: string; department?: string }) => Promise<AuthResponse>;
-  invitePartner: (partnerData: { email: string; name: string; department: string; password?: string; role?: 'admin' | 'user' }) => Promise<AuthResponse>;
+  registerUser: (userData: { email: string; name: string; password: string; department?: string }) => Promise<AuthResponse>;
+  invitePartner: (partnerData: { email: string; name: string; department: string; password: string; role?: 'admin' | 'user' }) => Promise<AuthResponse>;
   updateUserStatus: (email: string, status: 'approved' | 'blocked' | 'pending') => void;
   updateUserRole: (email: string, role: 'admin' | 'user') => void;
-  resetUserPassword: (email: string, newPassword?: string) => Promise<void>;
+  resetUserPassword: (email: string, newPassword: string) => Promise<AuthResponse | void>;
   changeCurrentUserPassword: (currentPassword: string, newPassword: string) => Promise<AuthResponse>;
   deleteUser: (email: string) => void;
   addOrUpdateProduct: (product: Product) => void;
@@ -453,26 +452,26 @@ const defaultUsers: User[] = [
   {
     email: 'marcus.almeida@certifica.com.br',
     name: 'Marcus Almeida',
-    salt: 'salt_adm_9941',
-    passwordHash: '7a13d7199c90538a74e4fe62c0ebdf58d601b0f02377ebba9c323fca8eb2f7c0',
+    salt: 'salt_seed_reset',
+    passwordHash: 'INVALID_MUST_CHANGE_PASSWORD',
     role: 'admin',
     status: 'approved',
     department: 'Diretoria Executiva',
     createdAt: '2026-08-01T10:00:00.000Z',
-    lastLogin: '2026-08-28T12:00:00.000Z',
-    authProvider: 'google'
+    authProvider: 'credentials',
+    mustChangePassword: true
   },
   {
     email: 'marcus.almeida@syngular.id',
     name: 'Marcus Almeida',
-    salt: 'salt_adm_9941',
-    passwordHash: '7a13d7199c90538a74e4fe62c0ebdf58d601b0f02377ebba9c323fca8eb2f7c0',
+    salt: 'salt_seed_reset',
+    passwordHash: 'INVALID_MUST_CHANGE_PASSWORD',
     role: 'admin',
     status: 'approved',
     department: 'Diretoria Executiva',
     createdAt: '2026-08-01T10:00:00.000Z',
-    lastLogin: '2026-08-28T12:00:00.000Z',
-    authProvider: 'google'
+    authProvider: 'credentials',
+    mustChangePassword: true
   }
 ];
 
@@ -485,7 +484,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('syngular_users_v2');
+    const saved = localStorage.getItem('syngular_users_v3');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -493,7 +492,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return parsed.filter(u => !MOCK_EMAILS.includes(u.email?.toLowerCase()));
         }
       } catch (e) {
-        logger.error('Erro ao ler usuários do localStorage:', e);
+        logger.error('Erro ao ler usuários do localStorage v3:', e);
+      }
+    }
+    const savedV2 = localStorage.getItem('syngular_users_v2');
+    if (savedV2) {
+      try {
+        const parsed = JSON.parse(savedV2);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const migrated: User[] = parsed
+            .filter(u => !MOCK_EMAILS.includes(u.email?.toLowerCase()))
+            .map(u => {
+              const clean = u.email?.toLowerCase().trim();
+              if (clean === 'marcus.almeida@certifica.com.br' || clean === 'marcus.almeida@syngular.id') {
+                return {
+                  ...u,
+                  role: 'admin' as const,
+                  status: 'approved' as const,
+                  passwordHash: 'INVALID_MUST_CHANGE_PASSWORD',
+                  salt: 'salt_seed_reset',
+                  mustChangePassword: true,
+                  authProvider: 'credentials' as const
+                };
+              }
+              if (u.role === 'admin' && clean !== 'marcus.almeida@certifica.com.br' && clean !== 'marcus.almeida@syngular.id') {
+                return { ...u, role: 'user' as const, authProvider: 'credentials' as const };
+              }
+              return { ...u, authProvider: 'credentials' as const };
+            });
+          localStorage.setItem('syngular_users_v3', JSON.stringify(migrated));
+          return migrated;
+        }
+      } catch (e) {
+        logger.error('Erro ao migrar usuários v2:', e);
       }
     }
     return defaultUsers;
@@ -559,47 +590,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
-  const DEFAULT_GEMINI_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42S0dvLUVDaFF2aUhYY3QxcnM3UnpPUmlYZkI5dnk0U0dZNWlaNmtVNHZfaHc=') : '';
   const [geminiApiKey, setGeminiApiKeyState] = useState<string>(() => {
     const saved = localStorage.getItem('syngular_gemini_key');
-    if (saved && saved.trim().length > 0) return saved.trim();
-    const envKey = (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY;
-    return envKey || DEFAULT_GEMINI_KEY;
+    return (saved && saved.trim().length > 0) ? saved.trim() : '';
   });
 
   useEffect(() => {
-    localStorage.setItem('syngular_users_v2', JSON.stringify(users));
-    pushSharedUsersToCloud(users);
+    localStorage.setItem('syngular_users_v3', JSON.stringify(users));
   }, [users]);
-
-  // Sincronização multi-dispositivo em tempo real (atualiza solicitações vindas de outros navegadores/celulares)
-  useEffect(() => {
-    const syncWithCloud = async () => {
-      const cloudUsers = await pullSharedUsersFromCloud();
-      if (cloudUsers && Array.isArray(cloudUsers) && cloudUsers.length > 0) {
-        setUsers(prev => {
-          let hasChanges = false;
-          const merged = [...prev];
-          
-          for (const cu of cloudUsers) {
-            const idx = merged.findIndex(u => u.email.toLowerCase() === cu.email.toLowerCase());
-            if (idx === -1) {
-              merged.push(cu);
-              hasChanges = true;
-            } else if (merged[idx].status !== cu.status) {
-              merged[idx] = { ...merged[idx], status: cu.status };
-              hasChanges = true;
-            }
-          }
-          return hasChanges ? merged : prev;
-        });
-      }
-    };
-
-    syncWithCloud();
-    const interval = setInterval(syncWithCloud, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     localStorage.setItem('syngular_kb_v8', JSON.stringify(knowledgeBase));
@@ -624,6 +622,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, message: 'Por favor, informe seu e-mail de acesso.' };
     }
 
+    if (!password || !password.trim()) {
+      return { success: false, message: 'A senha é obrigatória para acessar a plataforma.' };
+    }
+
+    const cleanPassword = password.trim();
+
     let existing = users.find(u => u.email.toLowerCase() === cleanEmail);
     if (!existing) {
       return { 
@@ -632,48 +636,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    // Sync with cloud in real-time to get fresh approval status
-    try {
-      const cloudUsers = await pullSharedUsersFromCloud();
-      if (cloudUsers && Array.isArray(cloudUsers)) {
-        const cloudUser = cloudUsers.find(u => u.email?.toLowerCase() === cleanEmail);
-        if (cloudUser) {
-          const mergedUser: User = { ...existing, ...cloudUser };
-          existing = mergedUser;
-          setUsers(prev => {
-            const idx = prev.findIndex(u => u.email.toLowerCase() === cleanEmail);
-            if (idx >= 0) {
-              const updated = [...prev];
-              updated[idx] = mergedUser;
-              return updated;
-            }
-            return [...prev, mergedUser];
-          });
-        }
+    // Se o usuário precisa definir uma nova senha obrigatória (primeiro login dos admins de seed)
+    if (existing.mustChangePassword) {
+      if (cleanPassword.length < 8) {
+        return {
+          success: false,
+          message: 'Por motivos de segurança, você deve definir uma nova senha com no mínimo 8 caracteres para este acesso administrativo.'
+        };
       }
-    } catch {
-      // continua com estado local
-    }
+      const { hash, salt } = await hashPassword(cleanPassword);
+      existing = {
+        ...existing,
+        passwordHash: hash,
+        salt,
+        mustChangePassword: false,
+        lastLogin: new Date().toISOString()
+      };
+      setUsers(prev => prev.map(u => u.email.toLowerCase() === cleanEmail ? existing! : u));
+    } else {
+      if (!existing.passwordHash || !existing.salt) {
+        return {
+          success: false,
+          message: 'Credenciais de acesso não configuradas. Solicite a definição de sua senha ao administrador.'
+        };
+      }
 
-    const legacyExisting = existing as LegacyUser;
-    if (existing.passwordHash && existing.salt && password) {
-      const isValid = await verifyPassword(password.trim(), existing.passwordHash, existing.salt);
+      const isValid = await verifyPassword(cleanPassword, existing.passwordHash, existing.salt);
       if (!isValid) {
         return { success: false, message: 'Senha incorreta. Verifique suas credenciais de acesso.' };
       }
-    } else if (legacyExisting.password && password) {
-      // Legacy plaintext migration to hash
-      if (legacyExisting.password !== password.trim()) {
-        return { success: false, message: 'Senha incorreta. Verifique suas credenciais de acesso.' };
-      }
-      const { hash, salt } = await hashPassword(password.trim());
-      existing.passwordHash = hash;
-      existing.salt = salt;
-      delete legacyExisting.password;
-    }
-
-    if (cleanEmail === 'marcus.almeida@certifica.com.br' || cleanEmail === 'marcus.almeida@syngular.id' || cleanEmail.startsWith('marcus.almeida@')) {
-      existing = { ...existing, role: 'admin', status: 'approved' };
     }
 
     if (existing.status === 'blocked') {
@@ -689,7 +680,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       lastLogin: new Date().toISOString()
     };
 
-    // Sanitize user for session storage
     const safeUser: User = {
       email: updatedUser.email,
       name: updatedUser.name,
@@ -698,10 +688,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       department: updatedUser.department,
       createdAt: updatedUser.createdAt,
       lastLogin: updatedUser.lastLogin,
-      authProvider: updatedUser.authProvider
+      authProvider: 'credentials'
     };
 
-    setUsers(prev => prev.map(u => u.email === cleanEmail ? updatedUser : u));
+    setUsers(prev => prev.map(u => u.email.toLowerCase() === cleanEmail ? updatedUser : u));
     setCurrentUser(safeUser);
     localStorage.setItem('syngular_current_user', JSON.stringify(safeUser));
 
@@ -712,111 +702,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   };
 
-  const loginWithGoogle = async (googleEmail?: string, googleName?: string): Promise<AuthResponse> => {
-    if (!googleEmail || !googleEmail.trim()) {
-      return { success: false, message: 'Por favor, selecione ou informe uma conta Google válida.' };
-    }
-    const cleanEmail = googleEmail.toLowerCase().trim();
-    const isCorporate = cleanEmail.endsWith('@certifica.com.br') || cleanEmail.endsWith('@syngular.id') || cleanEmail.endsWith('@syngular.com.br');
-
-    let existing = users.find(u => u.email.toLowerCase() === cleanEmail);
-
-    // Sync with cloud in real-time to get fresh approval status
-    try {
-      const cloudUsers = await pullSharedUsersFromCloud();
-      if (cloudUsers && Array.isArray(cloudUsers)) {
-        const cloudUser = cloudUsers.find(u => u.email?.toLowerCase() === cleanEmail);
-        if (cloudUser) {
-          existing = existing ? { ...existing, ...cloudUser } : cloudUser;
-        }
-      }
-    } catch {
-      // continua
-    }
-
-    if (!existing) {
-      const isMasterAdmin = cleanEmail === 'marcus.almeida@certifica.com.br' || cleanEmail === 'marcus.almeida@syngular.id' || cleanEmail.startsWith('marcus.almeida@');
-      const role: 'admin' | 'user' = isMasterAdmin ? 'admin' : 'user';
-      const status: 'approved' | 'pending' = (isCorporate || isMasterAdmin) ? 'approved' : 'pending';
-
-      const generatedName = googleName?.trim() || cleanEmail
-        .split('@')[0]
-        .replace(/[._]/g, ' ')
-        .split(' ')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
-
-      const newGoogleUser: User = {
-        email: cleanEmail,
-        name: generatedName || 'Usuário Google',
-        role,
-        status,
-        department: isCorporate ? 'Colaborador Corporativo' : 'Parceiro Externo (Google)',
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        authProvider: 'google'
-      };
-      existing = newGoogleUser;
-
-      setUsers(prev => [...prev, newGoogleUser]);
-      pushSingleUserRequest(newGoogleUser);
-
-      // Se não for e-mail corporativo, bloqueia a entrada direta e exige aprovação do Admin
-      if (!isCorporate && !isMasterAdmin) {
-        return {
-          success: false,
-          message: `Solicitação enviada com sucesso! Como seu e-mail (${cleanEmail}) é externo, o administrador foi notificado para aprovar seu acesso ao Copiloto.`
-        };
-      }
-    } else {
-      if (existing.status === 'blocked') {
-        return { success: false, message: 'Esta conta Google foi bloqueada pelo administrador.' };
-      }
-      if (existing.status === 'pending' && !isCorporate) {
-        return { 
-          success: false, 
-          message: `Seu acesso com a conta (${cleanEmail}) ainda está em análise e aguarda aprovação de um administrador.` 
-        };
-      }
-      if (isCorporate && existing.status !== 'approved') {
-        existing = { ...existing, status: 'approved' };
-      }
-      const updated = { ...existing, lastLogin: new Date().toISOString(), authProvider: 'google' as const };
-      existing = updated;
-      setUsers(prev => prev.map(u => u.email === cleanEmail ? updated : u));
-    }
-
-    const safeUser: User = {
-      email: existing.email,
-      name: existing.name,
-      role: existing.role,
-      status: existing.status,
-      department: existing.department,
-      createdAt: existing.createdAt,
-      lastLogin: existing.lastLogin,
-      authProvider: existing.authProvider
-    };
-
-    setCurrentUser(safeUser);
-    localStorage.setItem('syngular_current_user', JSON.stringify(safeUser));
-    return { 
-      success: true, 
-      message: `Bem-vindo(a), ${safeUser.name}! Acesso corporativo direto liberado.`, 
-      user: safeUser 
-    };
-  };
-
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('syngular_current_user');
   };
 
-  const registerUser = async (userData: { email: string; name: string; password?: string; department?: string }): Promise<AuthResponse> => {
+  const registerUser = async (userData: { email: string; name: string; password: string; department?: string }): Promise<AuthResponse> => {
     const cleanEmail = userData.email.toLowerCase().trim();
     const cleanName = userData.name.trim();
+    const cleanPassword = userData.password ? userData.password.trim() : '';
 
     if (!cleanEmail || !cleanName) {
       return { success: false, message: 'Nome e e-mail são obrigatórios.' };
+    }
+
+    if (!cleanPassword || cleanPassword.length < 6) {
+      return { success: false, message: 'A senha deve conter no mínimo 6 caracteres.' };
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -832,11 +733,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    const isMasterAdmin = cleanEmail === 'marcus.almeida@certifica.com.br' || cleanEmail === 'marcus.almeida@syngular.id' || cleanEmail.startsWith('marcus.almeida@');
-    const role: 'admin' | 'user' = isMasterAdmin ? 'admin' : 'user';
-    const status: 'approved' | 'pending' = isMasterAdmin ? 'approved' : 'pending';
-
-    const { hash, salt } = await hashPassword(userData.password?.trim() || 'syngular123');
+    const { hash, salt } = await hashPassword(cleanPassword);
 
     const newUser: User = {
       email: cleanEmail,
@@ -844,29 +741,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       passwordHash: hash,
       salt,
       department: userData.department?.trim() || 'Parceiro Comercial / AR',
-      role,
-      status,
+      role: 'user',
+      status: 'pending',
       createdAt: new Date().toISOString(),
       authProvider: 'credentials'
     };
 
     setUsers(prev => [...prev, newUser]);
-    pushSingleUserRequest(newUser);
 
     return {
       success: true,
-      message: isMasterAdmin 
-        ? 'Conta de Administrador criada com sucesso. Faça seu login!' 
-        : 'Solicitação enviada com sucesso! O administrador foi notificado para aprovar seu acesso.'
+      message: 'Solicitação de acesso enviada com sucesso! O administrador foi notificado para aprovar seu acesso.'
     };
   };
 
-  const invitePartner = async (partnerData: { email: string; name: string; department: string; password?: string; role?: 'admin' | 'user' }): Promise<AuthResponse> => {
+  const invitePartner = async (partnerData: { email: string; name: string; department: string; password: string; role?: 'admin' | 'user' }): Promise<AuthResponse> => {
     const cleanEmail = partnerData.email.toLowerCase().trim();
     const cleanName = partnerData.name.trim();
+    const cleanPassword = partnerData.password ? partnerData.password.trim() : '';
 
     if (!cleanEmail || !cleanName) {
       return { success: false, message: 'Nome e e-mail são obrigatórios.' };
+    }
+
+    if (!cleanPassword || cleanPassword.length < 6) {
+      return { success: false, message: 'A senha inicial deve conter no mínimo 6 caracteres.' };
     }
 
     const existing = users.find(u => u.email.toLowerCase() === cleanEmail);
@@ -874,7 +773,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, message: 'Este usuário já está cadastrado.' };
     }
 
-    const { hash, salt } = await hashPassword(partnerData.password?.trim() || 'syngular123');
+    const { hash, salt } = await hashPassword(cleanPassword);
 
     const newPartner: User = {
       email: cleanEmail,
@@ -889,54 +788,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setUsers(prev => [...prev, newPartner]);
-    pushSingleUserRequest(newPartner);
     return { success: true, message: `Colaborador ${newPartner.name} cadastrado e liberado com sucesso!` };
   };
 
   const updateUserStatus = (email: string, status: 'approved' | 'blocked' | 'pending') => {
     const clean = email.toLowerCase().trim();
-    setUsers(prev => {
-      const updated = prev.map(u => {
-        if (u.email.toLowerCase() === clean) {
-          if (clean === 'marcus.almeida@certifica.com.br' || clean === 'marcus.almeida@syngular.id' || clean.startsWith('marcus.almeida@')) return u;
-          return { ...u, status };
-        }
-        return u;
-      });
-      pushSharedUsersToCloud(updated);
-      return updated;
-    });
+    setUsers(prev => prev.map(u => {
+      if (u.email.toLowerCase() === clean) {
+        if (clean === 'marcus.almeida@certifica.com.br' || clean === 'marcus.almeida@syngular.id') return u;
+        return { ...u, status };
+      }
+      return u;
+    }));
   };
 
   const updateUserRole = (email: string, role: 'admin' | 'user') => {
     const clean = email.toLowerCase().trim();
-    setUsers(prev => {
-      const updated = prev.map(u => {
-        if (u.email.toLowerCase() === clean) {
-          if (clean === 'marcus.almeida@certifica.com.br' || clean === 'marcus.almeida@syngular.id' || clean.startsWith('marcus.almeida@')) return u;
-          return { ...u, role };
-        }
-        return u;
-      });
-      pushSharedUsersToCloud(updated);
-      return updated;
-    });
+    setUsers(prev => prev.map(u => {
+      if (u.email.toLowerCase() === clean) {
+        if (clean === 'marcus.almeida@certifica.com.br' || clean === 'marcus.almeida@syngular.id') return u;
+        return { ...u, role };
+      }
+      return u;
+    }));
   };
 
-  const resetUserPassword = async (email: string, newPassword?: string): Promise<void> => {
+  const resetUserPassword = async (email: string, newPassword: string): Promise<AuthResponse> => {
     const clean = email.toLowerCase().trim();
-    const pwd = newPassword || 'syngular123';
-    const { hash, salt } = await hashPassword(pwd);
-    setUsers(prev => {
-      const updated = prev.map(u => {
-        if (u.email.toLowerCase() === clean) {
-          return { ...u, passwordHash: hash, salt };
-        }
-        return u;
-      });
-      pushSharedUsersToCloud(updated);
-      return updated;
-    });
+    const cleanPassword = newPassword ? newPassword.trim() : '';
+    if (!cleanPassword || cleanPassword.length < 6) {
+      return { success: false, message: 'A nova senha deve ter no mínimo 6 caracteres.' };
+    }
+    const { hash, salt } = await hashPassword(cleanPassword);
+    setUsers(prev => prev.map(u => {
+      if (u.email.toLowerCase() === clean) {
+        return { ...u, passwordHash: hash, salt, mustChangePassword: false };
+      }
+      return u;
+    }));
+    return { success: true, message: `Senha do usuário ${clean} redefinida com sucesso!` };
   };
 
   const changeCurrentUserPassword = async (currentPassword: string, newPassword: string): Promise<AuthResponse> => {
@@ -951,8 +841,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, message: 'Informe sua senha atual.' };
     }
 
-    if (!cleanNew || cleanNew.length < 4) {
-      return { success: false, message: 'A nova senha deve ter no mínimo 4 caracteres.' };
+    if (!cleanNew || cleanNew.length < 6) {
+      return { success: false, message: 'A nova senha deve ter no mínimo 6 caracteres.' };
     }
 
     const existingUser = users.find(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
@@ -960,27 +850,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, message: 'Cadastro de usuário não encontrado.' };
     }
 
-    // Verify current password
-    const legacyUser = existingUser as LegacyUser;
-    if (existingUser.passwordHash && existingUser.salt) {
-      const isValid = await verifyPassword(cleanCurrent, existingUser.passwordHash, existingUser.salt);
-      if (!isValid) {
-        return { success: false, message: 'Senha atual incorreta. Digite sua senha vigente para confirmar.' };
-      }
-    } else if (legacyUser.password) {
-      if (legacyUser.password !== cleanCurrent) {
-        return { success: false, message: 'Senha atual incorreta.' };
-      }
+    if (!existingUser.passwordHash || !existingUser.salt) {
+      return { success: false, message: 'Credenciais de acesso não configuradas.' };
     }
 
-    // Generate new hash with fresh salt
+    const isValid = await verifyPassword(cleanCurrent, existingUser.passwordHash, existingUser.salt);
+    if (!isValid) {
+      return { success: false, message: 'Senha atual incorreta. Digite sua senha vigente para confirmar.' };
+    }
+
     const { hash, salt } = await hashPassword(cleanNew);
 
     setUsers(prev => prev.map(u => {
       if (u.email.toLowerCase() === currentUser.email.toLowerCase()) {
-        const updated: LegacyUser = { ...u, passwordHash: hash, salt };
-        delete updated.password;
-        return updated;
+        return { ...u, passwordHash: hash, salt, mustChangePassword: false };
       }
       return u;
     }));
@@ -990,12 +873,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteUser = (email: string) => {
     const cleanEmail = email.toLowerCase().trim();
-    if (cleanEmail === 'marcus.almeida@certifica.com.br' || cleanEmail === 'marcus.almeida@syngular.id' || cleanEmail.startsWith('marcus.almeida@')) return;
-    setUsers(prev => {
-      const updated = prev.filter(u => u.email.toLowerCase() !== cleanEmail);
-      pushSharedUsersToCloud(updated);
-      return updated;
-    });
+    if (cleanEmail === 'marcus.almeida@certifica.com.br' || cleanEmail === 'marcus.almeida@syngular.id') return;
+    setUsers(prev => prev.filter(u => u.email.toLowerCase() !== cleanEmail));
   };
 
   const addOrUpdateProduct = (product: Product) => {
@@ -1068,7 +947,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       geminiApiKey,
       setGeminiApiKey,
       login,
-      loginWithGoogle,
       logout,
       registerUser,
       invitePartner,

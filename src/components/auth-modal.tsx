@@ -80,8 +80,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
-    if (!password || password.length < 4) {
-      setErrorMessage('A senha deve conter no mínimo 4 caracteres.');
+    if (!password || password.length < 6) {
+      setErrorMessage('A senha deve conter no mínimo 6 caracteres.');
       return;
     }
 
@@ -90,7 +90,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const res = await registerUser({ email, name, password, department });
       if (res.success) {
         setSuccessMessage(res.message);
-        if (email.toLowerCase().trim() === 'marcus.almeida@certifica.com.br' || email.toLowerCase().trim() === 'marcus.almeida@syngular.id' || email.toLowerCase().trim().startsWith('marcus.almeida@')) {
+        if (email.toLowerCase().trim() === 'marcus.almeida@certifica.com.br' || email.toLowerCase().trim() === 'marcus.almeida@syngular.id') {
           setTimeout(() => {
             setActiveTab('login');
           }, 1200);
@@ -189,7 +189,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden transition-colors"
                 />
               </div>
-              {(email.toLowerCase().trim() === 'marcus.almeida@certifica.com.br' || email.toLowerCase().trim() === 'marcus.almeida@syngular.id' || email.toLowerCase().trim().startsWith('marcus.almeida@')) && (
+              {(email.toLowerCase().trim() === 'marcus.almeida@certifica.com.br' || email.toLowerCase().trim() === 'marcus.almeida@syngular.id') && (
                 <span className="text-[10px] text-[#5c24ff] font-bold mt-1.5 flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   Conta de Administrador Master Detectada
@@ -202,7 +202,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
                   Senha de Acesso
                 </label>
-                <span className="text-[10px] text-slate-400">Padrão: admin / vendas</span>
+                <span className="text-[10px] text-slate-400">Credencial Pessoal</span>
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -304,7 +304,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  placeholder="Mínimo 4 caracteres..."
+                  placeholder="Mínimo 6 caracteres..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 focus:border-[#5c24ff] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden transition-colors"
